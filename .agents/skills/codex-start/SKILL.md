@@ -71,6 +71,8 @@ For the most relevant spec (prefer `drafting`/`poc-review`/`awaiting-final-revie
 - **`blocked`**: say:
   > "Spec `<slug>` is blocked — the last LEDGER.md entry records why and what unlocks it. Run `$codex-spec-run <slug>` to investigate with a materially different path, or tell me if the external blocker cleared."
 
+When SPEC frontmatter carries `executor-tier:`, include it in the prompt (e.g. "recommended executor tier: standard") so the user can pick the session model accordingly; a `blocked` spec typically wants a strong-tier session.
+
 Do NOT auto-start the loop; `$codex-spec-run` is the user's call.
 
 ### Case A: At least one task with `status: awaiting-review`, `in-progress`, or `blocked`
@@ -101,6 +103,7 @@ Ask plainly:
 ## Notes
 
 - Keep the report short and actionable.
+- **Guideline triggers fire at boot**: the workflow guidelines are trigger-loaded, not read blindly (see `AGENTS.md` → Context Loading). If orientation surfaces an active task, read `.codex/guidelines/task-management.md` before acting on it; an active spec → `.codex/guidelines/spec-workflow.md`. Until read, their digests in `AGENTS.md` are binding.
 - **Warm resume for ad-hoc work:** when the user picks up a `(no task)` micro-handoff from `## In Progress` (Case B), read the files on its `Files:` line (cap ~5) before acting — the same warm-up a task resume gets. This is the `/compact`-style "re-read recent files" applied to un-planned work.
 - If `.codex/CONTEXT.md` items look stale (`<!-- since: -->` more than 30 days old), mention that `$codex-checkpoint` should refresh them after this session.
 - Flag stale Active tasks per the **Staleness Thresholds** table in `.codex/guidelines/task-management.md` (stalled `in-progress`, stuck `awaiting-review`, abandoned `planning`) — surface a stuck `awaiting-review` prominently; it is not abandoned, it just needs the user's sign-off.

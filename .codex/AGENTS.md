@@ -6,8 +6,11 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 
 - Read `.codex/CONTEXT.md` for current session state before meaningful work.
 - Read `.codex/tasks/index.md` (if it exists) for active implementation plans.
-- Read `.codex/guidelines/ai-behavior.md`, then load only the additional guideline files relevant to the current task. Do not read every guideline blindly.
-- Read `.codex/guidelines/knowledge-management.md` in full only when the task retrieves, writes, audits, or refactors project knowledge, or when the user asks for a knowledge update or prior-project evidence.
+- Read `.codex/guidelines/ai-behavior.md`, then load only the additional guideline files relevant to the current task. Do not read every guideline blindly. Read each guideline when its trigger fires, **before acting under it**; until read, the digest after each trigger is binding:
+  - `.codex/guidelines/task-management.md` — trigger: creating or resuming a task (`$codex-plan`, or an active task in CONTEXT / `tasks/index.md`). Digest: `planning` and `awaiting-review` are read-only locks — no code edits; never flip a task to `done` or archive it yourself — report at `awaiting-review` and stop.
+  - `.codex/guidelines/spec-workflow.md` — trigger: a spec mission is active or requested (`$codex-spec`, `$codex-spec-run`, `$codex-refactor`, or an active folder in `.codex/specs/`). Digest: never write implementation code while a spec is `drafting`/`poc-review`; never mark a mission done without its final gate; the spec folder, not chat, is the source of truth.
+  - `.codex/guidelines/agent-delegation.md` — trigger: before spawning subagents. Digest: worker prompts are self-contained; never shadow-run a delegated question; record each delegation in the owning task/spec artifact at spawn time.
+- Read `.codex/guidelines/knowledge-management.md` in full only when the task retrieves, writes, audits, or refactors project knowledge, or when the user asks for a knowledge update or prior-project evidence. Digest until read: patch the existing owner, update topic + route atomically, run `bash .codex/scripts/knowledge-check.sh` after any mutation; never auto-delete knowledge.
 - Do not auto-load `.codex/JOURNAL.md`; use it only for explicit history or learning tasks.
 - Do not auto-load `.codex/HANDOFF.md`; it is a one-shot session baton consumed by `$codex-start`.
 - Do not auto-load task bodies in `.codex/tasks/*.md` — read individual task files only when resuming or working on them.
@@ -18,6 +21,7 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 - `$codex-plan <description>` — creates a persistent implementation plan in `.codex/tasks/`. Use instead of session-only `/plan` for any multi-session or multi-file work.
 - `$codex-spec <mission>` — creates a mission-scale spec workspace in `.codex/specs/` — interview → POC artifact → decision-complete SPEC + ROADMAP, approved once as a standing approval.
 - `$codex-spec-run <slug>` — executes an approved spec autonomously until final review — verifies acceptance, records ROADMAP task dispositions and evidence, blocks unchanged failure loops, and offers session rotation at phase boundaries.
+- `$codex-refactor <mission>` — creates a behavior-preserving refactor/migration spec mission — pins a baseline, writes a behavior contract and blast radius from the pre-change code, and derives equivalence-proof acceptance scenarios executed by `$codex-spec-run`.
 - `$codex-project-discovery` — interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
 - `$codex-checkpoint` — bulk-maintains current state, task/spec indexes, JOURNAL, and eligible durable knowledge; it is not the only knowledge write gate.
 - `$codex-handoff` — writes a single-slot session baton (`.codex/HANDOFF.md`) distilling the session's reasoning state when the context window is nearly full or an investigation pauses mid-flight; the next `$codex-start` consumes and deletes it.

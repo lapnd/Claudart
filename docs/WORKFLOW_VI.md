@@ -1,3 +1,5 @@
+<!-- AI agents: this is a human-oriented manual. The binding contracts live in .claude/rules/ and .codex/guidelines/ — read those, not this file, when acting. Read this file only when the user asks about CLAUDART itself. -->
+
 # Quy trình CLAUDART
 
 Đây là manual. [README tiếng Việt](../README_VI.md) là phần giới thiệu; tài liệu này giải thích cách các mảnh thật sự vận hành - hai layer, mô hình memory, lifecycle của task, từng command, và mỗi file nằm ở đâu.
@@ -259,18 +261,19 @@ Phần sống sót sau đó đi vào task document: delegation strategy, role, o
 
 ## Command và skill
 
-| Claude Code          | Codex CLI                  | Tác dụng                                                                                                                                                                                          |
-| -------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/start`             | `$codex-start`             | Boot session nhẹ - đọc CONTEXT, active tasks, root knowledge router (không đọc hết topic) và 3 commit gần nhất                                                                                    |
-| `/plan <task>`       | `$codex-plan <task>`       | Tạo implementation plan bền trong `tasks/` - thay cho plan mode gốc                                                                                                                               |
-| `/spec <mission>`    | `$codex-spec <mission>`    | Planning quy mô mission - phỏng vấn → POC artifact lặp cùng bạn → SPEC + ROADMAP decision-complete trong `specs/`, approve một lần như standing approval                                          |
-| `/spec-run <slug>`   | `$codex-spec-run <slug>`   | Thực thi spec đã approve tự chủ tới cổng final review - verify acceptance, ghi disposition ROADMAP và evidence, chặn loop fail không đổi, đề nghị rotation ở ranh giới phase                      |
-| `/project-discovery` | `$codex-project-discovery` | Planning theo kiểu phỏng vấn trước - biến ý tưởng thô thành project docs trước khi code                                                                                                           |
-| `/refactor-memory`   | `$codex-refactor-memory`   | Chuẩn hóa in-place, idempotent: gọt root index, phân loại durable content, curate map, chạy knowledge checker trước và sau                                                                        |
-| `/checkpoint`        | `$codex-checkpoint`        | Rebuild CONTEXT declarative + sync index task/spec + append JOURNAL + bulk-distill các fact bền còn lại; không phải knowledge write boundary duy nhất                                             |
-| `/handoff`           | `$codex-handoff`           | Baton session single-slot (`HANDOFF.md`) distill trạng thái suy luận - giả thuyết, evidence, dead ends, next step có anchor - khi context window gần đầy; được lần start kế tiếp tiêu thụ rồi xóa |
-| `/learn`             | `$codex-learn`             | Retrospective về behavior - thăng cấp cách làm việc lặp lại thành rules/guidelines; fact dự án ở lại knowledge                                                                                    |
-| `/doctor`            | `$codex-doctor`            | Health check read-only: Bash checker deterministic trước, rồi audit drift ngữ nghĩa, phân loại, wiring, task và token hygiene                                                                     |
+| Claude Code           | Codex CLI                   | Tác dụng                                                                                                                                                                                          |
+| --------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/start`              | `$codex-start`              | Boot session nhẹ - đọc CONTEXT, active tasks, root knowledge router (không đọc hết topic) và 3 commit gần nhất                                                                                    |
+| `/plan <task>`        | `$codex-plan <task>`        | Tạo implementation plan bền trong `tasks/` - thay cho plan mode gốc                                                                                                                               |
+| `/spec <mission>`     | `$codex-spec <mission>`     | Planning quy mô mission - phỏng vấn → POC artifact lặp cùng bạn → SPEC + ROADMAP decision-complete trong `specs/`, approve một lần như standing approval                                          |
+| `/spec-run <slug>`    | `$codex-spec-run <slug>`    | Thực thi spec đã approve tự chủ tới cổng final review - verify acceptance, ghi disposition ROADMAP và evidence, chặn loop fail không đổi, đề nghị rotation ở ranh giới phase                      |
+| `/refactor <mission>` | `$codex-refactor <mission>` | Mission refactor/migration bảo toàn hành vi - ghim baseline, viết behavior contract + blast radius từ code trước thay đổi, sinh scenario chứng minh tương đương do spec runner thực thi           |
+| `/project-discovery`  | `$codex-project-discovery`  | Planning theo kiểu phỏng vấn trước - biến ý tưởng thô thành project docs trước khi code                                                                                                           |
+| `/refactor-memory`    | `$codex-refactor-memory`    | Chuẩn hóa in-place, idempotent: gọt root index, phân loại durable content, curate map, chạy knowledge checker trước và sau                                                                        |
+| `/checkpoint`         | `$codex-checkpoint`         | Rebuild CONTEXT declarative + sync index task/spec + append JOURNAL + bulk-distill các fact bền còn lại; không phải knowledge write boundary duy nhất                                             |
+| `/handoff`            | `$codex-handoff`            | Baton session single-slot (`HANDOFF.md`) distill trạng thái suy luận - giả thuyết, evidence, dead ends, next step có anchor - khi context window gần đầy; được lần start kế tiếp tiêu thụ rồi xóa |
+| `/learn`              | `$codex-learn`              | Retrospective về behavior - thăng cấp cách làm việc lặp lại thành rules/guidelines; fact dự án ở lại knowledge                                                                                    |
+| `/doctor`             | `$codex-doctor`             | Health check read-only: Bash checker deterministic trước, rồi audit drift ngữ nghĩa, phân loại, wiring, task và token hygiene                                                                     |
 
 Cả hai layer cũng ship ba review agent, mỗi cái **chỉ được gọi đích danh theo yêu cầu rõ ràng - không bao giờ tự động, kể cả bên trong một task hay spec loop**. `clean-code-reviewer` enforce scope và kỷ luật Clean Code. `security-auditor` chạy audit map theo OWASP - read-only trên code của bạn, ghi findings vào report `security-audit-<date>.md` ở project root và chỉ in summary ra chat. `ui-visual-critic` là bản review thiết kế kiểu "con mắt người" đối kháng cho UI hoặc visual đã render (nặng về thị giác và tốn quota, nên nó luôn chỉ chạy on-demand). Claude đặt tên agent bằng Markdown kebab-case; Codex dùng giá trị TOML `name` dạng snake_case.
 

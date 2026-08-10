@@ -7,13 +7,13 @@ Start this session with a lightweight CLAUDART orientation. This command is read
 ## Procedure
 
 1. Check `.claude/HANDOFF.md`. If present, read it in full — it is a one-shot reasoning baton written by a previous session's `/handoff`. Note its `created:` date. Consumption flow: see Case H below. If absent (the normal state), continue silently.
-2. Read `.claude/CONTEXT.md` if it exists. If missing, say the project has no Claude context yet and suggest `/checkpoint` after meaningful work.
+2. Use the `.claude/CONTEXT.md` content already imported into this session via `.claude/CLAUDE.md` — do not re-read the file (a fresh session's import is already current). If the import is absent, read the file once; if the file is missing, say the project has no Claude context yet and suggest `/checkpoint` after meaningful work.
 3. Read `.claude/tasks/index.md` if it exists. If missing, treat as "no active tasks". If present, extract entries under `## Active`.
 4. For each Active entry, verify the underlying file exists in `.claude/tasks/` (the index is a cache; the file is truth). Read its frontmatter (`status`, `updated`, `slug`) only — do not full-read task bodies in `/start`.
 5. Read `.claude/knowledge/INDEX.md` if it exists — the root router only. Count visible route lines under `## Knowledge` that match the canonical Markdown route grammar; ignore HTML comments/templates and `- _(none)_`, so a seed index reports zero. Do not follow domain-map or topic links during startup. Later work follows the bounded map-first retrieval in `.claude/rules/knowledge-management.md`.
 6. Read `.claude/specs/INDEX.md` if it exists — the INDEX only. Extract entries under `## Active`. Do NOT read SPEC/ROADMAP/NOTES/LEDGER bodies in `/start`.
 7. Run `git log -3 --oneline`. If the directory is not a git repo or has fewer than three commits, report what is available.
-8. Extract only these sections from `.claude/CONTEXT.md` when present:
+8. Extract only these sections from the imported CONTEXT content when present:
    - `## In Progress`
    - `## Next Session Should Start By`
    - `## Open Questions / Blockers`
@@ -68,6 +68,8 @@ For the most relevant spec (prefer `drafting`/`poc-review`/`awaiting-final-revie
 - **`blocked`**: say:
   > "Spec `<slug>` is blocked — the last LEDGER.md entry records why and what unlocks it. Run `/spec-run <slug>` to investigate with a materially different path, or tell me if the external blocker cleared."
 
+When SPEC frontmatter carries `executor-tier:`, include it in the prompt (e.g. "recommended executor tier: standard") so the user can pick the session model accordingly; a `blocked` spec typically wants a strong-tier session.
+
 Do NOT auto-start the loop; `/spec-run` is the user's call.
 
 ### Case A — At least one task with `status: awaiting-review`, `in-progress`, or `blocked`
@@ -98,6 +100,7 @@ Ask plainly:
 ## Notes
 
 - Keep the report short and actionable.
+- **Rule triggers fire at boot**: the workflow rules are trigger-loaded, not auto-imported (see `.claude/CLAUDE.md` → Domain Rules). If orientation surfaces an active task, read `.claude/rules/task-management.md` before acting on it; an active spec → `.claude/rules/spec-workflow.md`. Until read, their digests in `CLAUDE.md` are binding.
 - **Warm resume for ad-hoc work:** when the user picks up a `(no task)` micro-handoff from `## In Progress` (Case B), read the files on its `Files:` line (cap ~5) before acting — the same warm-up a task resume gets. This is the `/compact`-style "re-read recent files" applied to un-planned work.
 - If `.claude/CONTEXT.md` items look stale (e.g., dated `<!-- since: -->` more than 30 days old), mention that `/checkpoint` should refresh them after this session.
 - Flag stale Active tasks per the **Staleness Thresholds** table in `.claude/rules/task-management.md` (stalled `in-progress`, stuck `awaiting-review`, abandoned `planning`) — surface a stuck `awaiting-review` prominently; it is not abandoned, it just needs the user's sign-off.
