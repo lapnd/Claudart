@@ -8,6 +8,7 @@
 #   --claude     Install the Claude Code layer (explicit, same as default)
 #   --codex      Install the Codex layer (.codex/ + .agents/ + AGENTS.md at root)
 #   --both       Install both Claude and Codex layers
+#   --council    Also install Council of High Intelligence (/council) to user scope
 #   --force      Overwrite existing files
 #   --help       Show this help text
 
@@ -17,8 +18,12 @@ REPO="vankhaivn/Claudart"
 BRANCH="main"
 TARBALL_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz"
 
+COUNCIL_REPO="0xNyk/council-of-high-intelligence"
+COUNCIL_TARBALL_URL="https://github.com/${COUNCIL_REPO}/archive/refs/heads/main.tar.gz"
+
 INSTALL_CLAUDE=true
 INSTALL_CODEX=false
+INSTALL_COUNCIL=false
 FORCE=false
 
 # ── helpers ──────────────────────────────────────────────────────────────────
@@ -42,6 +47,10 @@ OPTIONS
   --claude     Install the Claude Code layer (explicit)
   --codex      Install the Codex layer instead
   --both       Install both Claude Code and Codex layers
+  --council    Also install Council of High Intelligence — the /council
+               deliberation command (0xNyk/council-of-high-intelligence) —
+               into your USER scope (~/.claude, ~/.codex), matching the
+               layers selected above
   --force      Overwrite files that already exist
   --help       Show this help text
 
@@ -59,6 +68,7 @@ for arg in "$@"; do
     --claude) INSTALL_CLAUDE=true;  INSTALL_CODEX=false ;;
     --codex)  INSTALL_CLAUDE=false; INSTALL_CODEX=true ;;
     --both)   INSTALL_CLAUDE=true;  INSTALL_CODEX=true ;;
+    --council) INSTALL_COUNCIL=true ;;
     --force)  FORCE=true ;;
     --help|-h) show_help; exit 0 ;;
     *) printf '%s Unknown option: %s\n' "$(red "error")" "$arg" >&2; exit 1 ;;
@@ -182,6 +192,31 @@ if [[ "$INSTALL_CODEX" == true ]]; then
     rm "$DEST/.codex/CODEX.md"
     printf '  %s  .codex/CODEX.md (deprecated; content consolidated into AGENTS.md)\n' "$(green "clean")"
   fi
+fi
+
+# ── optional companion: Council of High Intelligence ─────────────────────────
+
+if [[ "$INSTALL_COUNCIL" == true ]]; then
+  printf '\n%s\n' "$(bold "Council of High Intelligence (/council)")"
+  COUNCIL_TMP="$TMPDIR/council"
+  mkdir -p "$COUNCIL_TMP"
+  if command -v curl &>/dev/null; then
+    curl -fsSL "$COUNCIL_TARBALL_URL" | tar -xz -C "$COUNCIL_TMP" --strip-components=1
+  else
+    wget -qO- "$COUNCIL_TARBALL_URL" | tar -xz -C "$COUNCIL_TMP" --strip-components=1
+  fi
+
+  # Map CLAUDART layer selection onto the council installer's flags.
+  council_flags=()
+  if [[ "$INSTALL_CLAUDE" == true && "$INSTALL_CODEX" == true ]]; then
+    council_flags+=(--codex)
+  elif [[ "$INSTALL_CODEX" == true ]]; then
+    council_flags+=(--codex-only)
+  fi
+
+  # Council installs to USER scope (~/.claude, ~/.codex) — shared across projects.
+  bash "$COUNCIL_TMP/install.sh" ${council_flags[@]+"${council_flags[@]}"}
+  printf '  %s  /council available in your user scope. Integration recipe: docs/GUIDE.md → Deliberating a hard decision.\n' "$(green "done")"
 fi
 
 # ── summary ───────────────────────────────────────────────────────────────────
