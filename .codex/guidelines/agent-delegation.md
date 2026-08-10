@@ -11,7 +11,7 @@ tags: [subagents, delegation, parallelism, orchestration]
 
 **What this rule adds is the _how_, not the _whether_**: how to decompose work, how to avoid shadow-running a delegate, how to write a self-contained worker prompt, and how delegated findings persist into CLAUDART memory. One practical caveat: below Ultra, instruction-triggered spawning is newer and less proven than a direct request — if an expected fan-out does not materialize, name the delegation explicitly ("spawn one explorer per module …") instead of assuming the harness acted on this file.
 
-This protocol governs the built-in `explorer`/`worker`/`default` delegation pattern. Project-specific custom agents (defined under `.codex/agents/`) carry their own instructions and are invoked directly by name when the user asks for them; they are out of scope here.
+This protocol governs the built-in `explorer`/`worker`/`default` delegation pattern. Project-specific custom agents (defined under `.codex/agents/`) carry their own instructions and are invoked directly by name when the user asks for them; their invocation policy stays out of scope here, but the Independent Review Dispatch contract below applies whenever they run.
 
 ## Decompose before you fan out
 
@@ -90,6 +90,14 @@ Prefer read-only explorers before workers when ownership is unclear.
 - Conflicts between two returned patches are resolved by the parent directly. Never spawn another agent to mediate a conflict.
 - When a worker returns a wrong or partial result: retry **once**, with a sharpened prompt that names exactly what the first attempt got wrong; if the retry also fails, pull the unit back and do it locally. Never respawn the identical prompt hoping for a different outcome.
 
+## Independent Review Dispatch
+
+Independent review works only when the reviewer's context is genuinely fresh — a reviewer fed the author's reasoning inherits its rationalizations. When dispatching any review (a project custom agent, or a deliberate N-agent cross-check):
+
+- The prompt carries scope **by reference** — a commit range, exact paths, or a diff command to run — never a hand-paraphrased diff and never the author's justification narrative. The reviewer reads the code, not the story.
+- The verdict must record the commit or worktree state it reviewed. **Any later change to the reviewed surface voids the verdict** — re-dispatch on the new state instead of patching and keeping the old approval. The classic failure: "reviewer approved, then I made one tiny fix."
+- Adversarial cross-checks stop bounded: after 2 consecutive rounds producing no new confirmed finding, stop and report. "Keep looking until nothing is found" is unbounded and un-resumable.
+
 ## Parent Responsibilities
 
 The parent Codex session remains responsible for the final result. **Codex's documented orchestration model is spawn → wait → consolidate** — per the official docs it _"waits until all requested results are available, then returns a consolidated response"_ ([Codex Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents)). So after you delegate, the default is to **wait**, not to stay busy.
@@ -115,6 +123,22 @@ For planned work, capture delegation under `## Plan of Work` or `### Memory Hint
 - any concurrency or cost limits.
 
 When a task is likely to parallelize, record the strategy; otherwise note "Delegation opportunity: <short idea>" when it would materially help a later session.
+
+## Model & Effort Routing
+
+Route each spawn to the cheapest tier that reliably clears it — never default to the strongest. Tiers are abstract; Codex's lever is per-agent `model` / `model_reasoning_effort` in `.codex/agents/*.toml` plus the effort you request per spawn, so the mapping lives in one place:
+
+| Tier     | Codex lever                                                 | Route here                                                                                                               |
+| -------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| fast     | low reasoning effort (or a cheaper model in the agent TOML) | Read-only sweeps, mechanical edits, index syncs, running `verify:` commands — decision-complete work with a binary check |
+| standard | medium/high reasoning effort                                | Workers executing a decision-complete plan step: implementation, tests, drafting                                         |
+| strong   | xhigh reasoning effort (or the strongest configured model)  | Planning, review, verifying strong-tier work, unblocking, security/concurrency/schema surfaces                           |
+| frontier | —                                                           | Never auto-selected — explicit user request only                                                                         |
+
+- Verification subagents may run one tier above the executor for high-risk tasks — cheap execution with stronger checking is the cost-optimal asymmetry.
+- Context caveat: a cheaper model's context window can be much smaller; never route a sweep that could exceed it — split the sweep or use standard.
+- The single worker retry (see Integrating Results) also escalates one tier when the first failure was reasoning quality rather than missing context.
+- Model tier and context size are independent axes: large-context mechanical reading wants a cheap tier across fresh-context subagents; small-context hard reasoning wants a strong tier.
 
 ## Safety And Cost
 

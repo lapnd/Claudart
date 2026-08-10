@@ -11,7 +11,7 @@ tags: [subagents, delegation, parallelism, orchestration]
 
 **What this rule adds is the _how_, not the _whether_.** Claude's Agent tool already encodes the mechanics — launching parallel agents in one message, `SendMessage` to continue a thread, `run_in_background`, `isolation: worktree`, and _"once you've delegated a search, don't also run it yourself — wait for the result."_ On top of that, this rule supplies the project-specific layer: how to decompose work, how to avoid shadow-running, how to write a self-contained worker prompt, and how delegated findings persist into CLAUDART memory.
 
-This protocol governs general-purpose delegation (`subagent_type: general-purpose`, `Explore`, `Plan`). Project review agents (`clean-code-reviewer`, `security-auditor` under `.claude/agents/`) carry their own instructions and are invoked by name; they are out of scope here.
+This protocol governs general-purpose delegation (`subagent_type: general-purpose`, `Explore`, `Plan`). Project review agents (`clean-code-reviewer`, `security-auditor` under `.claude/agents/`) carry their own instructions and are invoked by name; their invocation policy stays out of scope here, but the Independent Review Dispatch contract below applies whenever they run.
 
 ## Decompose before you fan out
 
@@ -59,6 +59,14 @@ Every worker prompt must include: **Goal** (the exact user-visible outcome), **S
 - Conflicts between two returned patches are resolved by the parent directly. Never spawn another agent to mediate a conflict.
 - When a worker returns a wrong or partial result: retry **once**, with a sharpened prompt that names exactly what the first attempt got wrong; if the retry also fails, pull the unit back and do it locally. Never respawn the identical prompt hoping for a different outcome.
 
+## Independent Review Dispatch
+
+Independent review works only when the reviewer's context is genuinely fresh — a reviewer fed the author's reasoning inherits its rationalizations. When dispatching any review (a project review agent, or a deliberate N-agent cross-check):
+
+- The prompt carries scope **by reference** — a commit range, exact paths, or a diff command to run — never a hand-paraphrased diff and never the author's justification narrative. The reviewer reads the code, not the story.
+- The verdict must record the commit or worktree state it reviewed. **Any later change to the reviewed surface voids the verdict** — re-dispatch on the new state instead of patching and keeping the old approval. The classic failure: "reviewer approved, then I made one tiny fix."
+- Adversarial cross-checks stop bounded: after 2 consecutive rounds producing no new confirmed finding, stop and report. "Keep looking until nothing is found" is unbounded and un-resumable.
+
 ## Parent Responsibilities
 
 The parent session remains responsible for the final result. Beyond the harness mechanics:
@@ -73,6 +81,22 @@ The parent session remains responsible for the final result. Beyond the harness 
 ## Task Documents
 
 For planned work, capture delegation under `## Plan of Work` or `### Memory Hints`, not a separate schema section. Include: the intended decomposition; intended roles; read/write ownership boundaries; validation and review responsibilities; any concurrency or cost limits. When a task is likely to parallelize, record the strategy; otherwise note "Delegation opportunity: <short idea>" when it would materially help a later session.
+
+## Model & Effort Routing
+
+Route each spawn to the cheapest tier that reliably clears it — never default to the strongest. Tiers are abstract; the current harness mapping lives only in this table, so a model launch updates one place:
+
+| Tier     | Claude spawn                             | Route here                                                                                                               |
+| -------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| fast     | `model: haiku` (or inherit + low effort) | Read-only sweeps, mechanical edits, index syncs, running `verify:` commands — decision-complete work with a binary check |
+| standard | `model: sonnet`                          | Workers executing a decision-complete plan step: implementation, tests, drafting                                         |
+| strong   | `model: opus` or inherit                 | Planning, review, verifying strong-tier work, unblocking, security/concurrency/schema surfaces                           |
+| frontier | `model: fable`                           | Never auto-selected — explicit user request only                                                                         |
+
+- Verification subagents may run one tier above the executor for high-risk tasks — cheap execution with stronger checking is the cost-optimal asymmetry.
+- Context caveat: the fast tier's context window can be much smaller (Haiku: 200K); never route a sweep that could exceed it — split the sweep or use standard.
+- The single worker retry (see Integrating Results) also escalates one tier when the first failure was reasoning quality rather than missing context.
+- Model tier and context size are independent axes: large-context mechanical reading wants a cheap model across fresh-context subagents; small-context hard reasoning wants a strong model.
 
 ## Safety And Cost
 
