@@ -21,7 +21,7 @@ CLAUDART deals with this using files. A handful of slash commands maintain a sma
 ## Install
 
 ```bash
-# Flag after `bash -s --`:  --claude (default) · --codex · --both · --force (overwrite) · --council (adds the /council deliberation companion, user scope)
+# Flag after `bash -s --`:  --claude (default) · --codex · --both · --upgrade (refresh template files; never touches live state) · --force (overwrite everything) · --council (adds the /council deliberation companion, user scope)
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude
 ```
 

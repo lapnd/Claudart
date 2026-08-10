@@ -287,6 +287,14 @@ you>  /doctor
 
 Read-only: runs the mechanical knowledge checker, then audits wiring, staleness, and misfiled content — it reports, never fixes. If it finds drift in the memory system, the repair loop is `/doctor` → `/refactor-memory` → `/doctor`. Run it after upgrading CLAUDART, or whenever `/start` output looks wrong.
 
+**Upgrading CLAUDART** in an existing project: commit your tree, then rerun the installer with `--upgrade` (plus your layer flags):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --both --upgrade
+```
+
+It refreshes template-owned files (commands, rules, agents, skills, scripts) and **never touches live state** — CONTEXT, JOURNAL, tasks, specs, knowledge — or your evolved `CLAUDE.md`/`AGENTS.md` (reconcile those via [INTEGRATE.md](../INTEGRATE.md)). Review with `git diff`, then run `/doctor`.
+
 ---
 
 ## The three golden habits

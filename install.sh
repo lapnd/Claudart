@@ -9,7 +9,11 @@
 #   --codex      Install the Codex layer (.codex/ + .agents/ + AGENTS.md at root)
 #   --both       Install both Claude and Codex layers
 #   --council    Also install Council of High Intelligence (/council) to user scope
-#   --force      Overwrite existing files
+#   --upgrade    Upgrade an existing install: overwrite template-owned files
+#                (commands, rules, agents, skills, scripts) but never live
+#                state (CONTEXT, JOURNAL, tasks, specs, knowledge) or the
+#                user-evolved CLAUDE.md / AGENTS.md
+#   --force      Overwrite ALL existing files, including live state
 #   --help       Show this help text
 
 set -euo pipefail
@@ -22,9 +26,10 @@ COUNCIL_REPO="0xNyk/council-of-high-intelligence"
 COUNCIL_TARBALL_URL="https://github.com/${COUNCIL_REPO}/archive/refs/heads/main.tar.gz"
 
 INSTALL_CLAUDE=true
-INSTALL_CODEX=false
-INSTALL_COUNCIL=false
-FORCE=false
+INSTALL_CODEX=true
+INSTALL_COUNCIL=true
+UPGRADE=true
+FORCE=true
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -51,7 +56,16 @@ OPTIONS
                deliberation command (0xNyk/council-of-high-intelligence) —
                into your USER scope (~/.claude, ~/.codex), matching the
                layers selected above
-  --force      Overwrite files that already exist
+  --upgrade    Upgrade an existing CLAUDART install in place. Overwrites
+               TEMPLATE-OWNED files only (commands/, rules/, agents/,
+               scripts/, guidelines/, .agents/ skills). NEVER touches live
+               state (CONTEXT.md, JOURNAL.md, HANDOFF.md, tasks/, specs/,
+               knowledge/) or user-evolved indexes (CLAUDE.md, AGENTS.md,
+               config.toml) — reconcile those via INTEGRATE.md. Run from a
+               clean git tree so the upgrade is reviewable with git diff,
+               then run /doctor.
+  --force      Overwrite ALL files that already exist, including live state.
+               Use --upgrade instead unless you really mean this.
   --help       Show this help text
 
 LAYERS
@@ -69,6 +83,7 @@ for arg in "$@"; do
     --codex)  INSTALL_CLAUDE=false; INSTALL_CODEX=true ;;
     --both)   INSTALL_CLAUDE=true;  INSTALL_CODEX=true ;;
     --council) INSTALL_COUNCIL=true ;;
+    --upgrade) UPGRADE=true ;;
     --force)  FORCE=true ;;
     --help|-h) show_help; exit 0 ;;
     *) printf '%s Unknown option: %s\n' "$(red "error")" "$arg" >&2; exit 1 ;;
@@ -96,14 +111,40 @@ fi
 
 SKIPPED=0
 COPIED=0
+UPGRADED=0
+UNCHANGED=0
 
-# Copy a single file, skipping if it already exists (unless --force).
+# Template-owned paths: safe to overwrite on --upgrade. Everything else —
+# live state (CONTEXT, JOURNAL, HANDOFF, tasks/, specs/, knowledge/) and
+# user-evolved indexes (CLAUDE.md, AGENTS.md, config.toml) — is never
+# overwritten by an upgrade; reconcile those via INTEGRATE.md.
+is_template_path() {
+  case "$1" in
+    .claude/commands/*|.claude/rules/*|.claude/agents/*|.claude/scripts/*) return 0 ;;
+    .codex/guidelines/*|.codex/agents/*|.codex/scripts/*) return 0 ;;
+    .agents/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# Copy a single file. Existing files are skipped, unless --force (overwrite
+# everything) or --upgrade (overwrite template-owned paths only).
 copy_file() {
   local rel="$1"          # path relative to repo root, e.g. ".claude/CLAUDE.md"
   local src="$TMPDIR/$rel"
   local dst="$DEST/$rel"
 
-  if [[ -f "$dst" && "$FORCE" == false ]]; then
+  if [[ -f "$dst" ]]; then
+    if [[ "$FORCE" == true ]] || { [[ "$UPGRADE" == true ]] && is_template_path "$rel"; }; then
+      if cmp -s "$src" "$dst"; then
+        (( UNCHANGED++ )) || true
+        return
+      fi
+      cp "$src" "$dst"
+      printf '  %s  %s\n' "$(green "up  ")" "$rel"
+      (( UPGRADED++ )) || true
+      return
+    fi
     printf '  %s  %s\n' "$(yellow "skip")" "$rel"
     (( SKIPPED++ )) || true
     return
@@ -151,7 +192,16 @@ copy_tree() {
 
 # ── install ───────────────────────────────────────────────────────────────────
 
-printf '\n%s  Installing into %s\n' "$(bold "→")" "$DEST"
+if [[ "$UPGRADE" == true ]]; then
+  printf '\n%s  Upgrading CLAUDART in %s\n' "$(bold "→")" "$DEST"
+  if command -v git &>/dev/null && git -C "$DEST" rev-parse --is-inside-work-tree &>/dev/null; then
+    if [[ -n "$(git -C "$DEST" status --porcelain 2>/dev/null)" ]]; then
+      printf '%s  Working tree is not clean — consider committing first so the upgrade is reviewable with git diff.\n' "$(yellow "note")"
+    fi
+  fi
+else
+  printf '\n%s  Installing into %s\n' "$(bold "→")" "$DEST"
+fi
 
 if [[ "$INSTALL_CLAUDE" == true ]]; then
   printf '\n%s\n' "$(bold "Claude Code layer (.claude/)")"
@@ -184,6 +234,14 @@ if [[ "$INSTALL_CODEX" == true ]]; then
     location="$( [[ "$AGENTS_AT_ROOT" == true ]] && echo "root" || echo ".codex/" )"
     printf '  %s  AGENTS.md (already present at %s, skipping)\n' "$(yellow "skip")" "$location"
     (( SKIPPED++ )) || true
+    # copy_tree above may have just re-created .codex/AGENTS.md on a reinstall
+    # or upgrade; when the user's canonical copy lives at root and .codex/ had
+    # none before this run, remove the duplicate it left behind.
+    if [[ "$AGENTS_AT_ROOT" == true && "$AGENTS_IN_CODEX" == false && -f "$DEST/.codex/AGENTS.md" ]]; then
+      rm "$DEST/.codex/AGENTS.md"
+      (( COPIED-- )) || true
+      printf '  %s  .codex/AGENTS.md (removed duplicate; canonical copy is at root)\n' "$(green "clean")"
+    fi
   fi
 
   # .codex/CODEX.md is deprecated when present; the template uses AGENTS.md as
@@ -221,10 +279,13 @@ fi
 
 # ── summary ───────────────────────────────────────────────────────────────────
 
-printf '\n%s  Done. %d copied, %d skipped.\n\n' "$(bold "✓")" "$COPIED" "$SKIPPED"
+printf '\n%s  Done. %d copied, %d upgraded, %d unchanged, %d skipped.\n\n' "$(bold "✓")" "$COPIED" "$UPGRADED" "$UNCHANGED" "$SKIPPED"
 
-if [[ "$SKIPPED" -gt 0 ]]; then
-  printf '%s  Skipped files already exist in your project. Run with --force to overwrite them.\n\n' "$(yellow "note")"
+if [[ "$UPGRADE" == true ]]; then
+  printf '%s  Live state (CONTEXT, JOURNAL, tasks, specs, knowledge) and user-evolved indexes (CLAUDE.md, AGENTS.md) were left untouched.\n' "$(yellow "note")"
+  printf '%s  Review with git diff, reconcile customized indexes via INTEGRATE.md, then run /doctor.\n\n' "$(yellow "note")"
+elif [[ "$SKIPPED" -gt 0 ]]; then
+  printf '%s  Skipped files already exist in your project. Rerun with --upgrade to refresh template files safely, or --force to overwrite everything.\n\n' "$(yellow "note")"
 fi
 
 printf '%s\n' "$(bold "Next steps:")"
