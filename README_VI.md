@@ -1,3 +1,5 @@
+<!-- AI agents: human-oriented pitch. The binding contracts live in .claude/rules/ and .codex/guidelines/ — read those, not this file, when acting. -->
+
 <div align="center">
   <h1>CLAUDART</h1>
   <p><strong>Lớp vận hành bằng markdown cho Claude Code &amp; Codex CLI - memory, kế hoạch và review, tất cả nằm trong git.</strong></p>
@@ -19,7 +21,7 @@ CLAUDART xử lý chuyện này bằng file. Một nhóm slash command nhỏ duy
 ## Cài đặt
 
 ```bash
-# Flag sau `bash -s --`:  --claude (mặc định) · --codex · --both · --force (ghi đè)
+# Flag sau `bash -s --`:  --claude (mặc định) · --codex · --both · --force (ghi đè) · --council (cài thêm companion /council, phạm vi user)
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude
 ```
 
@@ -36,6 +38,7 @@ Installation hiện hữu dùng `INTEGRATE.md` để derive delta thực tế v�
 | Session nào cũng bắt đầu mù mờ               | `/start` đọc trạng thái hiện tại, task đang mở và các commit gần đây trước khi đụng vào bất kỳ thứ gì   |
 | Kế hoạch mất khi session đóng                | `/plan` ghi kế hoạch vào task file để session sau có thể tiếp tục đúng chỗ bạn dừng                     |
 | Mission quá lớn cho một session hay một plan | `/spec` đóng băng ý định thành POC + roadmap bạn approve một lần; `/spec-run` chạy lặp tới final review |
+| Refactor không được phép đổi hành vi         | `/refactor` ghim baseline, viết behavior contract + blast radius, và chứng minh tương đương             |
 | Session hiệu quả chạm trần context           | `/handoff` lưu suy luận của session - giả thuyết, evidence, dead ends - cho lần `/start` kế tiếp        |
 | Cùng quyết định bị tái khám phá hằng tuần    | `/learn` biến correction hành vi lặp lại thành rule có scope theo path                                  |
 | Fact bền của dự án không có chỗ đúng để sống | `knowledge/` lập map; agent nạp map phù hợp, outline topic rồi chỉ section liên quan                    |
@@ -71,6 +74,7 @@ Retrieval đi từ map và có budget: root `INDEX.md`, tối đa các domain ma
 /plan add JWT middleware        # ghi task file; agent chờ bạn approve trước khi code
 /spec build the demo game       # mission quá lớn cho một plan? phỏng vấn → POC → roadmap, approve một lần
 /spec-run demo-game             # session mới thực thi mission đã approve tự chủ tới cổng final review
+/refactor migrate auth to v2    # mission refactor: baseline ghim + behavior contract chứng minh tương đương
 /handoff                        # context gần đầy? lưu suy luận, resume fresh bằng /start
 /checkpoint                     # rebuild CONTEXT.md cuối session
 /learn                          # thăng cấp quyết định lặp lại thành rule
@@ -81,6 +85,7 @@ Codex CLI chạy cùng flow với `$codex-` thay cho `/` (ví dụ `$codex-start
 
 ## Tài liệu
 
+**[docs/GUIDE.md](docs/GUIDE.md)** là cookbook (tiếng Anh) - chọn tình huống, làm theo công thức: walkthrough cụ thể cho từng command và kịch bản.
 **[docs/WORKFLOW_VI.md](docs/WORKFLOW_VI.md)** là manual - kiến trúc, lifecycle đầy đủ của task, toàn bộ command và layout thư mục. README này chỉ là phần giới thiệu.
 
 Bản tiếng Anh: **[README.md](README.md)** và **[docs/WORKFLOW.md](docs/WORKFLOW.md)**.

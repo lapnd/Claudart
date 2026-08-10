@@ -1,3 +1,5 @@
+<!-- AI agents: human-oriented pitch. The binding contracts live in .claude/rules/ and .codex/guidelines/ — read those, not this file, when acting. -->
+
 <div align="center">
   <h1>CLAUDART</h1>
   <p><strong>A markdown operating layer for Claude Code &amp; Codex CLI — memory, plans, and review, all in git.</strong></p>
@@ -19,7 +21,7 @@ CLAUDART deals with this using files. A handful of slash commands maintain a sma
 ## Install
 
 ```bash
-# Flag after `bash -s --`:  --claude (default) · --codex · --both · --force (overwrite)
+# Flag after `bash -s --`:  --claude (default) · --codex · --both · --force (overwrite) · --council (adds the /council deliberation companion, user scope)
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude
 ```
 
@@ -36,6 +38,7 @@ Existing installations use `INTEGRATE.md` to derive their actual delta against c
 | Every session starts blind                    | `/start` reads the current state, open tasks, and recent commits before touching anything            |
 | Plans die when the session closes             | `/plan` writes the plan to a task file that any later session can pick up where you left off         |
 | A mission is too big for one session or plan  | `/spec` freezes the intent in a POC + roadmap you approve once; `/spec-run` loops it to final review |
+| A refactor must not change behavior           | `/refactor` pins a baseline, writes a behavior contract + blast radius, and proves equivalence       |
 | A productive session hits the context ceiling | `/handoff` saves the session's reasoning — hypothesis, evidence, dead ends — for the next `/start`   |
 | The same decisions get re-discovered weekly   | `/learn` turns recurring behavior corrections into path-scoped rules                                 |
 | Durable facts have nowhere to live            | `knowledge/` maps them; the agent loads the matching map, topic outline, then only relevant sections |
@@ -71,6 +74,7 @@ Retrieval is map-first and bounded: root `INDEX.md`, at most the relevant domain
 /plan add JWT middleware        # write a task file; the agent waits for your approval before coding
 /spec build the demo game       # mission too big for one plan? interview → POC → roadmap, approved once
 /spec-run demo-game             # fresh sessions execute the approved mission autonomously until final review
+/refactor migrate auth to v2    # refactor mission: pinned baseline + behavior contract prove equivalence
 /handoff                        # context nearly full? save your reasoning, resume fresh with /start
 /checkpoint                     # rebuild CONTEXT.md at session end
 /learn                          # promote recurring decisions into rules
@@ -81,6 +85,7 @@ Codex CLI runs the same flow with `$codex-` instead of `/` (e.g. `$codex-start`)
 
 ## Documentation
 
+**[docs/GUIDE.md](docs/GUIDE.md)** is the cookbook — pick your situation, follow the recipe: concrete walkthroughs for every command and scenario.
 **[docs/WORKFLOW.md](docs/WORKFLOW.md)** is the manual — architecture, the full task lifecycle, every command, directory layout. This README is just the pitch.
 
 ## Comparison
