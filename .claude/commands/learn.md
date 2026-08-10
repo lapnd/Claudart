@@ -36,7 +36,8 @@ Walk the conversation chronologically, comparing each assistant turn against the
    - **Grep when targeted**: if you suspect a specific pattern is recurring, use `grep '| decision |' .claude/JOURNAL.md` (or `pivot`) to surface only matching lines without loading the rest.
    - Look for the same `decision` or `pivot` recurring 2+ times in what you read. A repeating decision is a strong signal that the underlying principle should graduate from CONTEXT/JOURNAL into `.claude/rules/`. Surface these candidates explicitly.
    - Skip this step entirely if `.claude/JOURNAL.md` doesn't exist or has fewer than 5 entries.
-3. Before updating files:
+3. **Routing check**: did any model-tier choice prove wrong this session — a `fast`/`standard`-tier task that needed escalation to a stronger session, or a `strong`-tier task a cheaper session cleared comfortably? A one-off is noise; a recurring mismatch adjusts the tier rules in the planning commands or becomes a project knowledge fact (e.g. "this project's DB tasks always need the strong tier").
+4. Before updating files:
    - First, use the rule-file list from the re-grounding pass.
    - Compare the new knowledge with the scope of these existing files.
    - **CRITICAL CONSTRAINT**: DO NOT shoehorn or force new concepts into an existing file if the match is less than 80%. It is strictly PREFERRED to create a new domain file rather than polluting existing specific rules.
@@ -46,7 +47,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
      - Global standard (applies universally) → Update `.claude/CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
      - Descriptive fact → apply `.claude/rules/knowledge-management.md`. Promote it directly only if it is durable beyond the current work, current, evidenced, and correctly scoped. Patch the existing owner and reachable map atomically; leave WIP/proposals in the task/spec/CONTEXT surface and uncertainty/conflict as a candidate or `review-needed`.
 
-4. If knowledge changed, run `bash .claude/scripts/knowledge-check.sh`. Report checker failures and never claim the mutation healthy while they remain.
+5. If knowledge changed, run `bash .claude/scripts/knowledge-check.sh`. Report checker failures and never claim the mutation healthy while they remain.
 
 **Boundary**: `/learn` updates **rules, `.claude/knowledge/`, and `.claude/CLAUDE.md` only**. Do NOT modify `.claude/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claude/JOURNAL.md` entries (it's append-only). You may read both as evidence. `/checkpoint` bulk-maintains remaining candidates but is not the sole knowledge write gate.
 

@@ -29,6 +29,8 @@ Walk the session chronologically. Compare every assistant turn against the rule 
 
 Use JOURNAL recurrence as evidence: if the same decision or pivot appears at least twice, surface it as a behavioral candidate. Separate one-off environment failures and task-local narrative from reusable behavior. Do not turn a single unverified observation into a rule.
 
+Also run a **routing check**: did any model-tier choice prove wrong this session — a `fast`/`standard`-tier task that needed escalation to a stronger session, or a `strong`-tier task a cheaper session cleared comfortably? A one-off is noise; a recurring mismatch adjusts the tier rules in the planning skills or becomes a project knowledge fact.
+
 ## 3. Patch The Canonical Owner
 
 For each validated behavior:
