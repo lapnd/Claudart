@@ -13,6 +13,7 @@ Before doing anything, read `.codex/guidelines/spec-workflow.md`. That guideline
 
 - The user's request after `$codex-spec` is the mission description. If empty, ask: "What's the mission?"
 - If the request is actually a single feature or fix, say so and suggest `$codex-plan` instead. If it is a raw product idea with no repo and no scope at all, suggest `$codex-project-discovery` first — `$codex-spec` can then build on its `docs/project/` output.
+- If the mission is behavior-preserving refactoring or migration, additionally apply the **Refactor Missions** section below throughout the procedure.
 
 ## Procedure
 
@@ -51,7 +52,9 @@ The skeleton is already half-full from Steps 2-3; finish it. The hard part is **
 
 Explore the codebase read-only first (existing patterns, constraints, files each phase will touch) — de-risk decisions, don't pre-solve implementation. Use read-only `explorer` subagents for a broad survey when the active harness policy and `.codex/guidelines/agent-delegation.md` make that decomposition useful.
 
-Then write phases per the guideline file. Hold the decision-complete bar: exact paths, chosen approaches with the _why_, per-task `verify:`, phase validation commands, the SPEC scenarios each phase advances, any composite verification coverage, and the smallest non-redundant final verification set. Mark parallelizable waves for fan-out only where the prepared decomposition genuinely helps; a wave records strategy for a later harness, not permission. Phase 1 should reach something demoable early — the mission must produce visible progress every phase, not a big-bang integration at the end.
+Then write phases per the guideline file. Hold the decision-complete bar: exact paths, chosen approaches with the _why_, per-task `verify:`, phase validation commands, the SPEC scenarios each phase advances, any composite verification coverage, and the smallest non-redundant final verification set. Mark parallelizable waves for fan-out only where the prepared decomposition genuinely helps; a wave records strategy for a later harness, not permission.
+
+**Tier-annotate tasks** so an executing session can pick the right model: the default is `standard`; append `(tier: fast)` when a step is mechanical with a binary `verify:` touching at most 2 files, and `(tier: strong)` when it carries security/concurrency/db risk, touches a public contract or schema, or its `verify:` needed judgment to write. Set SPEC frontmatter `executor-tier:` to the cheapest tier that covers the roadmap: `standard` when every task is fast or standard; `strong` only when strong-tier tasks dominate — a mostly-standard roadmap with a few strong tasks stays `standard`, and the executor rotates or delegates one tier up for those tasks (tiers per `agent-delegation.md` → Model & Effort Routing). Phase 1 should reach something demoable early — the mission must produce visible progress every phase, not a big-bang integration at the end.
 
 For a new mission, seed `LEDGER.md` with its header and no entries, and `NOTES.md` with what exploration surfaced: how to run, build, and verify the project (dev server, test commands), key files and helpers, non-obvious constraints, pitfalls, planning-time decisions with their rejected alternatives. Include `## Current Acceptance Delta` with `- None.`; it stays compact during execution and is never a second roadmap. For a resumed scope amendment, preserve LEDGER history and existing NOTES, then amend ROADMAP using its disposition rules rather than erasing completed or superseded work. NOTES is the executor's Memory Hints — a roadmap without it forces the executor to re-discover everything you just learned.
 
@@ -66,6 +69,7 @@ Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretendin
 **POC**: `artifacts/<file>` — open it and check it still matches your intent
 **Scenarios**: <n> acceptance scenarios | **Roadmap**: <m> phases, <k> tasks
 **Commit policy**: `commits: user` — the loop never commits; say "per-task" or "per-phase" before approving if you want git checkpoints during the run
+**Runnable on**: `<executor-tier>` — run $codex-spec-run from a session of that tier; escalation is the same skill from a stronger session
 **Open questions**: <list, or "none">
 
 Review SPEC.md (especially Must-NOT-Have) and ROADMAP.md. When you approve, that is a STANDING
@@ -74,6 +78,32 @@ Say "go" to approve — then open a fresh session, $codex-start, and $codex-spec
 ```
 
 Do NOT begin implementing, even after approval — on "go", flip `status → ready`, sync INDEX, and stop. Execution belongs to `$codex-spec-run`.
+
+## Refactor Missions
+
+When the mission is behavior-preserving refactoring or migration ("restructure X without changing behavior", "migrate from A to B"), the spec carries one extra proof obligation: **behavioral equivalence against a pinned baseline**. The burden of proof is on the refactor, not on the reviewer. This section layers onto the normal procedure — same folder, same ROADMAP/LEDGER/gates, no extra machinery. `$codex-refactor <mission>` enters this flow directly.
+
+### Baseline and behavior contract (during Steps 2-4)
+
+- **Pin the baseline**: record `baseline: <sha>` (`git rev-parse HEAD` at spec time) in SPEC.md under Mission. Every contract citation points into the baseline, not the working tree.
+- **Write `artifacts/behavior-contract.md` from the PRE-change code**: enumerate the externally observable behavior in scope — business rules, validation, API shape, persistence semantics, security, observability. ID each entry (`B1`, `V1`, …) and cite baseline `file:line`. A category with nothing in scope says "None in scope" — never delete the heading; an absent heading reads as "not considered". Reconstruct the contract from the baseline worktree, never the refactored code — the new code's omissions must not define the standard. (Auditing an already-refactored codebase uses the same procedure; the refactor just already happened.)
+- **Blast radius from search, not memory**: for every symbol or module being moved or changed, enumerate inbound call-sites by grep and record the command that found them. Tag risk surfaces (api / db / security / concurrency / perf / ops); high-risk tags demand their own phase-validation scenarios. Record the **worst credible failure** in SPEC.md — if this refactor is wrong in the worst plausible way, what breaks in production, and how would we notice?
+- **Derive Acceptance Scenarios from the contract**: the highest-risk entries become scenarios (composite coverage allowed per the guideline file). Every blast-radius call-site must end the mission either migrated-with-evidence or explicitly out of scope.
+
+### Verification vocabulary (for ROADMAP `verify:` and phase validations)
+
+- **Differential worktree run**: `git worktree add <tmp> <baseline>`, run the same command/scenario on baseline and head, diff the outputs. Equivalence is the empty diff; any intended delta must be enumerated in SPEC.md.
+- **Deletion audit**: `git diff <baseline>..HEAD | grep '^-'` filtered for control-flow keywords (`if |case |catch |throw |return `) — every deleted branch is either relocated (name where) or an approved removal.
+- **Stale-reference sweep**: after moves/renames, grep the old names repo-wide — zero hits outside git history is the pass condition.
+- The final gate's evidence set must span three families: **static** (sweeps, deletion audit), **dynamic** (tests plus differential runs on a real surface), and **architectural** (the structural claim the mission exists for, checked by an explicit observable such as "zero imports of X from Y"). A skipped pass is recorded with its reason, never silently — a silently skipped pass reads as verified later.
+
+### Sequencing rules (into ROADMAP task design)
+
+- Every task leaves the repo buildable and green; move and modify are separate steps (and separate commits when the `commits:` policy grants them).
+- Migration-era names (`*_old`, `*_v2`, compat shims) may exist only mid-mission and must be gone before the final gate — the stale-reference sweep checks this.
+- Dead code is removed by proof (a sweep recorded in LEDGER), never by suspicion.
+- A pre-existing bug discovered mid-refactor is a finding recorded in NOTES — never a silent fix. Fixing it changes behavior, and scope changes belong to the user.
+- **Definition of Done for a refactor mission adds**: old path fully removed, sweeps clean, and zero behavior deltas beyond those enumerated in SPEC.md.
 
 ## Anti-Patterns
 

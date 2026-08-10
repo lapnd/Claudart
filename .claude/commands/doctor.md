@@ -19,7 +19,7 @@ Record its exit status and every finding. The checker is read-only and owns mech
 ### 1. Required Structure
 
 - `.claude/` exists at the repository root
-- `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`, `handoff.md`, `project-discovery.md`, `spec.md`, `spec-run.md`
+- `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`, `handoff.md`, `project-discovery.md`, `spec.md`, `spec-run.md`, `refactor.md`
 - `.claude/agents/` exists (may be empty if user removed shipped agents)
 - `.claude/rules/` exists (may be empty before the user runs `/refactor-memory`)
 - `.claude/rules/knowledge-management.md` exists and is referenced from `.claude/CLAUDE.md`
@@ -64,8 +64,8 @@ For every rule file in `.claude/rules/*.md`:
 
 - Read `.claude/CLAUDE.md`.
 - Find the `## Domain Rules` section.
-- For every `@.claude/rules/*.md` import there, confirm the target file exists.
-- For every file under `.claude/rules/`, confirm there is a matching `@` import in `.claude/CLAUDE.md`. Files without an import are loaded only when their `paths:` glob fires — flag this as **isolated rule** so the user knows it won't be globally visible.
+- For every `@.claude/rules/*.md` import and every trigger-line rule path there, confirm the target file exists.
+- For every file under `.claude/rules/`, confirm `.claude/CLAUDE.md` references it either as an `@` import or as a trigger line (plain path + load trigger + binding digest) under Domain Rules. Both are valid wiring — trigger lines are the deliberate token-hygiene choice for workflow rules. A rule with neither is loaded only when its `paths:` glob fires — flag as **isolated rule** so the user knows it won't be discoverable.
 
 ### 5. AI Behavior Wiring
 
