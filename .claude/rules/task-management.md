@@ -185,7 +185,7 @@ Its values — `none`, `strategy-only`, `authorized` — and **whether they gate
 
 When `status: in-progress`, the agent maintains the task file as it works:
 
-1. After completing each step, flip `- [ ]` → `- [x]` and prefix with `(YYYY-MM-DD HH:MMZ)` UTC timestamp.
+1. After completing each step, flip `- [ ]` → `- [x]` and prefix with `(YYYY-MM-DD HH:MMZ)` UTC timestamp. Record the step's `verify:` command and its decisive result line with the tick, following the evidence anatomy defined in `spec-workflow.md`.
 2. Bump frontmatter `updated:` whenever the file is touched.
 3. Append to **Surprises & Discoveries** when reality diverges from the plan (e.g., file moved, dependency missing, existing helper found). Prefix each entry with a `(YYYY-MM-DD HH:MMZ)` UTC timestamp.
 4. Append to **Decision Log** when changing approach mid-flight, prefixed with `(YYYY-MM-DD HH:MMZ, <agent>)`. Include rationale.

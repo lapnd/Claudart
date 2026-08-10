@@ -40,6 +40,7 @@ created: YYYY-MM-DD
 updated: YYYY-MM-DD
 agent: claude # claude | codex | both
 commits: user # user | per-task | per-phase — the executor's git-commit grant, chosen at approval; push is never granted
+executor-tier: standard # fast | standard | strong — cheapest session tier expected to execute this roadmap reliably; see agent-delegation.md → Model & Effort Routing
 ---
 
 # <Mission Title>
@@ -125,6 +126,8 @@ The roadmap holds _what_; the ledger holds _evidence and learnings_. Ticking nev
 ```
 
 Events: `run-started`, `task-started`, `task-completed`, `validation-failed`, `phase-validated`, `task-blocked`, `replanned`, `delegated`, `circuit-breaker`, `rotation-checkpoint`, `scope-change` (user-initiated only), `final-gate`. Never edit or delete prior entries.
+
+An evidence line is a proof, not a note: it names the claim being proven, the exact command run, the 1-3 decisive output lines observed, and the revision it was observed at — a commit sha, or the bounded worktree fingerprint defined for final gates below. Bulky output goes to a file under `artifacts/` and is referenced by path, never pasted into the ledger. No evidence line, no tick.
 
 Every `final-gate` entry records `mode: full-baseline | scoped-review`. A full baseline names why it ran (`initial`, `material-amendment`, or conservative fallback), the fresh scenario evidence, and the revision or worktree state proved. A scoped review names the latest successful `final-gate` evidence state it extends, the actual changed surface, `executed` checks, scenarios `covered` by those checks, evidence `reused` from that state, and why each reused scenario is outside the impact closure. Every successful gate also records the resulting revision or bounded worktree fingerprint it proved, then becomes the cumulative baseline for the next review change; the chain must remain rooted in an identifiable full baseline. For a dirty worktree, the fingerprint is the base revision plus mission-relevant changed paths and content digests; exclude secrets, ignored live state, and unrelated user files. This record, not chat memory, makes repeated evidence reuse auditable.
 
@@ -213,6 +216,15 @@ Long sessions degrade (context pressure, compaction, host lag). Rotation is the 
 ## Pausing & Interrupting
 
 **Stopping anytime is safe by design.** A user interrupt is indistinguishable from a crash: the loop's re-orientation rebuilds state from disk, and an unmatched `task-started`/`delegated` entry marks the in-flight work to verify before redoing. No need to wait for a rotation offer — a tick boundary is cleanest, but mid-task is recoverable.
+
+**Crash-recovery classification.** When re-orientation finds a crash marker, classify the in-flight work by worktree state and the task's `verify:` before touching anything:
+
+- **Clean tree, verify passes** — the work landed; complete the tick with evidence.
+- **Dirty tree, verify passes** — diff the uncommitted changes against the in-flight task; finish and tick only if the dirt clearly is that task's work, otherwise treat it as the dirty-fail case below.
+- **Dirty tree, verify fails** — never fix forward blind. Set the partial work aside and redo the task from the last verified state, mining the partial diff for intent only. Respect the `commits:` policy: with `commits: user`, never stash or commit the user's tree silently — record a one-line diff summary in the LEDGER and ask.
+- **Clean tree, verify fails** — prior evidence is contradicted; append `validation-failed` and reopen responsible work under the ROADMAP disposition rules.
+
+When in doubt, re-verify rather than re-do, and re-do rather than assume done.
 
 ## Completion — Final Gate
 
