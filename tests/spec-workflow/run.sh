@@ -73,6 +73,14 @@ for rule in "$CODEX_RULE" "$CLAUDE_RULE"; do
     "rule requires an exact review anchor"
   assert_not_contains "$rule" "last full baseline" \
     "rule does not skip evidence from earlier scoped reviews"
+  assert_contains "$rule" "decisive output lines" \
+    "rule specifies the evidence entry anatomy"
+  assert_contains "$rule" "No evidence line, no tick" \
+    "rule refuses ticks without evidence"
+  assert_contains "$rule" "re-verify rather than re-do" \
+    "rule classifies crash recovery before redoing work"
+  assert_contains "$rule" "executor-tier" \
+    "rule records the recommended executor tier in SPEC frontmatter"
 done
 
 assert_contains "$CODEX_RULE" \
@@ -111,6 +119,10 @@ for runner in "$CODEX_RUNNER" "$CLAUDE_RUNNER"; do
     "runner does not skip evidence from earlier scoped reviews"
   assert_not_contains "$runner" "changed verifier, or cross-cutting change" \
     "runner does not treat every local verifier edit as cross-cutting"
+  assert_contains "$runner" "executor-tier" \
+    "runner surfaces the recommended executor tier"
+  assert_contains "$runner" "escalation signal" \
+    "runner escalates after repeated failed validation below the strong tier"
 done
 
 assert_contains "$CODEX_RUNNER" \
@@ -131,6 +143,12 @@ for author in "$CODEX_AUTHOR" "$CLAUDE_AUTHOR"; do
     "spec authoring exposes a non-redundant final verification set"
   assert_contains "$author" "composite" \
     "spec authoring records composite coverage"
+  assert_contains "$author" "None in scope" \
+    "refactor missions keep empty contract categories explicit"
+  assert_contains "$author" "never the refactored code" \
+    "refactor contract is reconstructed from the baseline"
+  assert_contains "$author" "Tier-annotate tasks" \
+    "spec authoring annotates task tiers for model routing"
 done
 
 printf '1..%s\n' $((PASS_COUNT + FAIL_COUNT))
