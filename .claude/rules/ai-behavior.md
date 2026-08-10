@@ -39,3 +39,21 @@ These apply universally, regardless of project type.
   - "Add validation" → "Write tests for invalid inputs, then make them pass."
 - For multi-step tasks, state a brief plan with a `verify:` checkpoint for each step.
 - Strong success criteria allow autonomous looping. Weak criteria ("make it work") require constant clarification.
+
+## 5. Stop Conditions & Honest Reporting
+
+- STOP and ask instead of proceeding when: you still cannot understand the code or the request after genuine investigation; two consecutive fix attempts for the same failure have not worked; or you are about to guess. Stopping is compliant behavior. Guessing is a violation.
+- NEVER weaken, skip, or delete a failing test to make it pass. A failing test is information, not an obstacle.
+- Report reality exactly: a skipped step is reported as skipped, partial work as partial, an unverified claim as unverified. A truthful "blocked" is always acceptable. A false "done" is the single worst violation.
+- Never stream large command output into the session — redirect it to a file and read only the slices you need (`tail`, `grep`). One oversized output can kill the session that produced it.
+
+## 6. Self-Critique Before Reporting Done
+
+Before reporting any implementation work as complete, answer honestly:
+
+- What behavior might I have removed or broken without noticing?
+- What did I assume without evidence?
+- Which changed path has no verification covering it?
+- Would I ship this today?
+
+Any uncertain answer gets investigated now, or reported as a residual risk — never silently dropped.
