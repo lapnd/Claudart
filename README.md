@@ -79,6 +79,7 @@ Retrieval is map-first and bounded: root `INDEX.md`, at most the relevant domain
 /checkpoint                     # rebuild CONTEXT.md at session end
 /learn                          # promote recurring decisions into rules
 /doctor                         # health check when the setup feels off
+/optimize                       # auto-compact too often? audit where the tokens go
 ```
 
 Codex CLI runs the same flow with `$codex-` instead of `/` (e.g. `$codex-start`).

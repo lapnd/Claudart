@@ -27,6 +27,7 @@ WHEN THINGS LOOP OR DRIFT
   spec blocked ──► /spec-run again from a stronger session
   same correction twice ──► /learn
   memory feels off ──► /doctor → /refactor-memory → /doctor
+  auto-compact too frequent ──► /optimize
 ```
 
 ## Cheat sheet — which command, when
@@ -47,6 +48,7 @@ WHEN THINGS LOOP OR DRIFT
 | Ending a productive session                                     | `/checkpoint`                                             |
 | You corrected the agent twice for the same thing                | `/learn`                                                  |
 | Setup feels broken or memory drifted                            | `/doctor` (→ `/refactor-memory` → `/doctor`)              |
+| Auto-compact fires frequently / sessions feel token-hungry      | `/optimize`                                               |
 
 ---
 
@@ -294,6 +296,29 @@ curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | ba
 ```
 
 It refreshes template-owned files (commands, rules, agents, skills, scripts) and **never touches live state** — CONTEXT, JOURNAL, tasks, specs, knowledge — or your evolved `CLAUDE.md`/`AGENTS.md` (reconcile those via [INTEGRATE.md](../INTEGRATE.md)). Review with `git diff`, then run `/doctor`.
+
+## Step 14 — Sessions feel token-hungry (`/optimize`)
+
+Auto-compact keeps firing mid-session, or work feels slower and more expensive than it should:
+
+```
+you>  /optimize
+```
+
+A read-only token audit in three passes — **boot cost** (everything a session loads before work starts: CLAUDE.md imports, agent descriptions, and crucially any parent/global `CLAUDE.md` files up the directory tree that don't belong to this project), **session behavior** (the same file read twice, whole-file reads where a grep would do, command output flooded inline, oversized subagent fan-out), and **memory hygiene** (CONTEXT near its ceiling, oversized knowledge topics or NOTES). It names the dominant cause and returns a ranked report:
+
+```
+## Token Audit — 2026-08-11
+**Compaction diagnosis**: boot cost dominates — 2 workflow rules still @-imported
+**Boot surface**: ~9k tokens (budget ~3k) — over
+
+| # | Finding                                  | Est. cost      | Fix                        | Owner     |
+| 1 | ~/CLAUDE.md carries another project's config | ~1.7k/session | move it aside              | you       |
+| 2 | spec-workflow.md @-imported              | ~8.8k/session  | convert to trigger line    | apply-now |
+| 3 | build output streamed inline, 4×         | ~2k each       | redirect + tail            | /learn    |
+```
+
+Nothing is changed until you approve the "apply now" subset; behavioral fixes route through `/learn` so they become rules, state trimming routes to `/checkpoint`, and user-level items (foreign parent files, unused MCP servers) come with the exact command for you to run. One built-in honesty rule: if the diagnosis is "long `/spec-run` sessions," the fix is rotating earlier — that's what rotation is for — not trimming.
 
 ---
 

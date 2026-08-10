@@ -17,6 +17,7 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, including 
 - `/handoff` writes a single-slot session baton (`.claude/HANDOFF.md`) distilling this session's reasoning state — run when the context window is nearly full or when pausing mid-investigation; the next `/start` consumes and deletes it. Never auto-load `HANDOFF.md`.
 - `/learn` promotes validated recurring behavior into `.claude/rules/` and routes descriptive facts to knowledge.
 - `/doctor` runs the mechanical knowledge checker followed by a read-only semantic health audit.
+- `/optimize` audits token usage — boot cost, session behavior, memory hygiene — and routes ranked fixes; run it when auto-compact fires frequently.
 
 ## Verify
 

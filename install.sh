@@ -29,7 +29,7 @@ INSTALL_CLAUDE=true
 INSTALL_CODEX=true
 INSTALL_COUNCIL=true
 UPGRADE=true
-FORCE=true
+FORCE=false
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 

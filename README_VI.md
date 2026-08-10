@@ -79,6 +79,7 @@ Retrieval đi từ map và có budget: root `INDEX.md`, tối đa các domain ma
 /checkpoint                     # rebuild CONTEXT.md cuối session
 /learn                          # thăng cấp quyết định lặp lại thành rule
 /doctor                         # health check khi setup có vẻ lệch
+/optimize                       # auto-compact quá thường xuyên? audit xem token đi đâu
 ```
 
 Codex CLI chạy cùng flow với `$codex-` thay cho `/` (ví dụ `$codex-start`).

@@ -27,6 +27,7 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 - `$codex-handoff` — writes a single-slot session baton (`.codex/HANDOFF.md`) distilling the session's reasoning state when the context window is nearly full or an investigation pauses mid-flight; the next `$codex-start` consumes and deletes it.
 - `$codex-learn` — promotes validated recurring behavior into Codex guidelines and routes descriptive facts to knowledge.
 - `$codex-doctor` — runs the read-only mechanical checker plus semantic health audit.
+- `$codex-optimize` — audits token usage — boot cost, session behavior, memory hygiene — and routes ranked fixes; run it when auto-compact fires frequently.
 - `$codex-refactor-memory` — consolidates Codex memory and performs controlled, in-place knowledge normalization.
 
 ## Working Style
