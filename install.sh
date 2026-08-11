@@ -14,15 +14,25 @@
 #                state (CONTEXT, JOURNAL, tasks, specs, knowledge) or the
 #                user-evolved CLAUDE.md / AGENTS.md
 #   --force      Overwrite ALL existing files, including live state
+#   --repo=<o/n> Download from another GitHub repo (fork-friendly); also
+#                CLAUDART_REPO env; a local run auto-detects its checkout origin
+#   --branch=<b> Branch to download (default main; CLAUDART_BRANCH env)
 #   --help       Show this help text
 
 set -euo pipefail
 
-REPO="lapnd/Claudart"
-BRANCH="main"
-TARBALL_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz"
+# Repo resolution — precedence: --repo= flag > CLAUDART_REPO env > the script's
+# own checkout origin (when run as a local file from a Claudart clone) > the
+# canonical fallback below. The fallback is the ONLY owner-specific line in this
+# script; forks running via curl|bash override it with --repo= or CLAUDART_REPO
+# instead of patching source, and a local `bash install.sh` in any fork just
+# works because the checkout's origin wins.
+FALLBACK_REPO="lapnd/Claudart"
+REPO="${CLAUDART_REPO:-}"
+REPO_SOURCE="CLAUDART_REPO env"
+BRANCH="${CLAUDART_BRANCH:-main}"
 
-COUNCIL_REPO="0xNyk/council-of-high-intelligence"
+COUNCIL_REPO="${CLAUDART_COUNCIL_REPO:-0xNyk/council-of-high-intelligence}"
 COUNCIL_TARBALL_URL="https://github.com/${COUNCIL_REPO}/archive/refs/heads/main.tar.gz"
 
 INSTALL_CLAUDE=true
@@ -37,6 +47,29 @@ bold()  { printf '\033[1m%s\033[0m' "$*"; }
 green() { printf '\033[32m%s\033[0m' "$*"; }
 yellow(){ printf '\033[33m%s\033[0m' "$*"; }
 red()   { printf '\033[31m%s\033[0m' "$*"; }
+
+# Fill REPO if neither --repo= nor CLAUDART_REPO set it: when this script runs
+# as a local file inside a git checkout whose origin is a GitHub repo named
+# like Claudart, use that origin (fork-friendly); otherwise use the fallback.
+resolve_repo() {
+  if [[ -n "$REPO" ]]; then return; fi
+  local script="${BASH_SOURCE[0]:-}" sdir url rest name
+  if [[ -f "$script" ]]; then
+    sdir="$(cd "$(dirname "$script")" 2>/dev/null && pwd)" || sdir=""
+    if [[ -n "$sdir" ]] && url="$(git -C "$sdir" remote get-url origin 2>/dev/null)"; then
+      rest="${url#*github.com}"
+      if [[ "$rest" != "$url" ]]; then
+        rest="${rest#[:/]}"; rest="${rest%.git}"; rest="${rest%/}"
+        name="$(basename "$rest" | tr '[:upper:]' '[:lower:]')"
+        if [[ "$rest" == */* && "$name" == claudart* ]]; then
+          REPO="$rest"; REPO_SOURCE="checkout origin"
+          return
+        fi
+      fi
+    fi
+  fi
+  REPO="$FALLBACK_REPO"; REPO_SOURCE="default"
+}
 
 show_help() {
   cat <<EOF2
@@ -68,6 +101,13 @@ OPTIONS
                upgrade is reviewable with git diff, then run /doctor.
   --force      Overwrite ALL files that already exist, including live state.
                Use --upgrade instead unless you really mean this.
+  --repo=<owner/name>
+               Download from this GitHub repo instead of the default —
+               fork-friendly, no source patching. Precedence: --repo= >
+               CLAUDART_REPO env > the checkout's own git origin (when run
+               as a local file from a Claudart clone) > the built-in default.
+  --branch=<name>
+               Branch to download (default: main; env: CLAUDART_BRANCH).
   --help       Show this help text
 
 LAYERS
@@ -89,10 +129,15 @@ for arg in "$@"; do
     --council) INSTALL_COUNCIL=true ;;
     --upgrade) UPGRADE=true ;;
     --force)  FORCE=true ;;
+    --repo=*)   REPO="${arg#--repo=}";   REPO_SOURCE="--repo flag" ;;
+    --branch=*) BRANCH="${arg#--branch=}" ;;
     --help|-h) show_help; exit 0 ;;
     *) printf '%s Unknown option: %s\n' "$(red "error")" "$arg" >&2; exit 1 ;;
   esac
 done
+
+resolve_repo
+TARBALL_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz"
 
 # ── layer auto-detection (upgrade without explicit layer flags) ───────────────
 
@@ -118,7 +163,7 @@ fi
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
-printf '\n%s  Downloading CLAUDART from %s …\n' "$(bold "→")" "$REPO"
+printf '\n%s  Downloading CLAUDART from %s@%s (%s) …\n' "$(bold "→")" "$REPO" "$BRANCH" "$REPO_SOURCE"
 
 if command -v curl &>/dev/null; then
   curl -fsSL "$TARBALL_URL" | tar -xz -C "$TMPDIR" --strip-components=1

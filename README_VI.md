@@ -21,7 +21,7 @@ CLAUDART xử lý chuyện này bằng file. Một nhóm slash command nhỏ duy
 ## Cài đặt
 
 ```bash
-# Flag sau `bash -s --`:  --claude (mặc định) · --codex · --both · --upgrade (làm mới file template; không đụng live state) · --force (ghi đè tất cả) · --council (cài thêm companion /council, phạm vi user)
+# Flag sau `bash -s --`:  --claude (mặc định) · --codex · --both · --upgrade (làm mới file template; không đụng live state) · --force (ghi đè tất cả) · --council (cài thêm companion /council, phạm vi user) · --repo=<owner/name> (cài từ fork; env CLAUDART_REPO — chạy local tự phát hiện origin của checkout)
 curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --claude
 ```
 
