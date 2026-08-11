@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # CLAUDART Installer
 # Usage (one-liner):
-#   curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash
 #
 # Options (pass after --):
 #   (no flags)   Install the Claude Code layer (.claude/)
@@ -18,7 +18,7 @@
 
 set -euo pipefail
 
-REPO="vankhaivn/Claudart"
+REPO="lapnd/Claudart"
 BRANCH="main"
 TARBALL_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz"
 
@@ -43,8 +43,8 @@ show_help() {
 $(bold "CLAUDART Installer")
 
 USAGE
-  curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
-  curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- [OPTIONS]
+  curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash
+  curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- [OPTIONS]
   bash install.sh [OPTIONS]
 
 OPTIONS

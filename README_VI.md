@@ -5,10 +5,10 @@
   <p><strong>Lớp vận hành bằng markdown cho Claude Code &amp; Codex CLI - memory, kế hoạch và review, tất cả nằm trong git.</strong></p>
 
   <p>
-    <a href="https://github.com/vankhaivn/Claudart/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/vankhaivn/Claudart?style=for-the-badge&color=orange"></a>
+    <a href="https://github.com/lapnd/Claudart/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/lapnd/Claudart?style=for-the-badge&color=orange"></a>
     <img alt="Pure Markdown" src="https://img.shields.io/badge/memory-pure_markdown-blue?style=for-the-badge">
     <img alt="Offline-friendly" src="https://img.shields.io/badge/works-offline-green?style=for-the-badge">
-    <a href="https://github.com/vankhaivn/Claudart/issues"><img alt="Issues" src="https://img.shields.io/github/issues/vankhaivn/Claudart?style=for-the-badge&color=blue"></a>
+    <a href="https://github.com/lapnd/Claudart/issues"><img alt="Issues" src="https://img.shields.io/github/issues/lapnd/Claudart?style=for-the-badge&color=blue"></a>
   </p>
 </div>
 
@@ -22,12 +22,12 @@ CLAUDART xử lý chuyện này bằng file. Một nhóm slash command nhỏ duy
 
 ```bash
 # Flag sau `bash -s --`:  --claude (mặc định) · --codex · --both · --upgrade (làm mới file template; không đụng live state) · --force (ghi đè tất cả) · --council (cài thêm companion /council, phạm vi user)
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --claude
 ```
 
 `install.sh` copy mới toàn bộ, và đó không phải cách đúng cho một project đã có setup riêng. Trong trường hợp đó, hãy dán đoạn này vào agent của bạn. Nó sẽ đọc repo, diff với project, và chỉ merge những gì bạn phê duyệt:
 
-> Đọc https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md và làm theo để tích hợp CLAUDART vào project này. Hỏi tôi trước khi đụng tới bất kỳ thứ gì tôi đã custom.
+> Đọc https://raw.githubusercontent.com/lapnd/Claudart/main/INTEGRATE.md và làm theo để tích hợp CLAUDART vào project này. Hỏi tôi trước khi đụng tới bất kỳ thứ gì tôi đã custom.
 
 Installation hiện hữu dùng `INTEGRATE.md` để derive delta thực tế với upstream hiện tại, không giả định bản khởi đầu. Với knowledge contract đang được upstream khai báo, flow đối soát là `doctor → refactor-memory → doctor`; workflow này không có thêm command recall hay migration riêng.
 

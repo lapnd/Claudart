@@ -5,10 +5,10 @@
   <p><strong>A markdown operating layer for Claude Code &amp; Codex CLI — memory, plans, and review, all in git.</strong></p>
 
   <p>
-    <a href="https://github.com/vankhaivn/Claudart/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/vankhaivn/Claudart?style=for-the-badge&color=orange"></a>
+    <a href="https://github.com/lapnd/Claudart/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/lapnd/Claudart?style=for-the-badge&color=orange"></a>
     <img alt="Pure Markdown" src="https://img.shields.io/badge/memory-pure_markdown-blue?style=for-the-badge">
     <img alt="Offline-friendly" src="https://img.shields.io/badge/works-offline-green?style=for-the-badge">
-    <a href="https://github.com/vankhaivn/Claudart/issues"><img alt="Issues" src="https://img.shields.io/github/issues/vankhaivn/Claudart?style=for-the-badge&color=blue"></a>
+    <a href="https://github.com/lapnd/Claudart/issues"><img alt="Issues" src="https://img.shields.io/github/issues/lapnd/Claudart?style=for-the-badge&color=blue"></a>
   </p>
 </div>
 
@@ -22,12 +22,12 @@ CLAUDART deals with this using files. A handful of slash commands maintain a sma
 
 ```bash
 # Flag after `bash -s --`:  --claude (default) · --codex · --both · --upgrade (refresh template files; never touches live state) · --force (overwrite everything) · --council (adds the /council deliberation companion, user scope)
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --claude
 ```
 
 `install.sh` does a fresh copy, which is the wrong move for a project that already has its own setup. In that case, paste this into your agent instead. It reads the repo, diffs against your project, and merges only what you approve:
 
-> Read https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md and follow it to integrate CLAUDART into this project. Ask me before touching anything I've customized.
+> Read https://raw.githubusercontent.com/lapnd/Claudart/main/INTEGRATE.md and follow it to integrate CLAUDART into this project. Ask me before touching anything I've customized.
 
 Existing installations use `INTEGRATE.md` to derive their actual delta against current upstream instead of assuming a starting release. For the knowledge contract currently declared upstream, reconciliation runs `doctor → refactor-memory → doctor`; no additional recall or migration command is part of that workflow.
 

@@ -2,7 +2,7 @@
 
 **You are an AI coding agent** (Claude Code, Codex CLI, or similar) and your user pasted a link to this file because they want to **adopt or upgrade CLAUDART** in the current project. CLAUDART is a plain-markdown operating layer — slash commands / skills, a layered memory model, and review agents — for Claude Code and Codex CLI.
 
-Source of truth: <https://github.com/vankhaivn/Claudart> (branch `main`).
+Source of truth: <https://github.com/lapnd/Claudart> (branch `main`).
 
 This file is a **protocol, not a script** — follow it top to bottom. It exists because the one-line `install.sh` does a _fresh copy_ and will clobber an existing setup. You are smarter than that: you can read the repo, compare it to this project, and merge surgically.
 
@@ -18,10 +18,10 @@ This file is a **protocol, not a script** — follow it top to bottom. It exists
 
 1. Get a clean copy of CLAUDART so you can diff against it precisely. Clone with full history — the repo is small, and you will need `git log` to tell stale template copies apart from real user customizations:
    ```bash
-   rm -rf /tmp/claudart-src && git clone https://github.com/vankhaivn/Claudart /tmp/claudart-src
+   rm -rf /tmp/claudart-src && git clone https://github.com/lapnd/Claudart /tmp/claudart-src
    ```
    If you cannot clone (no git, or no network for clone), fetch files on demand from
-   `https://raw.githubusercontent.com/vankhaivn/Claudart/main/<path>` instead.
+   `https://raw.githubusercontent.com/lapnd/Claudart/main/<path>` instead.
 2. Before touching anything, read these in the source to integrate the _model_, not just files: `README.md`, `docs/WORKFLOW.md`, `CONTRIBUTING.md`.
 3. Do **not** run `install.sh` in a project that already has its own AI setup — that is exactly the situation this protocol replaces.
 
