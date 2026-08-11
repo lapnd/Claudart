@@ -27,7 +27,7 @@ set -euo pipefail
 # script; forks running via curl|bash override it with --repo= or CLAUDART_REPO
 # instead of patching source, and a local `bash install.sh` in any fork just
 # works because the checkout's origin wins.
-FALLBACK_REPO="lapnd/Claudart"
+FALLBACK_REPO="vankhaivn/Claudart"
 REPO="${CLAUDART_REPO:-}"
 REPO_SOURCE="CLAUDART_REPO env"
 BRANCH="${CLAUDART_BRANCH:-main}"

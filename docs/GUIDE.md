@@ -57,10 +57,14 @@ WHEN THINGS LOOP OR DRIFT
 ## Step 1 — Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s --   # --claude (default) · --codex · --both · --council
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s --  --repo=lapnd/Claudart # --claude (default) · --codex · --both · --council
 ```
 
-Add `--council` to also install the [Council of High Intelligence](https://github.com/0xNyk/council-of-high-intelligence) companion (`/council`, user scope — Step 8). Then, inside Claude Code:
+Add `--council` to also install the [Council of High Intelligence](https://github.com/0xNyk/council-of-high-intelligence) companion (`/council`, user scope — Step 8).
+
+**Using a fork?** No source patching needed — the script resolves its source repo by precedence: `--repo=<owner/name>` flag → `CLAUDART_REPO` env → the checkout's own git origin when you run `bash install.sh` from a local clone → the built-in default. The download banner names which one won.
+
+Then, inside Claude Code:
 
 ```
 /doctor            # verify the install is healthy
@@ -294,6 +298,8 @@ Read-only: runs the mechanical knowledge checker, then audits wiring, staleness,
 ```bash
 curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --upgrade
 ```
+
+(On a fork, swap the URL's owner or append `--repo=<owner/name>` — same resolution rules as Step 1.)
 
 It refreshes template-owned files (commands, rules, agents, skills, scripts) and **never touches live state** — CONTEXT, JOURNAL, tasks, specs, knowledge — or your evolved `CLAUDE.md`/`AGENTS.md` (reconcile those via [INTEGRATE.md](../INTEGRATE.md)). Review with `git diff`, then run `/doctor`.
 
