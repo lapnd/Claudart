@@ -25,6 +25,12 @@ CLAUDART xử lý chuyện này bằng file. Một nhóm slash command nhỏ duy
 curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --claude
 ```
 
+Để cập nhật một install đã có lên template mới nhất (live state và `CLAUDE.md`/`AGENTS.md` bạn đã custom không bao giờ bị đụng - commit trước, review bằng `git diff`, rồi chạy `/doctor`):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --upgrade   # tự phát hiện layer; thêm --claude/--codex/--both để override
+```
+
 `install.sh` copy mới toàn bộ, và đó không phải cách đúng cho một project đã có setup riêng. Trong trường hợp đó, hãy dán đoạn này vào agent của bạn. Nó sẽ đọc repo, diff với project, và chỉ merge những gì bạn phê duyệt:
 
 > Đọc https://raw.githubusercontent.com/lapnd/Claudart/main/INTEGRATE.md và làm theo để tích hợp CLAUDART vào project này. Hỏi tôi trước khi đụng tới bất kỳ thứ gì tôi đã custom.

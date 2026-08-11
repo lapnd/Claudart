@@ -25,6 +25,12 @@ CLAUDART deals with this using files. A handful of slash commands maintain a sma
 curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --claude
 ```
 
+To update an existing install to the latest template (live state and your customized `CLAUDE.md`/`AGENTS.md` are never touched — commit first, review with `git diff`, then run `/doctor`):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --upgrade   # layers auto-detected; add --claude/--codex/--both to override
+```
+
 `install.sh` does a fresh copy, which is the wrong move for a project that already has its own setup. In that case, paste this into your agent instead. It reads the repo, diffs against your project, and merges only what you approve:
 
 > Read https://raw.githubusercontent.com/lapnd/Claudart/main/INTEGRATE.md and follow it to integrate CLAUDART into this project. Ask me before touching anything I've customized.

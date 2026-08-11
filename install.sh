@@ -61,9 +61,11 @@ OPTIONS
                scripts/, guidelines/, .agents/ skills). NEVER touches live
                state (CONTEXT.md, JOURNAL.md, HANDOFF.md, tasks/, specs/,
                knowledge/) or user-evolved indexes (CLAUDE.md, AGENTS.md,
-               config.toml) — reconcile those via INTEGRATE.md. Run from a
-               clean git tree so the upgrade is reviewable with git diff,
-               then run /doctor.
+               config.toml) — reconcile those via INTEGRATE.md. Layers are
+               auto-detected from the existing install unless you pass
+               --claude/--codex/--both; with no install present it falls
+               back to a fresh install. Run from a clean git tree so the
+               upgrade is reviewable with git diff, then run /doctor.
   --force      Overwrite ALL files that already exist, including live state.
                Use --upgrade instead unless you really mean this.
   --help       Show this help text
@@ -77,11 +79,13 @@ EOF2
 
 # ── arg parsing ───────────────────────────────────────────────────────────────
 
+LAYER_EXPLICIT=false
+
 for arg in "$@"; do
   case "$arg" in
-    --claude) INSTALL_CLAUDE=true;  INSTALL_CODEX=false ;;
-    --codex)  INSTALL_CLAUDE=false; INSTALL_CODEX=true ;;
-    --both)   INSTALL_CLAUDE=true;  INSTALL_CODEX=true ;;
+    --claude) INSTALL_CLAUDE=true;  INSTALL_CODEX=false; LAYER_EXPLICIT=true ;;
+    --codex)  INSTALL_CLAUDE=false; INSTALL_CODEX=true;  LAYER_EXPLICIT=true ;;
+    --both)   INSTALL_CLAUDE=true;  INSTALL_CODEX=true;  LAYER_EXPLICIT=true ;;
     --council) INSTALL_COUNCIL=true ;;
     --upgrade) UPGRADE=true ;;
     --force)  FORCE=true ;;
@@ -90,9 +94,27 @@ for arg in "$@"; do
   esac
 done
 
-# ── download ──────────────────────────────────────────────────────────────────
+# ── layer auto-detection (upgrade without explicit layer flags) ───────────────
 
 DEST="${PWD}"
+
+if [[ "$UPGRADE" == true && "$LAYER_EXPLICIT" == false ]]; then
+  HAS_CLAUDE=false; HAS_CODEX=false
+  [[ -d "$DEST/.claude" ]] && HAS_CLAUDE=true
+  { [[ -d "$DEST/.codex" ]] || [[ -d "$DEST/.agents" ]]; } && HAS_CODEX=true
+
+  if [[ "$HAS_CLAUDE" == true || "$HAS_CODEX" == true ]]; then
+    INSTALL_CLAUDE=$HAS_CLAUDE
+    INSTALL_CODEX=$HAS_CODEX
+    layers="$( [[ "$HAS_CLAUDE" == true ]] && printf 'claude ' )$( [[ "$HAS_CODEX" == true ]] && printf 'codex' )"
+    printf '\n%s  Detected existing layers: %s — upgrading those.\n' "$(bold "→")" "${layers% }"
+  else
+    UPGRADE=false
+    printf '\n%s  No existing CLAUDART install detected here — doing a fresh install instead.\n' "$(yellow "note")"
+  fi
+fi
+
+# ── download ──────────────────────────────────────────────────────────────────
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
