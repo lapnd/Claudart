@@ -36,9 +36,9 @@ COUNCIL_REPO="${CLAUDART_COUNCIL_REPO:-0xNyk/council-of-high-intelligence}"
 COUNCIL_TARBALL_URL="https://github.com/${COUNCIL_REPO}/archive/refs/heads/main.tar.gz"
 
 INSTALL_CLAUDE=true
-INSTALL_CODEX=true
-INSTALL_COUNCIL=true
-UPGRADE=true
+INSTALL_CODEX=false
+INSTALL_COUNCIL=false
+UPGRADE=false
 FORCE=false
 
 # ── helpers ──────────────────────────────────────────────────────────────────
@@ -325,23 +325,37 @@ if [[ "$INSTALL_COUNCIL" == true ]]; then
   printf '\n%s\n' "$(bold "Council of High Intelligence (/council)")"
   COUNCIL_TMP="$TMPDIR/council"
   mkdir -p "$COUNCIL_TMP"
+
+  # Council is a third-party companion (a separate repo, separate maintainer).
+  # A failure here must never abort the CLAUDART install that already
+  # succeeded — degrade to a warning instead, even under set -e/pipefail.
+  council_ok=true
   if command -v curl &>/dev/null; then
-    curl -fsSL "$COUNCIL_TARBALL_URL" | tar -xz -C "$COUNCIL_TMP" --strip-components=1
+    curl -fsSL "$COUNCIL_TARBALL_URL" | tar -xz -C "$COUNCIL_TMP" --strip-components=1 || council_ok=false
   else
-    wget -qO- "$COUNCIL_TARBALL_URL" | tar -xz -C "$COUNCIL_TMP" --strip-components=1
+    wget -qO- "$COUNCIL_TARBALL_URL" | tar -xz -C "$COUNCIL_TMP" --strip-components=1 || council_ok=false
   fi
 
-  # Map CLAUDART layer selection onto the council installer's flags.
-  council_flags=()
-  if [[ "$INSTALL_CLAUDE" == true && "$INSTALL_CODEX" == true ]]; then
-    council_flags+=(--codex)
-  elif [[ "$INSTALL_CODEX" == true ]]; then
-    council_flags+=(--codex-only)
+  if [[ "$council_ok" == true ]]; then
+    # Map CLAUDART layer selection onto the council installer's flags.
+    council_flags=()
+    if [[ "$INSTALL_CLAUDE" == true && "$INSTALL_CODEX" == true ]]; then
+      council_flags+=(--codex)
+    elif [[ "$INSTALL_CODEX" == true ]]; then
+      council_flags+=(--codex-only)
+    fi
+
+    # Council installs to USER scope (~/.claude, ~/.codex) — shared across projects.
+    if bash "$COUNCIL_TMP/install.sh" ${council_flags[@]+"${council_flags[@]}"}; then
+      printf '  %s  /council available in your user scope. Integration recipe: docs/GUIDE.md → Deliberating a hard decision.\n' "$(green "done")"
+    else
+      council_ok=false
+    fi
   fi
 
-  # Council installs to USER scope (~/.claude, ~/.codex) — shared across projects.
-  bash "$COUNCIL_TMP/install.sh" ${council_flags[@]+"${council_flags[@]}"}
-  printf '  %s  /council available in your user scope. Integration recipe: docs/GUIDE.md → Deliberating a hard decision.\n' "$(green "done")"
+  if [[ "$council_ok" == false ]]; then
+    printf '  %s  Could not install Council of High Intelligence (network or upstream issue) — skipped. The rest of CLAUDART installed normally; retry with --council later, or see https://github.com/%s.\n' "$(yellow "warn")" "$COUNCIL_REPO"
+  fi
 fi
 
 # ── summary ───────────────────────────────────────────────────────────────────
