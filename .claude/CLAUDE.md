@@ -11,13 +11,13 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, including 
 - `/spec <mission>` creates a dated mission-scale spec workspace in `.claude/specs/` — interview → POC artifact → decision-complete SPEC + ROADMAP, approved once as a standing approval.
 - `/spec-run <slug>` executes an approved spec autonomously until final review — verifies acceptance, records ROADMAP task dispositions and evidence, blocks unchanged failure loops, and offers session rotation at phase boundaries.
 - `/refactor <mission>` creates a behavior-preserving refactor/migration spec mission — pins a baseline, writes a behavior contract and blast radius from the pre-change code, and derives equivalence-proof acceptance scenarios executed by `/spec-run`.
-- `/refactor-memory` consolidates the memory system and normalizes knowledge in place.
+- `/refactor-memory` consolidates the memory system and normalizes knowledge in place — owns structural/semantic correctness of `.claude/CLAUDE.md`, rules, and knowledge.
 - `/project-discovery` interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
 - `/checkpoint` rewrites current state, syncs task/spec indexes, appends meaningful history, and bulk-maintains eligible knowledge candidates.
 - `/handoff` writes a single-slot session baton (`.claude/HANDOFF.md`) distilling this session's reasoning state — run when the context window is nearly full or when pausing mid-investigation; the next `/start` consumes and deletes it. Never auto-load `HANDOFF.md`.
 - `/learn` promotes validated recurring behavior into `.claude/rules/` and routes descriptive facts to knowledge.
 - `/doctor` runs the mechanical knowledge checker followed by a read-only semantic health audit.
-- `/optimize` audits token usage — boot cost, session behavior, memory hygiene — and routes ranked fixes; run it when auto-compact fires frequently.
+- `/optimize` audits token usage — boot cost, session behavior, memory hygiene — applies only mechanical fixes and routes structural findings to `/refactor-memory`; run it when auto-compact fires frequently.
 
 ## Verify
 

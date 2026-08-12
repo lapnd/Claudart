@@ -4,6 +4,8 @@ description: Audit where this session's tokens went and what would make the next
 
 You are running a token-usage audit. Frequent auto-compaction is the trigger symptom; your job is to find the cause, rank the fixes by estimated savings, and route each fix to its rightful owner. **Read-only until Step 5** — you measure and diagnose first, apply only what the user approves.
 
+**Division of labor with `/refactor-memory`**: this command measures token cost and applies only mechanical, non-structural fixes (trigger-line conversions, description tightening, agent-skip markers). It never rewrites `.claude/CLAUDE.md` structure, extracts/splits rules, or normalizes `.claude/knowledge/` — that is `/refactor-memory`'s job. When a finding needs one of those, route it to `/refactor-memory` (Step 4/5) instead of attempting it here.
+
 Estimate tokens as `bytes / 4` and label every number an estimate. Never full-read `JOURNAL.md` or task/spec bodies to audit them — size them with `wc -l` / `wc -c`.
 
 ## Step 1 — Boot-cost audit (what every session pays before work starts)
@@ -46,7 +48,7 @@ Count occurrences and estimate the per-occurrence cost; recurring patterns are `
 
 Name the dominant cause before proposing fixes:
 
-- **Boot cost dominates** (heavy always-on surface) → trigger-line conversions, parent-file cleanup, MCP pruning. Biggest lasting savings.
+- **Boot cost dominates** (heavy always-on surface) → trigger-line conversions, parent-file cleanup, MCP pruning are mechanical fixes to apply here. If the cause is structural instead — `.claude/CLAUDE.md` over its line budget, a kitchen-sink or misfiled rule, ungrouped knowledge past its size bounds — route to `/refactor-memory`, which owns that rewrite; do not attempt it in this command.
 - **Behavior dominates** (repeated reads, inline floods) → `/learn` candidates so the fix becomes a rule, not a one-session resolution.
 - **Long spec sessions compact often** → this is **not** a trimming problem. Rotation exists for exactly this; recommend a tighter rotation cadence (fewer tasks per session) and point at the rule file's Session Rotation section.
 - **Genuinely large working set** (big files, wide missions) → recommend delegation patterns (fresh-context subagents per sweep) over fighting compaction.
@@ -59,13 +61,13 @@ Name the dominant cause before proposing fixes:
 **Compaction diagnosis**: <dominant cause, one sentence>
 **Boot surface**: ~<n>k tokens (budget ~3k) — <over/under>
 
-| #   | Finding   | Est. cost        | Fix   | Owner                                   |
-| --- | --------- | ---------------- | ----- | --------------------------------------- |
-| 1   | <finding> | ~<n> tok/session | <fix> | apply-now / /checkpoint / /learn / user |
+| #   | Finding   | Est. cost        | Fix   | Owner                                                      |
+| --- | --------- | ---------------- | ----- | ---------------------------------------------------------- |
+| 1   | <finding> | ~<n> tok/session | <fix> | apply-now / /checkpoint / /learn / /refactor-memory / user |
 
 **Apply now (needs your ok)**: <numbered subset — mechanical, safe edits only:
 trigger-line conversions, agent-skip markers, description tightening>
-**Routed**: <items sent to /checkpoint or /learn, and why>
+**Routed**: <items sent to /checkpoint, /learn, or /refactor-memory (structural CLAUDE.md/rule/knowledge fixes), and why>
 **Yours**: <user-level items with the exact command to run — parent CLAUDE.md,
 MCP config, model-tier choices>
 ```
@@ -76,5 +78,6 @@ Wait for explicit approval, apply only the approved subset, then re-measure the 
 
 - Read-only until the user approves the apply subset; never edit live state semantics (CONTEXT content decisions belong to `/checkpoint`).
 - Behavioral fixes become rules only through `/learn` — this command surfaces candidates, it does not write rules.
+- Structural fixes (CLAUDE.md rewrites, rule extraction/splitting, knowledge normalization) route to `/refactor-memory` — this command never performs them itself, even when the boot-cost audit points at one.
 - **Never trade correctness for tokens**: no weakening rules, no skipping verifies, no shrinking digests below their binding content.
 - One run's findings are evidence, not policy — only recurring findings graduate.
