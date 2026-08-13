@@ -19,7 +19,7 @@
 #   --branch=<b> Branch to download (default main; CLAUDART_BRANCH env)
 #   --help       Show this help text
 
-set -euo pipefail
+#set -euo pipefail
 
 # Repo resolution — precedence: --repo= flag > CLAUDART_REPO env > the script's
 # own checkout origin (when run as a local file from a Claudart clone) > the
@@ -27,7 +27,7 @@ set -euo pipefail
 # script; forks running via curl|bash override it with --repo= or CLAUDART_REPO
 # instead of patching source, and a local `bash install.sh` in any fork just
 # works because the checkout's origin wins.
-FALLBACK_REPO="vankhaivn/Claudart"
+FALLBACK_REPO="lapnd/Claudart"
 REPO="${CLAUDART_REPO:-}"
 REPO_SOURCE="CLAUDART_REPO env"
 BRANCH="${CLAUDART_BRANCH:-main}"
@@ -38,7 +38,7 @@ COUNCIL_TARBALL_URL="https://github.com/${COUNCIL_REPO}/archive/refs/heads/main.
 INSTALL_CLAUDE=true
 INSTALL_CODEX=false
 INSTALL_COUNCIL=false
-UPGRADE=false
+UPGRADE=true
 FORCE=false
 
 # ── helpers ──────────────────────────────────────────────────────────────────

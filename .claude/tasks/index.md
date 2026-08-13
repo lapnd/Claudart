@@ -3,7 +3,7 @@
 
 ## Active
 
-- _(no active tasks — run `/plan <description>` to create one)_
+- [claudart-portability](2026-08-13-001-claudart-portability.md) — in-progress — updated 2026-08-13
 
 ## Recently Done (last 14 days)
 
