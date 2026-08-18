@@ -13,7 +13,11 @@
 #                (commands, rules, agents, skills, scripts) but never live
 #                state (CONTEXT, JOURNAL, tasks, specs, knowledge) or the
 #                user-evolved CLAUDE.md / AGENTS.md
-#   --force      Overwrite ALL existing files, including live state
+#   --force      Overwrite ALL existing template/index files, including your
+#                own live state, with the repo's copy. CLAUDART's own
+#                dogfooded CONTEXT/JOURNAL/tasks/specs/knowledge are never
+#                sourced from the repo at all, --force included — see
+#                is_live_state_path below.
 #   --repo=<o/n> Download from another GitHub repo (fork-friendly); also
 #                CLAUDART_REPO env; a local run auto-detects its checkout origin
 #   --branch=<b> Branch to download (default main; CLAUDART_BRANCH env)
@@ -99,8 +103,10 @@ OPTIONS
                --claude/--codex/--both; with no install present it falls
                back to a fresh install. Run from a clean git tree so the
                upgrade is reviewable with git diff, then run /doctor.
-  --force      Overwrite ALL files that already exist, including live state.
-               Use --upgrade instead unless you really mean this.
+  --force      Overwrite ALL existing template/index files with the repo's
+               copy. Use --upgrade instead unless you really mean this.
+               CLAUDART's own dogfooded CONTEXT/JOURNAL/tasks/specs/knowledge
+               are never installed regardless of this flag.
   --repo=<owner/name>
                Download from this GitHub repo instead of the default —
                fork-friendly, no source patching. Precedence: --repo= >
@@ -180,6 +186,7 @@ SKIPPED=0
 COPIED=0
 UPGRADED=0
 UNCHANGED=0
+EXCLUDED=0
 
 # Template-owned paths: safe to overwrite on --upgrade. Everything else —
 # live state (CONTEXT, JOURNAL, HANDOFF, tasks/, specs/, knowledge/) and
@@ -190,6 +197,24 @@ is_template_path() {
     .claude/commands/*|.claude/rules/*|.claude/agents/*|.claude/scripts/*) return 0 ;;
     .codex/guidelines/*|.codex/agents/*|.codex/scripts/*) return 0 ;;
     .agents/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# Live-state paths: CLAUDART dogfoods itself (it uses CLAUDART to improve
+# CLAUDART), so this repo's own checked-in tree always carries real CONTEXT/
+# JOURNAL/tasks/specs/knowledge content for THIS repo's sessions. That content
+# must never be installed into anyone else's project — not on a fresh install,
+# not on --upgrade, not even under --force. copy_tree skips these entirely so
+# they are never considered for copying in the first place; the various
+# CLAUDART commands already tolerate these files being absent and create them
+# on first use.
+is_live_state_path() {
+  case "$1" in
+    .claude/CONTEXT.md|.claude/JOURNAL.md|.claude/HANDOFF.md) return 0 ;;
+    .claude/tasks/*|.claude/specs/*|.claude/knowledge/*) return 0 ;;
+    .codex/CONTEXT.md|.codex/JOURNAL.md|.codex/HANDOFF.md) return 0 ;;
+    .codex/tasks/*|.codex/specs/*|.codex/knowledge/*) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -253,6 +278,10 @@ copy_tree() {
 
   while IFS= read -r src_file; do
     local rel="${src_file#"$TMPDIR/"}"
+    if is_live_state_path "$rel"; then
+      (( EXCLUDED++ )) || true
+      continue
+    fi
     copy_file "$rel"
   done < <(find "$src_root" -type f | sort)
 }
@@ -360,10 +389,14 @@ fi
 
 # ── summary ───────────────────────────────────────────────────────────────────
 
-printf '\n%s  Done. %d copied, %d upgraded, %d unchanged, %d skipped.\n\n' "$(bold "✓")" "$COPIED" "$UPGRADED" "$UNCHANGED" "$SKIPPED"
+printf '\n%s  Done. %d copied, %d upgraded, %d unchanged, %d skipped, %d excluded.\n\n' "$(bold "✓")" "$COPIED" "$UPGRADED" "$UNCHANGED" "$SKIPPED" "$EXCLUDED"
+
+if [[ "$EXCLUDED" -gt 0 ]]; then
+  printf "%s  %d file(s) from CLAUDART's own dogfooded session state (CONTEXT/JOURNAL/tasks/specs/knowledge) were never installed — that content belongs to the CLAUDART repo, not your project. Those files are created fresh by CLAUDART commands as you use them.\n" "$(yellow "note")" "$EXCLUDED"
+fi
 
 if [[ "$UPGRADE" == true ]]; then
-  printf '%s  Live state (CONTEXT, JOURNAL, tasks, specs, knowledge) and user-evolved indexes (CLAUDE.md, AGENTS.md) were left untouched.\n' "$(yellow "note")"
+  printf '%s  Your own live state (CONTEXT, JOURNAL, tasks, specs, knowledge) and user-evolved indexes (CLAUDE.md, AGENTS.md) were left untouched.\n' "$(yellow "note")"
   printf '%s  Review with git diff, reconcile customized indexes via INTEGRATE.md, then run /doctor.\n\n' "$(yellow "note")"
 elif [[ "$SKIPPED" -gt 0 ]]; then
   printf '%s  Skipped files already exist in your project. Rerun with --upgrade to refresh template files safely, or --force to overwrite everything.\n\n' "$(yellow "note")"
