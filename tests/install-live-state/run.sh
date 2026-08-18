@@ -12,8 +12,11 @@
 # functions as shipped in install.sh (extracted by section marker, not
 # reimplemented), against a synthetic fixture tree standing in for a
 # downloaded tarball. It also proves the check can fail: the same fixture run
-# against install.sh as it existed at HEAD (before this fix) must leak the
-# live-state files — the historical pre-fix script is the negative control.
+# against install.sh as it existed just before this fix landed must leak the
+# live-state files — that historical pre-fix revision is the negative
+# control. Pinned to a specific commit, not HEAD: once the fix itself is
+# committed, HEAD stops being "the buggy version" and a HEAD-relative
+# negative control would permanently fail from that point on.
 
 set -u
 
@@ -127,20 +130,24 @@ DEST_PREFIX="$WORK/dest-prefix"
 build_fixture "$FIXTURE"
 
 # ── negative control: the pre-fix script must leak live state ──────────────
-if git -C "$REPO_ROOT" show HEAD:install.sh > "$WORK/install-head.sh" 2>/dev/null; then
-  if extract_functions "$WORK/install-head.sh" "$FUNCS_PREFIX"; then
+# c2d623b is the "fix(install): never ship ... live state" commit; its parent
+# is the last revision without is_live_state_path(). A fixed commit reference
+# survives the fix itself being committed, unlike HEAD.
+PREFIX_REV=c2d623b~1
+if git -C "$REPO_ROOT" show "$PREFIX_REV:install.sh" > "$WORK/install-prefix.sh" 2>/dev/null; then
+  if extract_functions "$WORK/install-prefix.sh" "$FUNCS_PREFIX"; then
     mkdir -p "$DEST_PREFIX"
     run_fresh_install "$FUNCS_PREFIX" "$FIXTURE" "$DEST_PREFIX"
     if [ -f "$DEST_PREFIX/.claude/CONTEXT.md" ]; then
-      pass "negative control: pre-fix install.sh (HEAD) leaks .claude/CONTEXT.md — the check can fail"
+      pass "negative control: pre-fix install.sh ($PREFIX_REV) leaks .claude/CONTEXT.md — the check can fail"
     else
-      fail "negative control: pre-fix install.sh (HEAD) leaks .claude/CONTEXT.md — the check can fail"
+      fail "negative control: pre-fix install.sh ($PREFIX_REV) leaks .claude/CONTEXT.md — the check can fail"
     fi
   else
-    fail "negative control: could not extract functions from HEAD:install.sh"
+    fail "negative control: could not extract functions from $PREFIX_REV:install.sh"
   fi
 else
-  fail "negative control: could not read HEAD:install.sh (not a git repo checkout?)"
+  fail "negative control: could not read $PREFIX_REV:install.sh (history rewritten or shallow clone?)"
 fi
 
 # ── current working tree: live state must never land in the destination ───
