@@ -8,4 +8,4 @@ Use this as a compact router, not an encyclopedia. Route lines use:
 
 ## Knowledge
 
-- _(none)_
+- [Codex Mirror Pattern](codex-mirror-pattern.md) — How .codex/guidelines mirrors .claude/rules; agent-delegation.md is the exception. · reference · active

@@ -81,6 +81,7 @@ Retrieval đi từ map và có budget: root `INDEX.md`, tối đa các domain ma
 /spec build the demo game       # mission quá lớn cho một plan? phỏng vấn → POC → roadmap, approve một lần
 /spec-run demo-game             # session mới thực thi mission đã approve tự chủ tới cổng final review
 /refactor migrate auth to v2    # mission refactor: baseline ghim + behavior contract chứng minh tương đương
+/prove sửa lỗi phân trang       # evidence-first: đỏ trước xanh, chạy gauntlet, báo cáo bằng số liệu
 /handoff                        # context gần đầy? lưu suy luận, resume fresh bằng /start
 /checkpoint                     # rebuild CONTEXT.md cuối session
 /learn                          # thăng cấp quyết định lặp lại thành rule

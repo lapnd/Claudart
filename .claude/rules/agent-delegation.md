@@ -24,6 +24,16 @@ When a task is a candidate for delegation, sketch a short decomposition first �
 
 Do not spawn if the next parent step is blocked on the subtask — that is the dependency test below, not reluctance to delegate. Do blocked work locally; fan out genuinely independent work freely.
 
+### Disjointness test — deciding what can run in parallel
+
+Before choosing parallel over serial execution for a set of candidate tasks (a ROADMAP wave, a plan's independent Concrete Steps, any ad-hoc fan-out), evaluate them against this test rather than assuming a marking is still accurate. Two tasks are disjoint, and therefore safe to run in parallel, only when **all three** hold:
+
+1. **No file/module overlap** — their stated target files/modules (or, for code, their actual touched paths) do not intersect.
+2. **No output dependency** — neither task's action, `verify:`, or description consumes an artifact, value, or state the other produces.
+3. **No ordering dependency** — neither is listed (in the roadmap phase order, task file step order, or explicit prerequisite) as a prerequisite of the other.
+
+A candidate set that fails any of the three runs serially, or is split so only the disjoint subset parallelizes. This is the test both `spec-workflow.md` (ROADMAP wave marking and the executor's per-iteration wave selection) and `task-management.md` (independent Concrete Steps) apply — defined once here so the two never drift into different definitions of "independent."
+
 ## The task-file `delegation:` field records strategy, not permission
 
 The `/plan` task-file `delegation:` field carries a **recorded delegation strategy** from planning into execution — it is a hint, not an authorization switch. The harness still decides whether to delegate at run time; the field just pre-loads a plan so a good decomposition isn't re-derived.
@@ -58,6 +68,18 @@ Every worker prompt must include: **Goal** (the exact user-visible outcome), **S
 - Integrate returned patches **one at a time, in dependency order**, running the relevant validation after each merge — batch-merging N patches and testing once makes a failure unattributable.
 - Conflicts between two returned patches are resolved by the parent directly. Never spawn another agent to mediate a conflict.
 - When a worker returns a wrong or partial result: retry **once**, with a sharpened prompt that names exactly what the first attempt got wrong; if the retry also fails, pull the unit back and do it locally. Never respawn the identical prompt hoping for a different outcome.
+
+## Worktree Lifecycle for Parallel Coding Work
+
+When a disjoint-task wave (per the test above) involves real code edits, "Safety And Cost" already requires spawning each writer with `isolation: worktree` so concurrent edits cannot conflict. This section is what happens after they return — a worktree is not done just because the worker said so.
+
+1. **Spawn.** Fan out one `Agent` call per disjoint task in a single message, each with `isolation: "worktree"`. The worker prompt follows the standard Worker Prompt Contract; its **Output** must additionally echo the worktree path and branch it worked in, as a cross-check against what the tool result reports.
+2. **Collect.** For each finished worker, take the worktree path and branch from the tool result (`isolation: "worktree"` returns them whenever the agent made changes). A worktree with no changes was already auto-cleaned — nothing further to do for it.
+3. **Integrate one at a time, in dependency order** — this is the existing "Integrating Results" rule, applied to worktree branches instead of patches: merge the branch into the base branch, then immediately re-run that task's `verify:`/relevant validation against the **merged base**, not against the worker's self-report. A worker's "done" is a claim to check, per "Parent Responsibilities" — merging without re-verifying is trusting it anyway.
+4. **Confirm the merge landed** before treating the task as complete: the branch's commits are present in the base branch's history and the working tree is clean (e.g. `git log <base>..HEAD` shows them, `git status` is clean). This confirmation, plus the merge command and its result, becomes part of that task's completion evidence.
+5. **Push only if already authorized.** This lifecycle never grants a new push authorization — `git-commits.md` still governs: push happens only when the user asked in the current message, and a spec's `commits:` policy never grants push regardless of its value. If a push was already authorized elsewhere, confirm it landed (e.g. the remote ref matches) as part of the same evidence; if not, the confirmed state is "merged locally, not pushed" and that is a complete, valid stopping point.
+6. **Delete the worktree only after merge (and push, if any) is confirmed.** Use `git worktree remove <path>` (and `git branch -d <branch>` once merged) — never `ExitWorktree`, which is scoped to worktrees the _current session_ entered via `EnterWorktree` and is a no-op on a worktree an `Agent` call created through `isolation: "worktree"`.
+7. **Never delete a worktree still holding unmerged or unconfirmed work.** A merge conflict or a failed re-verify keeps the worktree and its branch on disk; treat it like any other blocked unit under the owning workflow's existing blocked/circuit-breaker handling (`spec-workflow.md`'s convergence rules for spec work, or a direct report for `/plan` work) rather than inventing new failure handling or discarding the branch.
 
 ## Independent Review Dispatch
 

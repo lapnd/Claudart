@@ -115,6 +115,7 @@ The task file is the interface between the session that plans and the session th
 - **Carry**: decisions (what was chosen, why, what was rejected), non-obvious constraints and pitfalls discovered while exploring, and a `verify:` check per step.
 - **Do not carry**: the solution. No code snippets, pseudo-code, or line-level edit instructions in Concrete Steps. If writing a step required solving the problem first, the plan has overstepped — lift the step back to decision + verify and let the executor derive the how.
 - A step may stay vague about _how_ as long as its `verify:` is sharp about _what success is_. Verification substitutes for detail: it catches executor drift at the step where it happens, at a fraction of the tokens.
+- **Tier**: when a change needs proof rather than assertion — any bug fix, or a money/auth/data-loss/concurrency/public-API surface — name a tier from `evidence-gauntlet.md` in `Validation & Acceptance`. Naming it is what makes its layers binding; an unnamed layer is advisory. A Tier 2+ item is not satisfied until its test was observed failing first.
 - A well-written step can be handed verbatim to a subagent as the **Goal** of a worker prompt (see `agent-delegation.md`). Self-contained means it carries the decisions, constraints, and verify — not the answer.
 
 ## Status State Machine
@@ -180,6 +181,8 @@ On approval: flip frontmatter `status: planning → in-progress`, bump `updated:
 The frontmatter `delegation:` field records a delegation strategy at planning time so the approval signal ("go") can carry it into execution without re-deriving the decomposition. Set it during planning and note the choice in the Decision Log.
 
 Its values — `none`, `strategy-only`, `authorized` — and **whether they gate execution** are defined in `agent-delegation.md`, which is harness-specific; this file does not redefine them. If the strategy changes at runtime, update the field.
+
+When Concrete Steps include independent coding work, check them against `agent-delegation.md`'s disjointness test before running them serially by default — a disjoint set of coding steps fans out under that file's Worktree Lifecycle for Parallel Coding Work (isolated spawn, one-at-a-time merge, re-verify on the merged state, confirm the merge landed, only then delete the worktree), the same protocol a spec ROADMAP wave uses.
 
 ## Progress Updates During Implementation
 

@@ -7,4 +7,5 @@
 
 ## Recently Done (last 14 days)
 
-- _(none)_
+- [parallel-worktree-execution](done/2026-08-18-001-parallel-worktree-execution.md) — done 2026-08-18
+- [evidence-gauntlet](done/2026-08-14-001-evidence-gauntlet.md) — done 2026-08-18

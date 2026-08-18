@@ -45,6 +45,7 @@ Existing installations use `INTEGRATE.md` to derive their actual delta against c
 | Plans die when the session closes             | `/plan` writes the plan to a task file that any later session can pick up where you left off         |
 | A mission is too big for one session or plan  | `/spec` freezes the intent in a POC + roadmap you approve once; `/spec-run` loops it to final review |
 | A refactor must not change behavior           | `/refactor` pins a baseline, writes a behavior contract + blast radius, and proves equivalence       |
+| Tests that pass without proving anything      | `/prove` watches each test fail first, then gates on changed-line coverage and mutation              |
 | A productive session hits the context ceiling | `/handoff` saves the session's reasoning — hypothesis, evidence, dead ends — for the next `/start`   |
 | The same decisions get re-discovered weekly   | `/learn` turns recurring behavior corrections into path-scoped rules                                 |
 | Durable facts have nowhere to live            | `knowledge/` maps them; the agent loads the matching map, topic outline, then only relevant sections |
@@ -81,6 +82,7 @@ Retrieval is map-first and bounded: root `INDEX.md`, at most the relevant domain
 /spec build the demo game       # mission too big for one plan? interview → POC → roadmap, approved once
 /spec-run demo-game             # fresh sessions execute the approved mission autonomously until final review
 /refactor migrate auth to v2    # refactor mission: pinned baseline + behavior contract prove equivalence
+/prove fix the pagination bug   # evidence-first: red before green, gauntlet, then numbers instead of adjectives
 /handoff                        # context nearly full? save your reasoning, resume fresh with /start
 /checkpoint                     # rebuild CONTEXT.md at session end
 /learn                          # promote recurring decisions into rules

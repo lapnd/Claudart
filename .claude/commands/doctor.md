@@ -19,7 +19,7 @@ Record its exit status and every finding. The checker is read-only and owns mech
 ### 1. Required Structure
 
 - `.claude/` exists at the repository root
-- `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`, `handoff.md`, `project-discovery.md`, `spec.md`, `spec-run.md`, `refactor.md`, `optimize.md`
+- `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`, `handoff.md`, `project-discovery.md`, `spec.md`, `spec-run.md`, `refactor.md`, `optimize.md`, `prove.md`
 - `.claude/agents/` exists (may be empty if user removed shipped agents)
 - `.claude/rules/` exists (may be empty before the user runs `/refactor-memory`)
 - `.claude/rules/knowledge-management.md` exists and is referenced from `.claude/CLAUDE.md`

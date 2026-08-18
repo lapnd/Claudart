@@ -18,6 +18,7 @@ EVERY SESSION
               ├─ feature/fix (multi-file) ─► /plan → you say "go" → execute → awaiting-review → you confirm
               ├─ mission (demoable whole) ─► /spec → POC loop → "go" once → /spec-run (cheap session)
               └─ behavior-preserving ──────► /refactor → same as /spec with equivalence proof
+              └─ must be proved ───────────► /prove    → red before green, then the gauntlet
               │
   while working:  /council for hard decisions · review agents before merge · /handoff if context fills
               │
@@ -41,6 +42,7 @@ WHEN THINGS LOOP OR DRIFT
 | A feature or fix spanning several files or sessions             | `/plan <description>`                                     |
 | A mission too big for one plan (a whole game, a feature system) | `/spec <mission>` → approve once → `/spec-run <slug>`     |
 | A refactor or migration that must not change behavior           | `/refactor <mission>`                                     |
+| A change you want proved, not just asserted                     | `/prove <change>`                                         |
 | A spec got stuck on a cheap model                               | `/spec-run <slug>` again, from a stronger session         |
 | A hard decision needs multiple perspectives                     | `/council <question>` (optional companion)                |
 | Want a code / security / visual review                          | Ask for the agent by name (see Step 9)                    |

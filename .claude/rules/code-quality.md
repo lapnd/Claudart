@@ -17,9 +17,15 @@ A feature is not production-ready because it passes functional tests. All produc
 
 Application/business code must maintain **at least 95%** automated coverage — overall, for critical business/domain logic, for security-sensitive code, and for new production code alike. Coverage must come from meaningful behavioral tests, never padding: unit tests for domain/application logic, integration tests for important adapters, API/contract tests at external boundaries, E2E tests for critical workflows, and a regression test for every bug fix. Generated code may be excluded, but **every exclusion needs a documented reason** — never exclude code just to raise the percentage.
 
+The 95% figure is the project **standard**; it detects drift across the codebase. What gates an individual change is **changed-line coverage**: every line that change touched must be executed by a test, enforced by a command that exits nonzero when the threshold is missed (`--cov-fail-under`, `diff-cover --fail-under`, equivalent). A command that prints a percentage and exits 0 is a report, not a gate.
+
+Coverage alone cannot tell a test that pins behavior from one that merely executes a line, so the bar is defended by **mutation** testing: introduce plausible bugs into the changed code and confirm the suite kills each one. A surviving mutant means a missing or vacuous assertion. `evidence-gauntlet.md` owns the full procedure, the tier calibration that decides how much of it applies, and the red-before-green ordering that makes a test's failure observable in the first place.
+
 ## 2. Test Quality
 
 Tests validate **behavior**, not implementation details (Given → When → Then). Cover happy paths, validation failures, authorization failures, edge/boundary conditions, concurrency, retry/idempotency, dependency failures, timeouts, and security-sensitive cases. Tests must be deterministic — no dependence on developer machines, local filesystem state, arbitrary timing, uncontrolled external services, or execution order.
+
+A test that cannot fail is worse than no test, because it reports safety that does not exist. Never ship an assertion-free or tautological test, never mock the unit under test or mock so heavily that only the mocks are exercised, and never bless a snapshot you have not read. Never weaken a test — broadened assertions, added skips, raised tolerances, a deleted failure — to reach green; a test that seems wrong is a specification conversation, not an obstacle.
 
 ## 3. Security by Default
 
@@ -99,6 +105,7 @@ A review evaluates more than functionality: architecture, correctness, security,
 
 - [ ] Business behavior correct; architecture follows `code-organization.md`
 - [ ] Automated coverage ≥ 95%; critical paths have meaningful tests
+- [ ] Changed lines covered and gated; new tests observed failing before they passed; mutants killed or classified at the declared tier
 - [ ] Auth/authz enforced; tenant/resource isolation verified
 - [ ] Secrets and sensitive data protected; nothing committed to Git
 - [ ] Logs structured, sensitive fields redacted, trace context propagated
