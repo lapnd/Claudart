@@ -13,16 +13,4 @@ Never mention "uncommitted changes" or reference git status — it will be stale
 
 ## In Progress
 
-- _(nothing yet — run `/checkpoint` at the end of a session to populate this)_
-
-## Open Questions / Blockers
-
-- _(none)_
-
-## Recent Decisions (not yet promoted to rules)
-
-- _(none)_
-
-## Next Session Should Start By
-
-- _(no handoff yet)_
+- Working task `claudart-portability` (see .claude/tasks/2026-08-13-001-claudart-portability.md) — Steps 1-6 done and tested (`claudart-restore.sh` is functionally complete: Plan, Materialize, all 8 merge classes, shadow knowledge-check.sh gate, Commit with backups/receipt/ledger; `/backup`+`/restore` commands and Codex skill mirrors created; 98 assertions in tests/portability/run.sh). Remaining: Step 7 (docs — README/GUIDE/WORKFLOW/INTEGRATE/CHANGELOG/CLAUDE.md/CONTRIBUTING/doctor.md required-list) — see the task's "Step 7 surface map" and Memory Hints.

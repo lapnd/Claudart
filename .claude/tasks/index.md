@@ -3,7 +3,7 @@
 
 ## Active
 
-- [claudart-portability](2026-08-13-001-claudart-portability.md) — in-progress — updated 2026-08-13
+- [claudart-portability](2026-08-13-001-claudart-portability.md) — in-progress — updated 2026-08-18
 
 ## Recently Done (last 14 days)
 
