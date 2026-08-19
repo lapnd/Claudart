@@ -115,3 +115,5 @@ Distinguish three cases when touching existing structure:
 ## The Core Principle
 
 Do not optimize for _"where can I put this code so the feature works?"_ — optimize for _"what is the correct domain, responsibility, boundary, dependency direction, and extension point for this code?"_ A feature is not well-designed merely because it works: correct behavior + correct architecture + maintainability are all part of done.
+
+This is the architecture-specific instance of `ai-behavior.md`'s §3 (Correct Model Over Quick Fix — Bounded by Scope): favor the durable, correct structure over a shortcut, but stop at what the request actually needs — §1/§11's rejection of unrequested interfaces, frameworks, and speculative extension points is this rule's own scope fence, not a license to redesign adjacent code.
