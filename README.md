@@ -39,18 +39,19 @@ Existing installations use `INTEGRATE.md` to derive their actual delta against c
 
 ## What it solves
 
-| Pain                                          | What CLAUDART does about it                                                                          |
-| --------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Every session starts blind                    | `/start` reads the current state, open tasks, and recent commits before touching anything            |
-| Plans die when the session closes             | `/plan` writes the plan to a task file that any later session can pick up where you left off         |
-| A mission is too big for one session or plan  | `/spec` freezes the intent in a POC + roadmap you approve once; `/spec-run` loops it to final review |
-| A refactor must not change behavior           | `/refactor` pins a baseline, writes a behavior contract + blast radius, and proves equivalence       |
-| Tests that pass without proving anything      | `/prove` watches each test fail first, then gates on changed-line coverage and mutation              |
-| A productive session hits the context ceiling | `/handoff` saves the session's reasoning — hypothesis, evidence, dead ends — for the next `/start`   |
-| The same decisions get re-discovered weekly   | `/learn` turns recurring behavior corrections into path-scoped rules                                 |
-| Durable facts have nowhere to live            | `knowledge/` maps them; the agent loads the matching map, topic outline, then only relevant sections |
-| `CLAUDE.md` bloats into a token sink          | `/refactor-memory` trims it back to an index and files the content where it belongs                  |
-| Memory rots silently                          | `/doctor` runs a shipped read-only checker, then audits semantic drift and misfiled content          |
+| Pain                                                         | What CLAUDART does about it                                                                          |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| Every session starts blind                                   | `/start` reads the current state, open tasks, and recent commits before touching anything            |
+| Plans die when the session closes                            | `/plan` writes the plan to a task file that any later session can pick up where you left off         |
+| A mission is too big for one session or plan                 | `/spec` freezes the intent in a POC + roadmap you approve once; `/spec-run` loops it to final review |
+| A refactor must not change behavior                          | `/refactor` pins a baseline, writes a behavior contract + blast radius, and proves equivalence       |
+| Tests that pass without proving anything                     | `/prove` watches each test fail first, then gates on changed-line coverage and mutation              |
+| A productive session hits the context ceiling                | `/handoff` saves the session's reasoning — hypothesis, evidence, dead ends — for the next `/start`   |
+| The same decisions get re-discovered weekly                  | `/learn` turns recurring behavior corrections into path-scoped rules                                 |
+| Durable facts have nowhere to live                           | `knowledge/` maps them; the agent loads the matching map, topic outline, then only relevant sections |
+| `CLAUDE.md` bloats into a token sink                         | `/refactor-memory` trims it back to an index and files the content where it belongs                  |
+| Memory rots silently                                         | `/doctor` runs a shipped read-only checker, then audits semantic drift and misfiled content          |
+| Switching machines, or carrying context into another project | `/backup` exports a portable bundle; `/restore` merges it elsewhere without ever overwriting a file  |
 
 Three review agents ship alongside the commands — `clean-code-reviewer`, `security-auditor`, and `ui-visual-critic`, each invoked on explicit request only (never automatically, not even inside a task or spec loop) — plus a delegation protocol that keeps parallel subagent work bounded instead of letting it sprawl.
 
@@ -88,6 +89,8 @@ Retrieval is map-first and bounded: root `INDEX.md`, at most the relevant domain
 /learn                          # promote recurring decisions into rules
 /doctor                         # health check when the setup feels off
 /optimize                       # auto-compact too often? audit where the tokens go
+/backup                         # moving machines? export sessions + memory as a portable bundle
+/restore                        # import that bundle elsewhere — dry run first, never overwrites
 ```
 
 Codex CLI runs the same flow with `$codex-` instead of `/` (e.g. `$codex-start`).

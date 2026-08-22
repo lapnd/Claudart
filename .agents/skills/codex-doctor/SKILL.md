@@ -21,7 +21,7 @@ Run a read-only health check on this repository's CLAUDART installation from the
 - `.codex/config.toml` exists and contains an `[agents]` table with conservative delegation limits.
 - `.codex/tasks/` exists with `index.md` and `done/` subdirectory (warn if missing — `$codex-plan` will create on first use).
 - `.codex/specs/` exists with `INDEX.md` and `done/` archive folder (informational if missing — `$codex-spec` creates it on first use).
-- `.agents/skills/` exists and contains `codex-start`, `codex-checkpoint`, `codex-learn`, `codex-doctor`, `codex-refactor-memory`, `codex-plan`, `codex-handoff`, `codex-project-discovery`, `codex-spec`, `codex-spec-run`, `codex-refactor`, and `codex-optimize`.
+- `.agents/skills/` exists and contains `codex-start`, `codex-checkpoint`, `codex-learn`, `codex-doctor`, `codex-refactor-memory`, `codex-plan`, `codex-handoff`, `codex-project-discovery`, `codex-spec`, `codex-spec-run`, `codex-refactor`, `codex-prove`, `codex-optimize`, `codex-backup`, and `codex-restore`.
 
 For each missing path, report which workflow would create or repair it.
 

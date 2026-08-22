@@ -31,11 +31,12 @@ This is a category map, not an exhaustive or versioned allowlist. Enumerate the 
 
 **Claude layer** (`.claude/`):
 
-- `commands/` — slash commands: `start`, `plan`, `spec`, `spec-run`, `checkpoint`, `handoff`, `learn`, `refactor-memory`, `doctor`, `project-discovery`
+- `commands/` — slash commands: `start`, `plan`, `spec`, `spec-run`, `refactor`, `prove`, `project-discovery`, `checkpoint`, `handoff`, `learn`, `refactor-memory`, `doctor`, `optimize`, `backup`, `restore`
 - `agents/` — review agents: `clean-code-reviewer`, `security-auditor`, `ui-visual-critic` (read-only on user code; invoked on explicit request only, never automatically)
 - `rules/` — **prescriptive**, path-scoped behavior (`ai-behavior`, `agent-delegation`, `knowledge-management`, `task-management`, `spec-workflow`)
 - `knowledge/INDEX.md` — root router for **descriptive** durable project facts; optional `_maps/` and detail files are read on demand
 - `scripts/knowledge-check.sh` — dependency-free, read-only mechanical validation for the knowledge contract
+- `scripts/claudart-backup.sh` + `claudart-restore.sh` — portability engines behind `/backup` and `/restore`: allow-listed bundle export with a secret-scan gate; verify-and-merge import that never overwrites an existing file
 - `CONTEXT.md` (state now), `JOURNAL.md` (history, append-only), `CLAUDE.md` (memory index)
 - `tasks/` — persistent plan documents (`index.md` + `done/`)
 - `specs/` — mission-scale spec workspaces (only `INDEX.md` ships; mission folders are created by `/spec`)
@@ -43,7 +44,7 @@ This is a category map, not an exhaustive or versioned allowlist. Enumerate the 
 **Codex layer** (`.codex/` + `.agents/`):
 
 - `.agents/skills/codex-*` — the same commands as Codex skills
-- `.codex/guidelines/` (= rules, including `knowledge-management`), `.codex/knowledge/`, `.codex/scripts/knowledge-check.sh`, `.codex/agents/*.toml`, `.codex/config.toml`, `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, `.codex/tasks/`, `.codex/specs/`
+- `.codex/guidelines/` (= rules, including `knowledge-management`), `.codex/knowledge/`, `.codex/scripts/knowledge-check.sh`, `.codex/scripts/claudart-backup.sh` + `claudart-restore.sh` (byte-identical twins of the portability engines), `.codex/agents/*.toml`, `.codex/config.toml`, `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, `.codex/tasks/`, `.codex/specs/`
 - `AGENTS.md` at repo root (Codex memory index; the installer copies it from `.codex/AGENTS.md`)
 
 Every Claude command has a mirrored Codex skill. If you integrate both layers, keep them consistent.

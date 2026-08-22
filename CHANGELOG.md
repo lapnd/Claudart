@@ -18,6 +18,7 @@ commits that landed them on `main`.
 - **`--upgrade` installer mode**: refreshes template-owned files in place, never touches live state (CONTEXT, JOURNAL, tasks, specs, knowledge) or user-evolved indexes; warns on a dirty git tree; reports copied/upgraded/unchanged/skipped.
 - **`--council` installer flag**: optionally installs the [Council of High Intelligence](https://github.com/0xNyk/council-of-high-intelligence) `/council` deliberation companion to user scope, layer-matched.
 - **`docs/GUIDE.md`**: flow-ordered user cookbook — setup once, every session, executing by size, while working, closing the loop — with concrete walkthroughs for every command.
+- **Portability — `/backup` + `/restore`** (`$codex-backup` / `$codex-restore`): export a portable CLAUDART bundle (the project `.claude/` layer plus this project's Claude Code sessions, memory, and history) behind an allow-list collection, a length-constrained secret-scan gate, and six-encoding path-token cataloguing; restore translates every token via boundary-anchored sentinel substitution proven by independent occurrence arithmetic, then merges structurally — regenerating declared caches, line-unioning curated routers, sidecaring keyed-unit collisions — under a never-overwrite invariant with pre-write backups, `receipt.txt`, conflict parking, and a shadow `knowledge-check.sh` gate. Both engines ship as byte-identical Codex twins covered by a synthetic-fixture suite.
 
 ### Changed
 

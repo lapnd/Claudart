@@ -21,6 +21,7 @@ This is the manual. The [README](../README.md) is the pitch; this document expla
 - [Spec workflow — missions above the task layer](#spec-workflow--missions-above-the-task-layer)
 - [Subagent delegation](#subagent-delegation)
 - [Commands and skills](#commands-and-skills)
+- [Portability — moving machines or projects](#portability--moving-machines-or-projects)
 - [Directory layout](#directory-layout)
 
 ## Two layers
@@ -276,10 +277,20 @@ What survives afterwards goes in the task document: the delegation strategy, the
 | `/learn`              | `$codex-learn`              | Behavior retrospective — promotes recurring ways of working into rules/guidelines; project facts stay in knowledge                                                                                                                                          |
 | `/doctor`             | `$codex-doctor`             | Read-only health check: deterministic Bash checker first, then semantic drift, classification, wiring, task, and token-hygiene audits                                                                                                                       |
 | `/optimize`           | `$codex-optimize`           | Token-usage audit — boot cost, session behavior, memory hygiene — with ranked fixes routed to their owners; run when auto-compact fires frequently                                                                                                          |
+| `/backup`             | `$codex-backup`             | Exports a portable bundle — the project `.claude/` layer plus this project's Claude Code sessions/memory/history — behind allow-list collection, a secret-scan gate, and path-token cataloguing                                                             |
+| `/restore`            | `$codex-restore`            | Imports a `/backup` bundle — translates every source path token, proves the rewrite by occurrence arithmetic, merges structurally without ever overwriting an existing file; dry run until `--apply`                                                        |
 
 Both layers also ship three review agents, each **invoked by name on explicit request only — never automatically, not even inside a task or spec loop**. `clean-code-reviewer` enforces scope and Clean Code discipline. `security-auditor` runs an OWASP-mapped audit — read-only on your code, writing its findings to a `security-audit-<date>.md` report at the project root and printing only the summary to chat. `ui-visual-critic` is an adversarial "human-eye" design review of rendered UI or visuals (vision-heavy and quota-expensive, which is why it stays strictly on-demand). Claude names agents in kebab-case Markdown; Codex uses snake_case TOML `name` values.
 
 The shipped Codex config (`.codex/config.toml`) caps `[agents] max_concurrent_threads_per_session` at 6 so a downstream project gets useful parallelism without a small request accidentally fanning out into an expensive subagent tree. Delegation stays one level deep by protocol unless the user explicitly asks for recursion.
+
+## Portability — moving machines or projects
+
+Sessions, per-project memory, and prompt history live outside the repo (`~/.claude/projects/…`), so git alone cannot move them. `/backup` (`$codex-backup`) exports a self-describing bundle from an allow-list — the project `.claude/` layer plus this project's user-scope slice — and never reads settings or credentials. A length-constrained secret scan withholds the whole bundle when it finds something key-shaped; foreign project roots disclosed inside transcripts are named in the report rather than silently shipped.
+
+The bundle catalogs every source path token (raw absolute paths, mangled `~/.claude/projects/-Users-…` directory names, tilde forms, `file://` URIs, JSON-escaped and percent-encoded fragments) with per-file occurrence counts, but performs zero rewriting at export time. Export stays read-only, and one bundle can target many destinations.
+
+`/restore` (`$codex-restore`) plans the import: it translates every token to the destination (boundary-anchored two-phase sentinel substitution, most-specific first), proves the rewrite with independent occurrence arithmetic, and previews a structural merge — regenerate declared caches (`tasks/index.md`, `specs/INDEX.md`), line-union curated routers (`knowledge/INDEX.md`, `_maps/`), merge-or-sidecar keyed units. The invariant is **never overwrite**: pre-existing files keep their bytes (with backups + a `receipt.txt` on `--apply`), divergent same-session transcripts park under `.claude/.portability/conflicts/<epoch>/` for manual review, and a shadow run of `knowledge-check.sh` gates the commit so an import can never leave the knowledge contract broken. Dry run is the default; nothing writes until `--apply`.
 
 ## Directory layout
 
@@ -308,6 +319,8 @@ your-project/
 │   │   ├── INDEX.md                # Root router surfaced by $codex-start; topic files read on demand
 │   │   └── _maps/                  # Optional domain maps for large knowledge stores
 │   ├── scripts/
+│   │   ├── claudart-backup.sh      # /backup engine — portable bundle export (byte-identical .claude twin)
+│   │   ├── claudart-restore.sh     # /restore engine — verify-and-merge import (byte-identical .claude twin)
 │   │   └── knowledge-check.sh      # Dependency-free, read-only structural checker
 │   ├── specs/                      # Mission-scale spec workspaces (SPEC + ROADMAP + NOTES + LEDGER + artifacts/ per mission)
 │   │   └── INDEX.md                # Registry surfaced by $codex-start; one line per mission
@@ -334,6 +347,8 @@ your-project/
     │   ├── spec-workflow.md
     │   └── task-management.md
     ├── scripts/
+    │   ├── claudart-backup.sh      # /backup engine — portable bundle export (byte-identical .codex twin)
+    │   ├── claudart-restore.sh     # /restore engine — verify-and-merge import (byte-identical .codex twin)
     │   └── knowledge-check.sh      # Dependency-free, read-only structural checker
     ├── specs/                      # Mission-scale spec workspaces (SPEC + ROADMAP + NOTES + LEDGER + artifacts/ per mission)
     │   └── INDEX.md                # Registry surfaced by /start; one line per mission

@@ -40,9 +40,8 @@ usage() {
   cat <<'EOF'
 Usage: claudart-restore.sh --bundle DIR [options]
 
-Plan and verify importing a portable CLAUDART bundle. Reports what would be
-rewritten and merged; writes nothing unless --apply is given, and this build
-does not yet implement the write (Commit) phase at all.
+Plan, verify, and import a portable CLAUDART bundle. Reports what would be
+rewritten and merged; writes nothing unless --apply is given.
 
 Options:
   --bundle DIR         Bundle directory produced by claudart-backup.sh (required)
@@ -58,7 +57,8 @@ Options:
   --allow-dirty         Proceed even though the target's git tree is dirty
   --stage-out DIR       On a clean dry run, copy the rewritten (not yet merged)
                         payload here for inspection; must not already exist
-  --apply               Write changes (not yet implemented in this build)
+  --apply               Write the merged result: backups first, then receipt.txt
+                        and a lineage-ledger append
   --help                 Show this help
 
 Exit status:

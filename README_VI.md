@@ -50,6 +50,7 @@ Installation hiện hữu dùng `INTEGRATE.md` để derive delta thực tế v�
 | Fact bền của dự án không có chỗ đúng để sống | `knowledge/` lập map; agent nạp map phù hợp, outline topic rồi chỉ section liên quan                    |
 | `CLAUDE.md` phình thành bồn đốt token        | `/refactor-memory` gọt nó lại thành một index và đưa nội dung về đúng nơi                               |
 | Memory âm thầm mục ruỗng                     | `/doctor` chạy checker read-only được ship sẵn, rồi audit drift ngữ nghĩa và nội dung đặt sai tầng      |
+| Đổi máy, hoặc mang context sang project khác | `/backup` xuất bundle portable; `/restore` merge sang nơi khác mà không bao giờ ghi đè file có sẵn      |
 
 Ba review agent được ship kèm các command - `clean-code-reviewer`, `security-auditor` và `ui-visual-critic`, mỗi cái chỉ chạy khi được yêu cầu rõ ràng (không bao giờ tự động, kể cả bên trong một task hay spec loop) - cùng một delegation protocol để giữ việc subagent song song có biên rõ ràng thay vì lan rộng mất kiểm soát.
 
@@ -87,6 +88,8 @@ Retrieval đi từ map và có budget: root `INDEX.md`, tối đa các domain ma
 /learn                          # thăng cấp quyết định lặp lại thành rule
 /doctor                         # health check khi setup có vẻ lệch
 /optimize                       # auto-compact quá thường xuyên? audit xem token đi đâu
+/backup                         # đổi máy? xuất session + memory thành bundle portable
+/restore                        # nhập bundle đó ở nơi khác - dry run trước, không bao giờ ghi đè
 ```
 
 Codex CLI chạy cùng flow với `$codex-` thay cho `/` (ví dụ `$codex-start`).

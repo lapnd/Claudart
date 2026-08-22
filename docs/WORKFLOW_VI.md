@@ -21,6 +21,7 @@
 - [Spec workflow - mission trên tầng task](#spec-workflow---mission-trên-tầng-task)
 - [Subagent delegation](#subagent-delegation)
 - [Command và skill](#command-và-skill)
+- [Tính di động - đổi máy hoặc project](#tính-di-động---đổi-máy-hoặc-project)
 - [Layout thư mục](#layout-thư-mục)
 
 ## Hai layer
@@ -276,10 +277,20 @@ Phần sống sót sau đó đi vào task document: delegation strategy, role, o
 | `/learn`              | `$codex-learn`              | Retrospective về behavior - thăng cấp cách làm việc lặp lại thành rules/guidelines; fact dự án ở lại knowledge                                                                                                                               |
 | `/doctor`             | `$codex-doctor`             | Health check read-only: Bash checker deterministic trước, rồi audit drift ngữ nghĩa, phân loại, wiring, task và token hygiene                                                                                                                |
 | `/optimize`           | `$codex-optimize`           | Audit token usage — boot cost, hành vi session, memory hygiene — với fix xếp hạng và định tuyến đúng chủ; chạy khi auto-compact xảy ra quá thường xuyên                                                                                      |
+| `/backup`             | `$codex-backup`             | Xuất bundle portable - layer `.claude/` của project cùng session/memory/history Claude Code của project này - sau allow-list, secret-scan gate và catalogue path-token                                                                       |
+| `/restore`            | `$codex-restore`            | Nhập bundle từ `/backup` - dịch mọi source path token, chứng minh bản dịch bằng phép trừ occurrence độc lập, merge cấu trúc không bao giờ ghi đè file có sẵn; dry run cho tới `--apply`                                                      |
 
 Cả hai layer cũng ship ba review agent, mỗi cái **chỉ được gọi đích danh theo yêu cầu rõ ràng - không bao giờ tự động, kể cả bên trong một task hay spec loop**. `clean-code-reviewer` enforce scope và kỷ luật Clean Code. `security-auditor` chạy audit map theo OWASP - read-only trên code của bạn, ghi findings vào report `security-audit-<date>.md` ở project root và chỉ in summary ra chat. `ui-visual-critic` là bản review thiết kế kiểu "con mắt người" đối kháng cho UI hoặc visual đã render (nặng về thị giác và tốn quota, nên nó luôn chỉ chạy on-demand). Claude đặt tên agent bằng Markdown kebab-case; Codex dùng giá trị TOML `name` dạng snake_case.
 
 Config Codex được ship kèm (`.codex/config.toml`) giới hạn `[agents] max_concurrent_threads_per_session` ở 6 để downstream project có parallelism hữu ích mà một request nhỏ không vô tình fan out thành cây subagent tốn kém. Delegation giữ ở một cấp theo protocol trừ khi user yêu cầu đệ quy rõ ràng.
+
+## Tính di động - đổi máy hoặc project
+
+Session, memory theo project và lịch sử prompt sống ngoài repo (`~/.claude/projects/…`), nên một mình git không chuyển chúng đi được. `/backup` (`$codex-backup`) xuất một bundle tự mô tả từ allow-list - layer `.claude/` của project cùng phần user-scope của project này - và không bao giờ đọc settings hay credential. Secret scan với ràng buộc độ dài giữ lại toàn bộ bundle khi thấy thứ gì đó giống key; các root project lạ bị lộ trong transcript được nêu tên trong report thay vì được ship âm thầm.
+
+Bundle catalogue mọi path token nguồn (path tuyệt đối raw, tên thư mục mangled `~/.claude/projects/-Users-…`, dạng tilde, URI `file://`, fragment JSON-escaped và percent-encoded) kèm số lần xuất hiện theo từng file, nhưng không rewrite gì lúc export. Export giữ tính read-only, và một bundle dùng được cho nhiều đích đến.
+
+`/restore` (`$codex-restore`) lập kế hoạch nhập: dịch mọi token sang đích (substitution sentinel hai pha có boundary anchor, cụ thể nhất trước), chứng minh bản dịch bằng phép trừ occurrence độc lập, và preview một merge cấu trúc - regenerate các cache đã khai báo (`tasks/index.md`, `specs/INDEX.md`), line-union các router được curate (`knowledge/INDEX.md`, `_maps/`), merge-or-sidecar các keyed unit. Bất biến là **không bao giờ ghi đè**: file có sẵn giữ nguyên byte (kèm backup + `receipt.txt` khi `--apply`), transcript cùng session nhưng lệch nội dung được park dưới `.claude/.portability/conflicts/<epoch>/` chờ review thủ công, và một lượt chạy shadow `knowledge-check.sh` chặn bước commit để import không thể phá vỡ knowledge contract. Mặc định là dry run; không ghi gì cho tới `--apply`.
 
 ## Layout thư mục
 
@@ -308,6 +319,8 @@ your-project/
 │   │   ├── INDEX.md                # Root router hiển thị bởi $codex-start; topic files đọc khi cần
 │   │   └── _maps/                  # Domain map tùy chọn cho knowledge store lớn
 │   ├── scripts/
+│   │   ├── claudart-backup.sh      # Engine /backup - xuất bundle portable (bản twin .claude byte-identical)
+│   │   ├── claudart-restore.sh     # Engine /restore - nhập verify-and-merge (bản twin .claude byte-identical)
 │   │   └── knowledge-check.sh      # Checker cấu trúc read-only, không dependency
 │   ├── specs/                      # Workspace spec quy mô mission (SPEC + ROADMAP + NOTES + LEDGER + artifacts/ mỗi mission)
 │   │   └── INDEX.md                # Registry hiển thị bởi $codex-start; mỗi mission một dòng
@@ -334,6 +347,8 @@ your-project/
     │   ├── spec-workflow.md
     │   └── task-management.md
     ├── scripts/
+    │   ├── claudart-backup.sh      # Engine /backup - xuất bundle portable (bản twin .codex byte-identical)
+    │   ├── claudart-restore.sh     # Engine /restore - nhập verify-and-merge (bản twin .codex byte-identical)
     │   └── knowledge-check.sh      # Checker cấu trúc read-only, không dependency
     ├── specs/                      # Workspace spec quy mô mission (SPEC + ROADMAP + NOTES + LEDGER + artifacts/ mỗi mission)
     │   └── INDEX.md                # Registry hiển thị bởi /start; mỗi mission một dòng

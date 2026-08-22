@@ -19,6 +19,8 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, including 
 - `/learn` promotes validated recurring behavior into `.claude/rules/` and routes descriptive facts to knowledge.
 - `/doctor` runs the mechanical knowledge checker followed by a read-only semantic health audit.
 - `/optimize` audits token usage — boot cost, session behavior, memory hygiene — applies only mechanical fixes and routes structural findings to `/refactor-memory`; run it when auto-compact fires frequently.
+- `/backup` exports a portable CLAUDART bundle (`.claude/scripts/claudart-backup.sh`) — the project layer plus this project's Claude Code sessions/memory/history; never credentials. A secret scan may withhold the bundle.
+- `/restore <bundle>` imports a `/backup` bundle (`.claude/scripts/claudart-restore.sh`) — dry run first, `--apply` only after the user reviews the plan; structural merge that never overwrites an existing file.
 
 ## Verify
 

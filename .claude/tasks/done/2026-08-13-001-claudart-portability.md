@@ -1,8 +1,8 @@
 ---
 slug: claudart-portability
-status: in-progress
+status: done
 created: 2026-08-13
-updated: 2026-08-18
+updated: 2026-08-22
 agent: claude
 delegation: strategy-only
 tags: [portability, backup, restore, knowledge, sessions]
@@ -87,7 +87,7 @@ Finish with the parity obligations this repo enforces mechanically — byte-iden
 - [x] (2026-08-18 07:00Z) Step 4 — Implement the merge classes driven by `MERGEPLAN` (regenerate `tasks/index.md`/`specs/INDEX.md`; line-union `knowledge/INDEX.md`/`_maps/*`; 2-way with sidecar-on-conflict for `keyed-unit` — see Decision Log for the deferred 3-way-via-ledger scope cut), the git-lineage stand-down, the conflict-parking protocol under `.claude/.portability/conflicts/<epoch>/` (divergent same-`sessionId` transcripts only), the shadow `knowledge-check.sh --root <stage>` gate, and phase Commit with backups + `receipt.txt` + ledger append. `MEMORY.md` regeneration is a disclosed gap, not implemented — see Decision Log. (verify: `/bin/bash tests/portability/run.sh` → 98 assertions, 0 failures, including a populated-target fixture proving every pre-existing file's cksum unchanged except the MERGE allowlist, and a curated `knowledge/INDEX.md` retaining its other routes verbatim)
 - [x] (2026-08-18 07:00Z) Step 5 — Add import + round-trip assertions, including the never-overwrite invariant and double-apply idempotency. (verify: same 98-assertion run — `snapshot(after 1st --apply) == snapshot(after 2nd --apply)` byte for byte on the target tree, asserted directly)
 - [x] (2026-08-18 08:00Z) Step 6 — `.claude/commands/backup.md` + `.claude/commands/restore.md` (single `description:` frontmatter, house style per `refactor.md`) and `.agents/skills/codex-{backup,restore}/SKILL.md` (Codex mirrors, `name:`+`description:` frontmatter). Both Codex script twins already byte-identical and both scripts already registered in `package.json` `check:shell`/`check` (done incidentally in Steps 3-5). No `.prettierignore` entry needed — fixtures remain inline per the Step 2 deviation, still true. No `install.sh` change needed — `is_template_path()` already classifies `.claude/commands/*` and `.agents/*` as template-owned. (verify: `npm run format:md:check` passes on all 4 new files; `npm run check` passes end to end — 295 assertions, 0 failures)
-- [ ] Step 7 — **(Doc surfaces already mapped — see "Step 7 surface map" below; the drafted copy uses the WRONG command names and must be renamed before use.)** Update docs: `README.md`/`README_VI.md`, `docs/GUIDE.md` cheat sheet, `docs/WORKFLOW.md`/`_VI.md` commands section + directory tree, `INTEGRATE.md` manifest, `CONTRIBUTING.md` parity list, `.claude/commands/doctor.md` required-commands list (+ Codex twin), `CHANGELOG.md` `[Unreleased]`. (verify: `npm run check` passes; `grep -rl claudart-backup docs README.md INTEGRATE.md` shows every intended surface updated)
+- [x] (2026-08-22 08:30Z) Step 7 — Docs updated across every mapped surface: README/README_VI table row + quick-start lines, GUIDE flow-diagram block + cheat-sheet row + new Part 6 (Steps 15–16), WORKFLOW/\_VI Contents + commands-table rows + "Portability" section + both directory trees, INTEGRATE commands list + Claude/Codex manifest bullets, CHANGELOG `[Unreleased]` Added, CONTRIBUTING parity bullet, `.claude/CLAUDE.md` Core Commands, doctor required-command lists in both layers. Additionally fixed restore's stale `--help` text in both byte-identical twins (see Surprises) and two pre-existing stale command lists touched en route. (verify: `npm run check` → exit 0, 295 assertions, 0 failures; every listed surface greps positive for backup/restore; `cmp -s` twins OK; prettier reflowed added table rows)
 
 ### Step 7 surface map (recorded early, 2026-08-13 04:55Z)
 
@@ -211,16 +211,16 @@ Same-session continuation from Step 3. Added all 8 merge classes (`unique`, `key
 
 ## Validation & Acceptance
 
-- [ ] `npm run check` passes (prettier + `bash -n` + knowledge fixtures + spec-workflow contract + `test:portability`)
-- [ ] Never-overwrite invariant holds: every pre-existing target file is byte-identical after `--apply`, except the MERGE allowlist — asserted for both `full` and `graft` modes
-- [ ] Double-apply idempotency: two consecutive `--apply` runs produce byte-identical snapshots of both trees; no sidecar created twice
-- [ ] Round trip: backup a synthetic root → restore into a _different_ cwd → per-file line counts equal, memory intact, `knowledge-check.sh --root <repo>` exits 0
-- [ ] Prefix hazard: `/w/demo-app-backup` and `-w-demo-app-backup` byte-identical in output while the real path is rewritten
-- [ ] Secret false-positive regression: a fixture with bare `sk-ant-` / `sk-ant-oat01-` in prose exits 0 with zero findings
-- [ ] Secret positive: bundle absent, exit 1, and the matched bytes absent from stderr, `SECRETS.txt`, and `MANIFEST.json`
-- [ ] Every credential canary is absent from the bundle **by content**, not merely by path
-- [ ] Both Codex script twins are byte-identical (`cmp -s`)
-- [ ] Manual smoke test noted as outstanding: whether the real CLI re-anchors from a transcript's `cwd` on `/resume` (design is conservative either way)
+- [x] `npm run check` passes (prettier + `bash -n` + knowledge fixtures + spec-workflow contract + `test:portability`) — exit 0, **295 assertions, 0 failures**; final fresh run 2026-08-22 08:32Z after the last doc edit and prettier reflow
+- [x] Never-overwrite invariant holds: every pre-existing target file is byte-identical after `--apply`, except the MERGE allowlist — asserted for both `full` and `graft` modes (portability suite, populated-target merge fixture)
+- [x] Double-apply idempotency: two consecutive `--apply` runs produce byte-identical snapshots of both trees; no sidecar created twice (portability suite)
+- [x] Round trip: backup a synthetic root → restore into a _different_ cwd → per-file line counts equal, memory intact, `knowledge-check.sh --root <repo>` exits 0 (portability suite)
+- [x] Prefix hazard: `/w/demo-app-backup` and `-w-demo-app-backup` byte-identical in output while the real path is rewritten (portability suite)
+- [x] Secret false-positive regression: a fixture with bare `sk-ant-` / `sk-ant-oat01-` in prose exits 0 with zero findings (portability suite)
+- [x] Secret positive: bundle absent, exit 1, and the matched bytes absent from stderr, `SECRETS.txt`, and `MANIFEST.json` (portability suite)
+- [x] Every credential canary is absent from the bundle **by content**, not merely by path (portability suite)
+- [x] Both Codex script twins are byte-identical (`cmp -s`) — re-verified 2026-08-22 after the `--help` text fix was applied to both twins
+- [ ] Manual smoke test noted as outstanding: whether the real CLI re-anchors from a transcript's `cwd` on `/resume` (design is conservative either way) — **waived by the user at close-out (2026-08-22)**: never performed; recorded as a disclosed limitation, not a pass
 
 ## Decision Log
 
@@ -274,6 +274,8 @@ Same-session continuation from Step 3. Added all 8 merge classes (`unique`, `key
   **Rationale**: `tasks/index.md` and `specs/INDEX.md` have their exact format specified in this project's own rules (`task-management.md`, `spec-workflow.md`), so regenerating them from disk is provably correct. `MEMORY.md` is part of Claude Code's auto-memory system, documented only in the runtime system prompt this project does not own or control — guessing at its format risks writing something the memory system itself cannot parse. Silence here is a disclosed gap (see Step 4 evidence and the merge routing report), not a silent skip.
 - **Decision** (2026-08-18, claude): A colliding `specs/<folder>/` always gets a deterministic `-imported-<bundle_id>` rename, even when the incoming folder's content is byte-identical to what is already there (a re-import of the same spec).
   **Rationale**: MERGEPLAN entries are per-file, not per-folder, and `SPEC.md` is not guaranteed to be the first file of a folder encountered during the merge (alphabetically, `ROADMAP.md` sorts first), so detecting "this whole folder was already imported identically" before committing to a destination folder name would need buffering every file of a folder before deciding any of their destinations. Rejected as disproportionate for this pass: the unconditional-rename behavior is still fully safe (never overwrites, and a true re-import just produces a second, per-file-idempotent-content copy under the renamed folder) — just not maximally tidy. Documented as a known limitation rather than silently accepted.
+- **Decision** (2026-08-22 08:20Z, user): Close the task by finishing Step 7 first, then archiving — not by descoping the docs step.
+  **Rationale**: the user's close-out request ("đóng task này… nó đã xong rồi") was checked against reality and found premature: no doc surface mentioned the feature yet. Offered the choice, the user picked finish-then-close, and the chosen option's text pre-authorized the archive once Step 7 completed clean — so this task transitions straight from `in-progress` to `done` under that standing instruction instead of parking at `awaiting-review`, with this entry recording the deviation from the normal two-phase gate.
 
 ## Surprises & Discoveries
 
@@ -296,7 +298,13 @@ Same-session continuation from Step 3. Added all 8 merge classes (`unique`, `key
 - (2026-08-18) **`status: review-needed` is not optional for an unrouted knowledge file — it's what makes leaving it unrouted legal.** The plan's sidecar convention ("K206 is a WARN, so `--fail-on error` still passes") is only true if the sidecar's status is actually non-active; a sidecar that keeps `status: active` while unrouted is `K205` (error), because `K205` and `K206` check different things (an _active_ entry must be reachable; a _review-needed_ entry merely may be). Read a cited rule-code's actual trigger condition before trusting a plan's shorthand explanation of it.
 - (2026-08-18) **Idempotency bugs hide behind "compare two things that were never the same representation to begin with."** Two independent instances of this same failure shape appeared in this task: verification 4 (Step 3, comparing a value against a derivation of itself) and `merge_keyed_unit` (Step 4, comparing a graft's raw source against the destination's already-transformed copy, so a re-run could never recognize its own prior work as already done). The general lesson: when a "same thing, different run" comparison is part of a check's correctness, make sure both sides are actually computed the same way — compute the transformed/canonical form once, then compare and place/write using only that form.
 - (2026-08-18) **The lineage ledger and conflict-parking directory are hardcoded to `.claude/.portability/` in both scripts, including the `.codex/scripts/` copy** — not layer-aware, by design: a project's bundle-import lineage is a property of the project, not of which agent layer happened to run the command, matching the original plan's own single hardcoded path. Worth knowing rather than assuming a Codex-tree run would use `.codex/.portability/` — it won't. Recorded in `codex-restore/SKILL.md` so the doc matches reality.
+- (2026-08-22 08:43Z) **The shipped `claudart-restore.sh --help` text had rotted**: it still described `--apply` as "not yet implemented in this build" although Step 4 shipped the Commit phase — the help block was never updated when the write path landed, and the test suite only asserts that `Usage:` prints, not what it says. Fixed in both byte-identical twins (`cmp -s` re-verified). A shipped feature's own `--help` is a doc surface and rots like one.
+- (2026-08-22 08:43Z) Two pre-existing stale lists were found while editing the exact lines Step 7 touched, and fixed on the spot: `INTEGRATE.md`'s commands list was missing `refactor`/`prove`/`optimize`, and `.agents/skills/codex-doctor/SKILL.md`'s required-skills list was missing `codex-prove`. Disclosed here because both fixes are one line beyond the strict surface map.
 
 ## Outcomes & Retrospective
 
-<!-- Filled when status flips to done or cancelled. -->
+**Delivered (2026-08-22):** `/backup` + `/restore` end to end — `claudart-backup.sh` (allow-list export, secret-scan gate, PATHMAP six-encoding path cataloguing, lineage-ledger read) and `claudart-restore.sh` (two-phase sentinel rewrite with occurrence-arithmetic verification, 8 merge classes, never-overwrite invariant, conflict parking, shadow `knowledge-check.sh` gate, Commit phase with backups/receipt/ledger append), byte-identical `.codex/scripts/` twins, `/backup`+`/restore` commands with `$codex-*` skill mirrors, and `tests/portability/run.sh` (98 assertions). Step 7 closed this session: every mapped doc surface now names the feature — README/README_VI (table row + quick start), GUIDE (flow diagram + cheat sheet + Part 6, Steps 15–16), WORKFLOW/\_VI (contents, command table, Portability section, both directory trees), INTEGRATE (commands list + both layer manifests), CHANGELOG `[Unreleased]`, CONTRIBUTING parity bullet, `.claude/CLAUDE.md` Core Commands, doctor required-command lists in both layers. Final state: `npm run check` exit 0, 295 assertions, 0 failures.
+
+**Deferred / disclosed gaps (unchanged, recorded rather than silently dropped):** ledger-based 3-way merge for `keyed-unit` (2-way-safe sidecar-on-difference shipped); `user/memory/MEMORY.md` regeneration (no owned format spec); deterministic re-import rename for `specs/` folders; and the waived manual smoke test of real-CLI `/resume` cwd re-anchoring — never performed; the design is conservative either way.
+
+**Lesson:** a shipped feature's own `--help` text rots exactly like documentation, and the suite only checked that help _prints_, not what it says. If this recurs elsewhere, propose `/learn` to make "CLI help is a doc surface; assert its load-bearing lines" a rule candidate.
