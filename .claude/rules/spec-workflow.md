@@ -208,6 +208,7 @@ A tripped breaker is a stop-and-report, never a silent retry loop and never a re
 Long sessions degrade (context pressure, compaction, host lag). Rotation is the designed unit of work, not an emergency:
 
 - **Offer rotation** at every phase boundary; mid-phase whenever a compaction occurred or context feels degraded (finish the in-flight task first); and in any case after ~8-10 completed tasks inside a long phase — don't wait for degradation to show.
+- **Numeric trigger**: a CONTEXT-GUARD warning is an offer-now signal — WARN (transcript ≥8MB) offers rotation at the next task boundary; ACT (≥16MB) rotates before anything new starts. Without the guard, treat statusline ≥75% or a transcript at ~16MB the same way. Bytes, not vibes.
 - The offer: report current phase, task inventory (`n/m`), and Current Acceptance Delta, then ask: _checkpoint and rotate now, or continue?_
 - **On yes**: append a `rotation-checkpoint` LEDGER entry (one-line state + exact next task), bump `updated:`, then run the `/checkpoint` flow — it syncs the specs INDEX, refreshes CONTEXT's spec pointer, and collects NOTES' `→ graduate:` flags — and tell the user: open a fresh session, orient with `/start`, and run `/spec-run <slug>`.
 - **On no**: continue the loop.

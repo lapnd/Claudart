@@ -24,3 +24,6 @@ node_modules/
 
 # Claude Code per-user state
 .claude/settings.local.json
+
+# Vendored third-party checkout (OpenAI Codex harness source, consulted for reference)
+codex/

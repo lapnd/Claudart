@@ -55,6 +55,8 @@ This is the cross-cutting design principle: **prefer the change that makes the u
 - NEVER weaken, skip, or delete a failing test to make it pass. A failing test is information, not an obstacle.
 - Report reality exactly: a skipped step is reported as skipped, partial work as partial, an unverified claim as unverified. A truthful "blocked" is always acceptable. A false "done" is the single worst violation.
 - Never stream large command output into the session — redirect it to a file and read only the slices you need (`tail`, `grep`). One oversized output can kill the session that produced it.
+- Never paste base64 images, PDFs, or screenshots into context casually — they inflate the serialized API request invisibly to token-based compaction and are the #1 cause of the unrecoverable ~32MB request-body failure. Prefer file paths and targeted slices.
+- Obey the context guard: a CONTEXT-GUARD WARN (transcript ≥8MB) means finish the current unit and prepare to `/handoff` + rotate; CONTEXT-GUARD ACT (≥16MB) means run `/handoff` now and rotate before starting anything else. The guard measures transcript bytes because bytes — not tokens — are what kill sessions.
 
 ## 7. Self-Critique Before Reporting Done
 

@@ -13,4 +13,4 @@ Never mention "uncommitted changes" or reference git status — it will be stale
 
 ## In Progress
 
-- Working task `claudart-portability` (see .claude/tasks/2026-08-13-001-claudart-portability.md) — Steps 1-6 done and tested (`claudart-restore.sh` is functionally complete: Plan, Materialize, all 8 merge classes, shadow knowledge-check.sh gate, Commit with backups/receipt/ledger; `/backup`+`/restore` commands and Codex skill mirrors created; 98 assertions in tests/portability/run.sh). Remaining: Step 7 (docs — README/GUIDE/WORKFLOW/INTEGRATE/CHANGELOG/CLAUDE.md/CONTRIBUTING/doctor.md required-list) — see the task's "Step 7 surface map" and Memory Hints.
+- _(none)_ — last closed: `output-limit-resilience` (2026-08-22): context-guard hook + settings wiring shipped; see tasks/done/2026-08-22-001-output-limit-resilience.md. Deferred: knowledge candidate `claude-code-output-limits` → `/checkpoint`; `.codex/guidelines/` mirror-sync pass.

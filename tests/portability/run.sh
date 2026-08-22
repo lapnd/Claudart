@@ -183,8 +183,9 @@ CLAUDE_HOME_DEST=$FIXTURE_ROOT/claude-home-dest
 BUNDLE=$FIXTURE_ROOT/bundle
 STAGE_OUT=$FIXTURE_ROOT/stage-out
 
-mkdir -p "$SRC_PROJECT/.claude/commands" "$DEST_PROJECT/.claude/commands"
+mkdir -p "$SRC_PROJECT/.claude/commands" "$SRC_PROJECT/.claude/hooks" "$DEST_PROJECT/.claude/commands"
 echo "template start command" >"$SRC_PROJECT/.claude/commands/start.md"
+echo "template hook" >"$SRC_PROJECT/.claude/hooks/context-guard.sh"
 echo "pre-existing dest file" >"$DEST_PROJECT/.claude/commands/existing.md"
 
 SRC_PROJECT=$(CDPATH='' cd -- "$SRC_PROJECT" && pwd -P)
@@ -204,6 +205,12 @@ run_script /bin/bash "$CLAUDE_BACKUP" \
   --root "$SRC_PROJECT" --claude-home "$CLAUDE_HOME_SRC" --out "$BUNDLE" \
   --sessions all --history no
 assert_status 0 "fixture: claudart-backup.sh succeeds on the synthetic source"
+
+if [ -f "$BUNDLE/project/.claude/hooks/context-guard.sh" ]; then
+  pass "fixture: hook script is template-owned and lands in the bundle"
+else
+  fail "fixture: hook script is template-owned and lands in the bundle"
+fi
 
 run_script /bin/bash "$CLAUDE_RESTORE" \
   --bundle "$BUNDLE" --target "$DEST_PROJECT" --claude-home "$CLAUDE_HOME_DEST" \

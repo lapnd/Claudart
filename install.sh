@@ -194,7 +194,7 @@ EXCLUDED=0
 # overwritten by an upgrade; reconcile those via INTEGRATE.md.
 is_template_path() {
   case "$1" in
-    .claude/commands/*|.claude/rules/*|.claude/agents/*|.claude/scripts/*) return 0 ;;
+    .claude/commands/*|.claude/rules/*|.claude/agents/*|.claude/scripts/*|.claude/hooks/*) return 0 ;;
     .codex/guidelines/*|.codex/agents/*|.codex/scripts/*) return 0 ;;
     .agents/*) return 0 ;;
     *) return 1 ;;

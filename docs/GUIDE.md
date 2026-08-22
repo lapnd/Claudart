@@ -29,6 +29,9 @@ WHEN THINGS LOOP OR DRIFT
   same correction twice ──► /learn
   memory feels off ──► /doctor → /refactor-memory → /doctor
   auto-compact too frequent ──► /optimize
+
+MOVING MACHINES OR PROJECTS
+  /backup → carry the bundle → /restore there (dry run, review, --apply)
 ```
 
 ## Cheat sheet — which command, when
@@ -51,6 +54,7 @@ WHEN THINGS LOOP OR DRIFT
 | You corrected the agent twice for the same thing                | `/learn`                                                  |
 | Setup feels broken or memory drifted                            | `/doctor` (→ `/refactor-memory` → `/doctor`)              |
 | Auto-compact fires frequently / sessions feel token-hungry      | `/optimize`                                               |
+| Moving to a new machine or carrying context to another project  | `/backup` → carry the bundle → `/restore` there (Part 6)  |
 
 ---
 
@@ -265,6 +269,32 @@ you>  /handoff
 
 It writes `.claude/HANDOFF.md` — objective, hypothesis, evidence as file:line, dead ends already ruled out, your constraints verbatim, and the exact next step. Close the session. The next `/start` offers the baton, re-verifies its evidence against current code, and consumes it. Don't use `/handoff` for spec work (the spec folder is already the baton) or as a session-end ritual (that's the next step).
 
+## Step 10b — Session output-limit resilience (automatic)
+
+Sessions don't only die of full context windows. They die when the serialized API request crosses a hard ~32MB request-body cap. Base64 images and accumulated tool output inflate bytes invisibly to token-based auto-compact — and once one request exceeds the cap, every retry replays the same payload. The session is unrecoverable, `--resume` included.
+
+CLAUDART ships a mechanical guard against this. The committed `.claude/settings.json` wires a PostToolUse hook (`.claude/hooks/context-guard.sh`) that measures your session transcript after every tool call and injects a warning into the conversation at two thresholds:
+
+| Level                | Trigger           | What to do                                        |
+| -------------------- | ----------------- | ------------------------------------------------- |
+| `CONTEXT-GUARD WARN` | transcript ≥ 8MB  | Finish the current unit, then `/handoff` + rotate |
+| `CONTEXT-GUARD ACT`  | transcript ≥ 16MB | `/handoff` now; rotate before starting anything   |
+
+Thresholds are env-tunable (`CLAUDART_GUARD_WARN_MB` / `CLAUDART_GUARD_ACT_MB`, MB units). The same settings pin `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=70` (compact at 70% of whatever the model's window is) and `BASH_MAX_OUTPUT_LENGTH=30000`. No project statusline is shipped on purpose — statusline percentages underreport ~10–19% versus real usage and would clobber your global one.
+
+**Why wiring travels by git, not bundles:** `/backup` excludes `settings.json` from bundles by design (credential safety). Committed settings reach collaborators through git; after a `/restore` into a non-git target, re-create the `hooks` block by hand pointing at `.claude/hooks/context-guard.sh`.
+
+**Runbook for an already-dead session** (every retry fails with an output/body-size error):
+
+1. Check the transcript size:
+   ```
+   you>  ! ls -lh ~/.claude/projects/<munged-cwd>/<session-id>.jsonl
+   ```
+2. Under ~16MB: `claude --resume <session-id>`, then immediately run `/compact`.
+3. At or over ~16MB: don't resume — the oversized payload just replays. Open a fresh session, run `/start`, and rebuild state from the last checkpoint.
+
+**Codex parity:** Codex has no PostToolUse contract, so no guard hook exists there; `.codex/guidelines/` carries the same numeric triggers as behavioral rules instead.
+
 ---
 
 # Part 5 — Closing the loop
@@ -327,6 +357,33 @@ A read-only token audit in three passes — **boot cost** (everything a session 
 ```
 
 Nothing is changed until you approve the "apply now" subset; behavioral fixes route through `/learn` so they become rules, state trimming routes to `/checkpoint`, and user-level items (foreign parent files, unused MCP servers) come with the exact command for you to run. One built-in honesty rule: if the diagnosis is "long `/spec-run` sessions," the fix is rotating earlier — that's what rotation is for — not trimming.
+
+---
+
+# Part 6 — Moving machines or projects
+
+Sessions and per-project memory live outside the repo (`~/.claude/projects/…`), so `git push` alone cannot carry them to a new laptop. `/backup` and `/restore` move the whole CLAUDART context as a self-describing bundle.
+
+## Step 15 — Export (`/backup`)
+
+```
+you>  /backup --out ~/migrate/claudart-bundle
+```
+
+Exports an allow-listed set — the project `.claude/` layer plus this project's Claude Code data: session transcripts, per-project memory, prompt history — and never reads settings or credentials. A secret scan gates the write: anything key-shaped withholds the bundle and names what it found. Source paths are catalogued in six encodings rather than rewritten at export time, which keeps the export read-only and lets one bundle target any destination. `--dry-run` previews; `--project-scope graft` exports just `knowledge/` + `rules/` for carrying context into a different project; `--archive` adds a `.tar.gz` beside the bundle.
+
+## Step 16 — Import (`/restore`)
+
+On the other machine (or the other project):
+
+```
+you>  /restore --bundle ~/migrate/claudart-bundle             # dry run — full report, writes nothing
+you>  /restore --bundle ~/migrate/claudart-bundle --apply     # reviewed? commit the plan
+```
+
+Every path token is translated to the destination and the rewrite is proved by independently recounting occurrences. The merge is structural and **never overwrites**: declared caches regenerate, curated routers line-union, colliding units sidecar under a new name instead of replacing anything, pre-existing files are backed up before being touched, and a `receipt.txt` records the whole apply. Divergent copies of the same session are parked under `.claude/.portability/conflicts/` for you — never auto-resolved. On a different project, `--mode graft` carries only knowledge and rules and hard-refuses bundles that would transplant session history into a place it never happened.
+
+Codex CLI runs both as `$codex-backup` / `$codex-restore`.
 
 ---
 
