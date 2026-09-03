@@ -11,6 +11,7 @@ Before doing anything, read `.claude/rules/spec-workflow.md` and `.claude/rules/
 - The user's request after `/spec` is the mission description. If empty, ask: "What's the mission?"
 - If the request is actually a single feature or fix, say so and suggest `/plan` instead. If it is a raw product idea with no repo and no scope at all, suggest `/project-discovery` first — `/spec` can then build on its `docs/project/` output.
 - If the mission is behavior-preserving refactoring or migration, additionally apply the **Refactor Missions** section below throughout the procedure.
+- If that migration also crosses a language, runtime, or UI-framework boundary, it is a port: read `.claude/rules/stack-migration.md` and apply it on top of Refactor Missions (`/migrate` enters here directly).
 
 ## Procedure
 

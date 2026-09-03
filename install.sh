@@ -94,10 +94,11 @@ OPTIONS
                into your USER scope (~/.claude, ~/.codex), matching the
                layers selected above
   --upgrade    Upgrade an existing CLAUDART install in place. Overwrites
-               TEMPLATE-OWNED files only (commands/, rules/, agents/,
-               scripts/, guidelines/, .agents/ skills). NEVER touches live
-               state (CONTEXT.md, JOURNAL.md, HANDOFF.md, tasks/, specs/,
-               knowledge/) or user-evolved indexes (CLAUDE.md, AGENTS.md,
+               TEMPLATE-OWNED files only (commands/, rules/, skills/,
+               agents/, scripts/, guidelines/, .agents/ skills). NEVER
+               touches live state (CONTEXT.md, JOURNAL.md, HANDOFF.md,
+               tasks/, specs/, knowledge/) or user-evolved indexes
+               (CLAUDE.md, AGENTS.md,
                config.toml) — reconcile those via INTEGRATE.md. Layers are
                auto-detected from the existing install unless you pass
                --claude/--codex/--both; with no install present it falls
@@ -194,7 +195,7 @@ EXCLUDED=0
 # overwritten by an upgrade; reconcile those via INTEGRATE.md.
 is_template_path() {
   case "$1" in
-    .claude/commands/*|.claude/rules/*|.claude/agents/*|.claude/scripts/*|.claude/hooks/*) return 0 ;;
+    .claude/commands/*|.claude/rules/*|.claude/skills/*|.claude/agents/*|.claude/scripts/*|.claude/hooks/*) return 0 ;;
     .codex/guidelines/*|.codex/agents/*|.codex/scripts/*) return 0 ;;
     .agents/*) return 0 ;;
     *) return 1 ;;

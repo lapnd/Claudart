@@ -19,7 +19,7 @@ Record its exit status and every finding. The checker is read-only and owns mech
 ### 1. Required Structure
 
 - `.claude/` exists at the repository root
-- `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`, `handoff.md`, `project-discovery.md`, `spec.md`, `spec-run.md`, `refactor.md`, `optimize.md`, `prove.md`, `backup.md`, `restore.md`
+- `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`, `handoff.md`, `project-discovery.md`, `spec.md`, `spec-run.md`, `refactor.md`, `migrate.md`, `optimize.md`, `prove.md`, `backup.md`, `restore.md`
 - `.claude/agents/` exists (may be empty if user removed shipped agents)
 - `.claude/rules/` exists (may be empty before the user runs `/refactor-memory`)
 - `.claude/rules/knowledge-management.md` exists and is referenced from `.claude/CLAUDE.md`
@@ -50,6 +50,12 @@ For every `.agents/skills/*/SKILL.md` file:
 
 - Verify the file starts with YAML frontmatter.
 - Confirm `name:` and `description:` are present.
+
+For every `.claude/skills/*/SKILL.md` file (reference skills — `python-to-go-idioms`, `nicegui-to-vue`, and any the project added):
+
+- Verify the file starts with YAML frontmatter.
+- Confirm `name:` and `description:` are present, and that `name:` matches its directory name.
+- Confirm every relative link in the body resolves to a file that exists (a `references/` page that was renamed or never written makes the skill silently useless).
 
 ### 3. Rule Path Coverage
 

@@ -18,6 +18,7 @@ EVERY SESSION
               ├─ feature/fix (multi-file) ─► /plan → you say "go" → execute → awaiting-review → you confirm
               ├─ mission (demoable whole) ─► /spec → POC loop → "go" once → /spec-run (cheap session)
               └─ behavior-preserving ──────► /refactor → same as /spec with equivalence proof
+              └─ new language/stack ───────► /migrate  → port mission: contract-first + parity runs
               └─ must be proved ───────────► /prove    → red before green, then the gauntlet
               │
   while working:  /council for hard decisions · review agents before merge · /handoff if context fills
@@ -45,6 +46,7 @@ MOVING MACHINES OR PROJECTS
 | A feature or fix spanning several files or sessions             | `/plan <description>`                                     |
 | A mission too big for one plan (a whole game, a feature system) | `/spec <mission>` → approve once → `/spec-run <slug>`     |
 | A refactor or migration that must not change behavior           | `/refactor <mission>`                                     |
+| Porting to another language, runtime, or UI framework           | `/migrate <mission>`                                      |
 | A change you want proved, not just asserted                     | `/prove <change>`                                         |
 | A spec got stuck on a cheap model                               | `/spec-run <slug>` again, from a stronger session         |
 | A hard decision needs multiple perspectives                     | `/council <question>` (optional companion)                |
@@ -117,6 +119,7 @@ This is the one judgment call the flow asks of you, and the agent will push back
 - **Several files or several sessions** → `/plan` (Step 6). Survives the terminal closing.
 - **A demoable whole** — a game, a feature system, a client POC → `/spec` (Step 7). Approve once, execute across many cheap sessions.
 - **A refactor/migration that must not change behavior** → `/refactor` (Step 7b). A spec with an equivalence proof bolted on.
+- **A port to another language, runtime, or UI framework** → `/migrate` (Step 7c). A refactor mission whose two halves cannot share a build, so parity is proved by running both.
 
 ---
 
@@ -222,6 +225,30 @@ Same three moves as Step 7, with the refactor overlay on the authoring step: it 
 ```
 
 Approval and execution are the normal `/spec-run` loop. Done means: old path removed, sweeps clean, zero behavior deltas beyond the ones SPEC enumerates. For a small single-file refactor the agent will tell you `/plan` is enough.
+
+## Step 7c — Porting to another stack (`/migrate`)
+
+```
+you>  /migrate port the NiceGUI app to a Go backend and a Vue SPA, hexagonal, modular
+```
+
+`/refactor` proves equivalence inside one build. A port has two builds, so the same claim has to be proved by running both stacks and diffing what a user would see. `/migrate` is `/refactor` plus `.claude/rules/stack-migration.md`, and the overlay adds four things to the authoring step:
+
+- **Translation rules as an artifact.** `artifacts/translation-rules.md` is _this project's_ table — source pattern → target pattern → why → a real example from your code. The reference skills (`.claude/skills/python-to-go-idioms/`, `.claude/skills/nicegui-to-vue/`) seed it; grounding every row in your own source is what keeps session #9 translating a decorator the same way session #2 did.
+- **The API seam is frozen before any target code.** OpenAPI (or proto) is written first, the client is generated from it, and a contract diff against the baseline runs at every phase boundary. Left undesigned, the public API becomes an accident of whichever endpoint the agent wrote first.
+- **A UI-fused source gets decomposed, not translated.** Every NiceGUI callback is split into domain / transport / view before a line of Go exists, and every piece of implicit server-held state (`app.storage.user`, module globals, values parked on widgets) gets an explicit destination. Skipping this is how a port ends up with a Go program shaped like an event loop.
+- **Parity is a differential run.** Both stacks up, same inputs, responses diffed — plus a smoke path that exists from Phase 1, a data-migration rehearsal in the first phase that touches persistence, and a dead-code sweep at every phase rather than at the end.
+
+```markdown
+- [ ] P2.4 port bookings use case to internal/booking (verify: differential run — POST /bookings
+      on baseline vs target, response bodies diff empty for the 6 fixture cases)
+- [ ] P2.5 architecture gate (verify: domain package's transitive deps contain no net/http,
+      database/sql, or UI package — command exits nonzero if any appear)
+```
+
+The mission is not done when the target passes: SPEC states the cutover shape (big-bang, strangler-fig, or parallel-run) up front, and Definition of Done includes cutover executed or scheduled, the source repo marked, and a rollback path.
+
+Full walkthrough — what to prepare, the three interview questions, what to check before approving, and a symptom→fix table: **[docs/MIGRATE.md](MIGRATE.md)** ([tiếng Việt](MIGRATE_VI.md)).
 
 ---
 

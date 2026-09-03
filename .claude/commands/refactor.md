@@ -11,4 +11,6 @@ This command is an entry point, not a separate protocol. Run the `/spec` flow (r
 3. POC fidelity: for a pure refactor the frozen reference is usually the behavior contract plus the pinned baseline itself, not an HTML artifact. Offer the user the choice, defaulting to contract-as-artifact.
 4. Execution is unchanged: on approval the user runs `/spec-run <slug>` — the executor needs no refactor-specific knowledge beyond what the ROADMAP carries.
 
+If the mission crosses a language, runtime, or UI-framework boundary (Python→Go, NiceGUI→Vue), it is a port, not a refactor: equivalence cannot be diffed in one build. Say so and use `/migrate`, which layers `.claude/rules/stack-migration.md` on top of this same flow.
+
 If the request is actually a small, single-file refactor, say so and suggest `/plan` instead — list the at-risk behaviors in the task's Memory Hints and carry the sweeps as Validation checks.
