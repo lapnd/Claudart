@@ -306,7 +306,7 @@ jnum() {
 # resulting provenance to avoid downgrading a newer local template file.
 is_template_path() {
   case "$1" in
-    .claude/commands/* | .claude/rules/* | .claude/agents/* | .claude/scripts/* | .claude/hooks/*) return 0 ;;
+    .claude/commands/* | .claude/rules/* | .claude/skills/* | .claude/agents/* | .claude/scripts/* | .claude/hooks/*) return 0 ;;
     .codex/guidelines/* | .codex/agents/* | .codex/scripts/*) return 0 ;;
     .agents/*) return 0 ;;
     *) return 1 ;;

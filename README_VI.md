@@ -39,18 +39,19 @@ Installation hiện hữu dùng `INTEGRATE.md` để derive delta thực tế v�
 
 ## CLAUDART giải quyết gì
 
-| Nỗi đau                                      | Cách CLAUDART xử lý                                                                                     |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Session nào cũng bắt đầu mù mờ               | `/start` đọc trạng thái hiện tại, task đang mở và các commit gần đây trước khi đụng vào bất kỳ thứ gì   |
-| Kế hoạch mất khi session đóng                | `/plan` ghi kế hoạch vào task file để session sau có thể tiếp tục đúng chỗ bạn dừng                     |
-| Mission quá lớn cho một session hay một plan | `/spec` đóng băng ý định thành POC + roadmap bạn approve một lần; `/spec-run` chạy lặp tới final review |
-| Refactor không được phép đổi hành vi         | `/refactor` ghim baseline, viết behavior contract + blast radius, và chứng minh tương đương             |
-| Session hiệu quả chạm trần context           | `/handoff` lưu suy luận của session - giả thuyết, evidence, dead ends - cho lần `/start` kế tiếp        |
-| Cùng quyết định bị tái khám phá hằng tuần    | `/learn` biến correction hành vi lặp lại thành rule có scope theo path                                  |
-| Fact bền của dự án không có chỗ đúng để sống | `knowledge/` lập map; agent nạp map phù hợp, outline topic rồi chỉ section liên quan                    |
-| `CLAUDE.md` phình thành bồn đốt token        | `/refactor-memory` gọt nó lại thành một index và đưa nội dung về đúng nơi                               |
-| Memory âm thầm mục ruỗng                     | `/doctor` chạy checker read-only được ship sẵn, rồi audit drift ngữ nghĩa và nội dung đặt sai tầng      |
-| Đổi máy, hoặc mang context sang project khác | `/backup` xuất bundle portable; `/restore` merge sang nơi khác mà không bao giờ ghi đè file có sẵn      |
+| Nỗi đau                                      | Cách CLAUDART xử lý                                                                                                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Session nào cũng bắt đầu mù mờ               | `/start` đọc trạng thái hiện tại, task đang mở và các commit gần đây trước khi đụng vào bất kỳ thứ gì                                                               |
+| Kế hoạch mất khi session đóng                | `/plan` ghi kế hoạch vào task file để session sau có thể tiếp tục đúng chỗ bạn dừng                                                                                 |
+| Mission quá lớn cho một session hay một plan | `/spec` đóng băng ý định thành POC + roadmap bạn approve một lần; `/spec-run` chạy lặp tới final review                                                             |
+| Refactor không được phép đổi hành vi         | `/refactor` ghim baseline, viết behavior contract + blast radius, và chứng minh tương đương                                                                         |
+| Viết lại sang ngôn ngữ hoặc UI stack khác    | `/migrate` đóng băng API seam và bảng translation-rules của chính dự án, rồi chứng minh parity bằng cách chạy song song hai stack ([hướng dẫn](docs/MIGRATE_VI.md)) |
+| Session hiệu quả chạm trần context           | `/handoff` lưu suy luận của session - giả thuyết, evidence, dead ends - cho lần `/start` kế tiếp                                                                    |
+| Cùng quyết định bị tái khám phá hằng tuần    | `/learn` biến correction hành vi lặp lại thành rule có scope theo path                                                                                              |
+| Fact bền của dự án không có chỗ đúng để sống | `knowledge/` lập map; agent nạp map phù hợp, outline topic rồi chỉ section liên quan                                                                                |
+| `CLAUDE.md` phình thành bồn đốt token        | `/refactor-memory` gọt nó lại thành một index và đưa nội dung về đúng nơi                                                                                           |
+| Memory âm thầm mục ruỗng                     | `/doctor` chạy checker read-only được ship sẵn, rồi audit drift ngữ nghĩa và nội dung đặt sai tầng                                                                  |
+| Đổi máy, hoặc mang context sang project khác | `/backup` xuất bundle portable; `/restore` merge sang nơi khác mà không bao giờ ghi đè file có sẵn                                                                  |
 
 Ba review agent được ship kèm các command - `clean-code-reviewer`, `security-auditor` và `ui-visual-critic`, mỗi cái chỉ chạy khi được yêu cầu rõ ràng (không bao giờ tự động, kể cả bên trong một task hay spec loop) - cùng một delegation protocol để giữ việc subagent song song có biên rõ ràng thay vì lan rộng mất kiểm soát.
 
@@ -82,6 +83,7 @@ Retrieval đi từ map và có budget: root `INDEX.md`, tối đa các domain ma
 /spec build the demo game       # mission quá lớn cho một plan? phỏng vấn → POC → roadmap, approve một lần
 /spec-run demo-game             # session mới thực thi mission đã approve tự chủ tới cổng final review
 /refactor migrate auth to v2    # mission refactor: baseline ghim + behavior contract chứng minh tương đương
+/migrate nicegui app to go+vue  # mission port: seam contract-first, translation rules, parity chạy song song
 /prove sửa lỗi phân trang       # evidence-first: đỏ trước xanh, chạy gauntlet, báo cáo bằng số liệu
 /handoff                        # context gần đầy? lưu suy luận, resume fresh bằng /start
 /checkpoint                     # rebuild CONTEXT.md cuối session

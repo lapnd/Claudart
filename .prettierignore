@@ -1,3 +1,4 @@
 .local/
 tests/knowledge-check/fixtures/**
 codex/
+translating-python-idioms-to-go-1.0.0/
