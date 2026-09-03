@@ -300,7 +300,7 @@ SPEC frontmatter is the source of truth; INDEX is a cache. Active lists status �
 ## Relationship to the Rest of CLAUDART
 
 - **Tasks**: a spec replaces `/plan` for its scope. Never mirror roadmap tasks into `.claude/tasks/`; never run both layers over the same work.
-- **CONTEXT.md**: may carry one pointer line (`Running spec \`<slug>\` (see .claude/specs/YYYY-MM-DD-<slug>/SPEC.md)`); never absorbs spec content.
+- **CONTEXT.md**: may carry one pointer line (`Running spec \`<slug>\` (see .claude/specs/YYYY-MM-DD-<slug>/SPEC.md)`); never absorbs spec content. A progress count (`n/m tasks`) written there is a **cache that goes stale silently** — it drifts the moment a task ticks or is replanned, and nothing recomputes it. NEVER quote it: recount from the ROADMAP's checkboxes, the same way SPEC frontmatter — not INDEX — is the source of truth for status.
 - **`/start`**: surfaces Active specs from INDEX and directs the user to `/spec`, `/spec-run`, or final verification according to status.
 - **`/checkpoint`**: syncs INDEX from SPEC frontmatter, same as it syncs `tasks/index.md`.
 - **knowledge/**: route map-first at planning time under `knowledge-management.md`. NOTES remains the candidate surface for mission discoveries. The executor may write canonical knowledge mid-run only when a descriptive fact passes every gate and one of that rule's immediate-promotion triggers applies; update owner + reachable map atomically and run the checker. Remaining flags are bulk-maintained at rotation `/checkpoint` or mission close.

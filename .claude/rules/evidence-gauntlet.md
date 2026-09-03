@@ -57,7 +57,7 @@ Run every applicable layer for the declared tier. **Never skip a layer silently*
 
 | Layer                     | What it catches                     | Gate                                                                                                                                                                                                                                                                                                                   |
 | ------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Full test suite           | regressions                         | zero **new** failures; record pre-existing failures as a baseline first                                                                                                                                                                                                                                                |
+| Full test suite           | regressions                         | zero **new** failures; record pre-existing failures as a baseline first, **with the tools and build state it was captured under** — a baseline that does not state its own preconditions expires silently (`verification-mechanics.md` §2)                                                                             |
 | Static types              | whole classes of bugs               | zero new errors                                                                                                                                                                                                                                                                                                        |
 | Lint + format             | latent bugs, drift                  | zero new warnings                                                                                                                                                                                                                                                                                                      |
 | **Changed-line coverage** | untested code paths                 | every changed/added line executed, branch coverage where supported. **This layer must exit nonzero when its threshold is missed** (`--cov-fail-under`, `diff-cover --fail-under`, equivalent) — a layer that prints a percentage and exits 0 is a report, not a gate, and it will sit there green while coverage falls |
@@ -89,11 +89,13 @@ Prefer the ecosystem's tool (mutmut, Stryker, cargo-mutants, PIT). With no tool,
 1. Take the new/changed implementation code.
 2. One at a time, introduce 3-5 plausible bugs biased toward the logic that matters: flip a comparison, off-by-one a bound, delete a branch or early return, swap `and`/`or`, replace a returned value with a constant.
 3. Run the suite after each. **Every mutant must make at least one test fail.** A survivor means a missing or vacuous assertion — add the test that kills it.
-4. Restore and confirm green; verify the restore with `git diff`, not by eyeball.
+4. Restore and confirm green; verify the restore by diffing against an **explicit saved copy** of the file taken before the first mutant, never by eyeball and NEVER with `git diff` against `HEAD` — the implementation under mutation is normally uncommitted, so a `HEAD` diff shows your own in-progress work and could not distinguish a bad restore from it (`verification-mechanics.md` §5, `.claude/lesson.md` §14).
 
 **Kills are attributed to whichever test fails first**, so a 7/7 score validates the suite as a whole, not every layer in it. At Tier 3, rerun the mutants against the property suite alone before claiming the properties verify anything.
 
 With a tool, a survivor is not automatically a failure: some mutants are semantically **equivalent mutant**s and cannot be killed. Classify these as "equivalent, because `<reason>`" rather than adding a meaningless test to kill them — that would violate rule 4. Hand-written mutants get no such excuse: you chose them, so choose real bugs.
+
+A survivor has a third resolution besides "kill it" and "classify it equivalent": **the mutated code may be unobservable, in which case delete the code.** A defensive branch whose removal no test can detect, because a later expression already handles the case, is not a coverage gap to be papered over with a contrived test — it is dead code that `ai-behavior.md` §2 says not to have written. Deleting it is the honest fix and lowers the changed-line count the gate has to cover. NEVER reach instead for a more elaborate test to make an unobservable branch look tested; a test written to reach a line rather than to pin a behavior is rule 4's exact violation, and mutation is what exposes it.
 
 ## 6. Checkers, entry point, and evidence
 
@@ -101,7 +103,7 @@ With a tool, a survivor is not automatically a failure: some mutants are semanti
 
 **Prove a checker can fail before trusting its pass.** Run it once against a known-bad input — a **negative control** — and watch it fail. This is the RED principle applied to checkers. Be precise about what it buys: a negative control proves one known-bad case reaches the failure path. It does **not** prove the checker recognizes every violation of the rule it serves. Where the gate is narrower than the rule, say so where the rule is written.
 
-Persist one **gauntlet entry point** that runs every layer in sequence and fails on the first broken one. Start it by deleting stale artifacts from previous runs so no layer can read a prior run's output — freshness by mechanism, not discipline. Pin dev-tool versions so a rerun uses the same gauntlet.
+Persist one **gauntlet entry point** that runs every layer in sequence and fails on the first broken one. Start it by deleting stale artifacts from previous runs so no layer can read a prior run's output — freshness by mechanism, not discipline. Pin dev-tool versions so a rerun uses the same gauntlet — and **pin each tool's rule set in-repo as well**, because a version pin alone does not fix a gate's meaning: a linter with no configuration section reports whatever the installed version defaults to, so the next upgrade silently redefines the layer. See `verification-mechanics.md` §4.
 
 Evidence follows the anatomy already defined in `spec-workflow.md` — the claim, the exact command, 1-3 decisive output lines, and the revision observed at. This rule adds one event and two obligations:
 
@@ -131,4 +133,5 @@ Four states are recorded: `passed` finalizes; `failed` and `blocked` do not; **`
 - Adding a test whose only purpose is to touch lines.
 - Reporting a mutation score from a runner that never executed the mutants, or whose restores were never verified.
 - Treating a green gauntlet as proof the acceptance surface is complete.
+- Reading a layer's exit status through a pipe, so the formatter's success is reported as the layer's (`verification-mechanics.md` §1).
 - Auto-dispatching a review agent from inside a task or spec loop.

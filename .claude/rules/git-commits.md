@@ -56,8 +56,35 @@ genuinely co-wrote the change.
 ## Format
 
 - **Conventional commits** — `type(scope): summary`, matching each repo's existing history.
-- Never commit directly to `main`; never `--no-verify`.
-- Never `git push` and never rewrite history unless the user asks in the current message.
+- Never `--no-verify`.
+- Never `git push` and never rewrite history unless the user asks in the current message. A
+  blanket instruction ("do the right thing", "clean this up") is NOT that request: history
+  rewriting is the one operation that needs a specific, current-message ask, precisely because
+  its damage is invisible in the result.
+
+## Branch, don't commit to `main` — what this repo actually does
+
+Verifiable from `git log --first-parent --merges`: this repository works on branches and merges
+them. 98 merge commits, branch names prefixed `feature/`, `fix/`, `chore/`, `refactor/`,
+`release/`. The spec missions follow it too — P1.3, P1.5, P2.1, P2.2, P3.1, P4.1 and P4.2 each
+landed as a `merge:` commit off an isolated worktree branch, which is `agent-delegation.md`'s
+Worktree Lifecycle working as designed.
+
+- **Implementation goes through a branch.** Any commit touching `src/`, `edt/`, `desktop/`,
+  `scripts/` or CI config — anything `feat:`, `fix:`, `build:`, `perf:`, `refactor:` — is
+  authored on a branch and merged. Checkable: a `feat:` commit touching `src/` whose first parent
+  chain shows no merge is a violation.
+- **Spec and memory bookkeeping may commit directly to `main`.** Roadmap ticks, LEDGER and NOTES
+  entries, `CONTEXT.md`/`JOURNAL.md` checkpoints, rule and knowledge edits — `spec(...)`,
+  `docs(...)`, `chore(claude)`. This is long-standing practice here (`a46c24c`, `83cd1c1`,
+  `137a8de`, `3f5df51`), and branching a one-line checkbox flip buys nothing.
+
+**NEVER justify a direct-to-`main` implementation commit on the grounds that recent history
+already contains some.** That is the exact rationalization used in this workspace on 2026-08-30:
+four implementation commits (`22aa357`, `1883426`, `4c88726`, `c8b6f53`) went straight to `main`,
+and each one made the next look normal. Drift is not precedent. **YOU MUST read the workflow off
+`git log --merges` before claiming a repo has one** — asserting it from the last handful of
+commits is how a mistake gets promoted into a convention.
 
 ## Relationship to spec and task work
 
