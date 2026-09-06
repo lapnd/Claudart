@@ -3,8 +3,8 @@
 
 ## Active
 
-- _(no specs — run `/spec <mission description>` to create one)_
+- [governed-intelligence-poc](2026-09-06-governed-intelligence-poc/SPEC.md) — running — updated 2026-09-06
 
 ## Done
 
-- _(none)_
+- [graph-driven-development](done/2026-09-06-graph-driven-development/SPEC.md) — done 2026-09-06

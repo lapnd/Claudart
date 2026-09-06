@@ -1,0 +1,5 @@
+project: fixture
+hours_per_month: 4
+max_proposals_per_month: 4
+proposal_expires_days: 30
+queue_max_age_days: 30

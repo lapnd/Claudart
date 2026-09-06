@@ -2,7 +2,7 @@
 name: related-map
 description: "Map relation fixture."
 type: map
-status: review-needed
+status: draft
 updated: 2026-07-20
 related:
   - "knowledge:shared-name"

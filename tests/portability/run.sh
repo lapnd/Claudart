@@ -380,9 +380,12 @@ cat >"$DEST2/.claude/knowledge/colliding-topic.md" <<'EOF'
 name: colliding-topic
 description: "the destination's own version"
 type: reference
-status: active
+status: stable
 updated: 2026-01-01
 last_verified: 2026-01-01
+verified:
+  - by: human:fixture
+    at: 2026-01-01T00:00:00Z
 verify: "n/a"
 ---
 
@@ -393,23 +396,26 @@ cat >"$DEST2/.claude/knowledge/already-routed.md" <<'EOF'
 name: already-routed
 description: "already present and routed"
 type: reference
-status: active
+status: stable
 updated: 2026-01-01
 last_verified: 2026-01-01
+verified:
+  - by: human:fixture
+    at: 2026-01-01T00:00:00Z
 verify: "n/a"
 ---
 
 Already routed content.
 EOF
-cat >"$DEST2/.claude/knowledge/INDEX.md" <<'EOF'
-<!-- .claude/knowledge/INDEX.md -- root router for durable descriptive knowledge. -->
+cat >"$DEST2/.claude/knowledge/index.md" <<'EOF'
+<!-- .claude/knowledge/index.md -- root router for durable descriptive knowledge. -->
 
 # Project Knowledge
 
 ## Knowledge
 
-- [Colliding Topic](colliding-topic.md) — the destination's own version · reference · active
-- [Already Routed](already-routed.md) — already present and routed · reference · active
+- [Colliding Topic](colliding-topic.md) — the destination's own version · reference · stable
+- [Already Routed](already-routed.md) — already present and routed · reference · stable
 EOF
 cat >"$DEST2/.claude/rules/existing-rule.md" <<'EOF'
 # Existing Rule (destination version)
@@ -438,11 +444,14 @@ cat >"$SRC2/.claude/knowledge/new-topic.md" <<EOF
 name: new-topic
 description: "a brand new grafted topic"
 type: reference
-status: active
+status: stable
 updated: 2026-01-01
 last_verified: 2026-01-01
+verified:
+  - by: human:fixture
+    at: 2026-01-01T00:00:00Z
 sources:
-  - "path:docs/missing-on-dest.md"
+  - resource: "path:docs/missing-on-dest.md"
 related:
   - "rule:existing-rule"
   - "knowledge:nonexistent-elsewhere"
@@ -456,24 +465,27 @@ cat >"$SRC2/.claude/knowledge/colliding-topic.md" <<'EOF'
 name: colliding-topic
 description: "the source's own, different version"
 type: reference
-status: active
+status: stable
 updated: 2026-01-02
 last_verified: 2026-01-02
+verified:
+  - by: human:fixture
+    at: 2026-01-02T00:00:00Z
 verify: "n/a"
 ---
 
 Source content, deliberately different from the destination's.
 EOF
-cat >"$SRC2/.claude/knowledge/INDEX.md" <<'EOF'
-<!-- .claude/knowledge/INDEX.md -- root router for durable descriptive knowledge. -->
+cat >"$SRC2/.claude/knowledge/index.md" <<'EOF'
+<!-- .claude/knowledge/index.md -- root router for durable descriptive knowledge. -->
 
 # Project Knowledge
 
 ## Knowledge
 
-- [New Topic](new-topic.md) — a brand new grafted topic · reference · active
-- [Colliding Topic](colliding-topic.md) — the source's own, different version · reference · active
-- [Already Routed](already-routed.md) — a source-side hook for an already-routed link · reference · active
+- [New Topic](new-topic.md) — a brand new grafted topic · reference · stable
+- [Colliding Topic](colliding-topic.md) — the source's own, different version · reference · stable
+- [Already Routed](already-routed.md) — a source-side hook for an already-routed link · reference · stable
 EOF
 cat >"$SRC2/.claude/rules/existing-rule.md" <<'EOF'
 # Existing Rule (source version -- different content)
@@ -636,10 +648,10 @@ if grep -qF "rule:existing-rule" "$NEW_TOPIC" 2>/dev/null; then
 else
   fail "merge fixture: resolving related: entry was kept"
 fi
-if grep -qF "new-topic.md" "$DEST2/.claude/knowledge/INDEX.md" 2>/dev/null; then
-  pass "merge fixture: new topic routed once in INDEX.md"
+if grep -qF "new-topic.md" "$DEST2/.claude/knowledge/index.md" 2>/dev/null; then
+  pass "merge fixture: new topic routed once in index.md"
 else
-  fail "merge fixture: new topic routed once in INDEX.md"
+  fail "merge fixture: new topic routed once in index.md"
 fi
 
 # Colliding knowledge topic sidecared with a rewritten name:, unrouted.
@@ -654,7 +666,7 @@ if grep -qF "name: colliding-topic-imported-$BUNDLE2_ID" "$COLLIDING_SIDECAR" 2>
 else
   fail "merge fixture: sidecar's name: rewritten to match its own basename"
 fi
-if grep -qF "colliding-topic-imported-$BUNDLE2_ID.md" "$DEST2/.claude/knowledge/INDEX.md" 2>/dev/null; then
+if grep -qF "colliding-topic-imported-$BUNDLE2_ID.md" "$DEST2/.claude/knowledge/index.md" 2>/dev/null; then
   fail "merge fixture: sidecared topic left unrouted (K205)"
 else
   pass "merge fixture: sidecared topic left unrouted (K205)"
@@ -662,7 +674,7 @@ fi
 
 # The source's own "already-routed" line must be skipped (K205), not
 # duplicated, since that link target is already routed at the destination.
-ALREADY_ROUTED_COUNT=$(grep -cF "](already-routed.md)" "$DEST2/.claude/knowledge/INDEX.md" 2>/dev/null | tr -d ' ')
+ALREADY_ROUTED_COUNT=$(grep -cF "](already-routed.md)" "$DEST2/.claude/knowledge/index.md" 2>/dev/null | tr -d ' ')
 if [ "$ALREADY_ROUTED_COUNT" = 1 ]; then
   pass "merge fixture: already-routed link target not duplicated (K205)"
 else
@@ -732,24 +744,29 @@ cat >"$BAD_SRC/.claude/knowledge/broken-topic.md" <<'EOF'
 name: broken-topic
 description: "a topic with a type outside the canonical enum"
 type: bogus-type-value
-status: active
+status: stable
 updated: 2026-01-01
+last_verified: 2026-01-01
+verified:
+  - by: human:fixture
+    at: 2026-01-01T00:00:00Z
+verify: "n/a"
 ---
 
 Broken. type: is never rewritten by the graft transform (only status/
 status_note/last_verified/sources/related/supersedes are), so this survives
 to the shadow knowledge-check.sh gate untouched -- unlike an invalid status:,
-which the graft's own review-needed rewrite would silently neutralize before
-the checker ever saw it.
+which the graft's own status rewrite would silently neutralize before the
+checker ever saw it.
 EOF
-cat >"$BAD_SRC/.claude/knowledge/INDEX.md" <<'EOF'
-<!-- .claude/knowledge/INDEX.md -- root router for durable descriptive knowledge. -->
+cat >"$BAD_SRC/.claude/knowledge/index.md" <<'EOF'
+<!-- .claude/knowledge/index.md -- root router for durable descriptive knowledge. -->
 
 # Project Knowledge
 
 ## Knowledge
 
-- [Broken Topic](broken-topic.md) — a topic with an invalid status · reference · active
+- [Broken Topic](broken-topic.md) — a topic with an invalid type · reference · stable
 EOF
 BAD_SRC=$(CDPATH='' cd -- "$BAD_SRC" && pwd -P)
 BAD_DEST=$(CDPATH='' cd -- "$BAD_DEST" && pwd -P)

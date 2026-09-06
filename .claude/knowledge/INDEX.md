@@ -8,6 +8,6 @@ Use this as a compact router, not an encyclopedia. Route lines use:
 
 ## Knowledge
 
-- [Codex Mirror Pattern](codex-mirror-pattern.md) — How .codex/guidelines mirrors .claude/rules; agent-delegation.md is the exception. · reference · active
+- [Codex Mirror Pattern](codex-mirror-pattern.md) — How .codex/guidelines mirrors .claude/rules; agent-delegation.md and knowledge-management.md are independent, not substituted. · reference · active
 - [Engineering Constitution](engineering-constitution.md) — Decision-priority ladder + sixteen Golden Rules; cost discipline that stops at correctness. · reference · active
 - [Development-Graph Model](graph-model.md) — Node = claim+verifier+state, edge types, append-only event schema, engine exit codes. · architecture · active

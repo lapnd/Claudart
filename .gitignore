@@ -32,3 +32,5 @@ codex/
 # Python bytecode from the graph engine (generated on run)
 __pycache__/
 *.pyc
+# Built okf binary (okf-agent-memory CLI), fetched/built on demand by okf-install.sh
+.claude/scripts/bin/

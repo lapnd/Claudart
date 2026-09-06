@@ -134,6 +134,8 @@ run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/healthy-claude.out" \
 assert_status "healthy direct store exits successfully with inferred Claude layer" 0
 assert_empty "healthy direct store has no findings, including its valid related cycle"
 assert_no_code "old updated date is not stale when last_verified is recent" K150
+assert_no_code "generated/verified/stale_after mapping grammar parses cleanly" K102
+assert_no_code "generated and verified actor tokens are accepted" K106
 snapshot "$healthy_claude" "$TMP_ROOT/healthy-after"
 if diff -u "$TMP_ROOT/healthy-before" "$TMP_ROOT/healthy-after" \
   >"$TMP_ROOT/healthy.diff"; then
@@ -159,28 +161,52 @@ run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/spaced-root.out" \
 assert_status "repository root path containing spaces is handled safely" 0
 assert_empty "spaced repository root has no quoting-related findings"
 
+# --- negative control for the OKF v0.2 vocabulary migration --------------------------------------
+# `legacy-vocabulary/` is a pre-migration twin of `healthy-direct/`: the same three files, differing
+# only in `status: active`, bare-string `sources:` items, the pre-migration route statuses, and the
+# `INDEX.md` filename. `healthy-direct` exits 0 above; this one MUST exit 1 on both twins. Without
+# this pair the suite would only prove the new vocabulary passes, never that the old one is
+# rejected -- a migration whose gate cannot go red on the thing it migrated away from is not a gate
+# (evidence-gauntlet.md 6, verification.md 1).
+materialize legacy-vocabulary claude
+legacy_claude=$MATERIALIZED
+run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/legacy-vocabulary-claude.out" \
+  --root "$legacy_claude" --layer claude --today 2026-07-29
+assert_status "negative control: pre-migration vocabulary is rejected" 1
+assert_code "negative control: status: active is outside the canonical enum" K107
+assert_code "negative control: bare-string sources item is rejected" K102
+assert_code "negative control: pre-migration route status breaks route grammar" K200
+assert_code "negative control: uppercase INDEX.md is no longer the root router" K112
+
+materialize legacy-vocabulary codex
+legacy_codex=$MATERIALIZED
+run_checker "$CODEX_CHECKER" "$TMP_ROOT/legacy-vocabulary-codex.out" \
+  --root "$legacy_codex" --layer codex --today 2026-07-29
+assert_status "negative control: Codex twin also rejects the pre-migration vocabulary" 1
+assert_code "negative control: Codex twin reports the status enum failure" K107
+
 materialize domain-map claude
 domain_claude=$MATERIALIZED
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/domain-map.out" \
   --root "$domain_claude" --layer claude --today 2026-07-29 --fail-on warning
-assert_status "active domain map reaches its topic exactly once" 0
+assert_status "stable domain map reaches its topic exactly once" 0
 assert_empty "healthy domain map allows a curated hook richer than description"
 
 materialize review-map-path claude
 review_map_root=$MATERIALIZED
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/review-map-path.out" \
   --root "$review_map_root" --layer claude --today 2026-07-29
-assert_status "review-needed map cannot establish an active authority path" 1
-assert_code "active topic behind a review-needed map reports K205" K205
+assert_status "draft map cannot establish a stable authority path" 1
+assert_code "stable topic behind a draft map reports K205" K205
 
 materialize lifecycle claude
 lifecycle_claude=$MATERIALIZED
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/lifecycle-error-threshold.out" \
   --root "$lifecycle_claude" --layer claude --today 2026-07-29 --fail-on error
 assert_status "warning-only lifecycle store passes the default error threshold" 0
-assert_code "unrouted review-needed entry is reported without auto-promotion" K206
-assert_no_code "superseded entry with reverse successor and status note is valid" K208
-assert_no_code "historical non-active entries do not emit perpetual staleness warnings" K150
+assert_code "unrouted draft entry is reported without auto-promotion" K206
+assert_no_code "deprecated entry with reverse successor and status note is valid" K208
+assert_no_code "historical non-stable entries do not emit perpetual staleness warnings" K150
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/lifecycle-warning-threshold.out" \
   --root "$lifecycle_claude" --layer claude --today 2026-07-29 --fail-on warning
 assert_status "warning threshold fails on lifecycle warning" 1
@@ -237,8 +263,8 @@ missing_index=$TMP_ROOT/missing-index
 mkdir -p "$missing_index/.claude/knowledge"
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/missing-index.out" \
   --root "$missing_index" --layer claude --today 2026-07-29
-assert_status "missing INDEX is a contract failure, not runtime failure" 1
-assert_code "missing INDEX reports K002" K002
+assert_status "missing index is a contract failure, not runtime failure" 1
+assert_code "missing index reports K002" K002
 
 materialize freshness claude
 freshness_root=$MATERIALIZED
@@ -265,9 +291,9 @@ assert_code "committed source newer than last_verified reports K134" K134
 if [ "$(grep -c '^WARN|K133|' "$LAST_OUTPUT")" -eq 1 ] &&
   [ "$(grep -c '^WARN|K134|' "$LAST_OUTPUT")" -eq 1 ] &&
   ! grep -q 'retired-history.md' "$LAST_OUTPUT"; then
-  pass "Git freshness warnings are limited to active entries"
+  pass "Git freshness warnings are limited to stable entries"
 else
-  fail "Git freshness warnings are limited to active entries"
+  fail "Git freshness warnings are limited to stable entries"
   sed 's/^/  /' "$LAST_OUTPUT" >&2
 fi
 

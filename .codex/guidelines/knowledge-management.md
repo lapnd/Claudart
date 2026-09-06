@@ -7,18 +7,18 @@ tags: [knowledge, retrieval, evidence, memory]
 
 # Knowledge Management
 
-`.codex/knowledge/` stores durable **descriptive** project facts. Topic Markdown is the source of truth; `INDEX.md` and `_maps/*.md` are compact routers. This file is the source of truth for the knowledge contract.
+`.codex/knowledge/` stores durable **descriptive** project facts. Topic Markdown is the source of truth; `index.md` and `_maps/*.md` are compact routers. This file is the source of truth for the knowledge contract.
 
-Read this guideline in full only when the current task retrieves, writes, audits, or refactors knowledge, or when the user asks for a knowledge update or prior-project evidence. Routine `$codex-start` reads only the root `INDEX.md`; it does not load this guideline, detail topics, domain maps, or the checker.
+Read this guideline in full only when the current task retrieves, writes, audits, or refactors knowledge, or when the user asks for a knowledge update or prior-project evidence. Routine `$codex-start` reads only the root `index.md`; it does not load this guideline, detail topics, domain maps, or the checker.
 
 ## Route With A Fixed Budget
 
-1. Read `.codex/knowledge/INDEX.md`.
+1. Read `.codex/knowledge/index.md`.
 2. Follow at most 2 relevant `_maps/*.md` routes.
 3. Select at most 3 direct topics using exact slug/name/alias first, then typed scope, triggers, description/type, and source match.
 4. For each topic, inspect frontmatter and the heading outline, then read the smallest relevant section. Read the full body only when the task needs the whole invariant or the smaller view is insufficient.
 5. Expand at most 2 one-hop `related` topics. Do not recurse through the graph.
-6. Treat `review-needed`, conflicting, superseded, or retired material as context to verify, not current authority.
+6. Treat `draft`, conflicting, or `deprecated` material as context to verify, not current authority.
 
 If routed context is insufficient, search actual repository evidence with bounded `rg` and Git queries across canonical sources, knowledge, task/spec archives, and targeted JOURNAL lines. Return file/section evidence and distinguish source text from inference. This is an internal fallback, not a recall command. Reading never writes, promotes, deletes, or records telemetry.
 
@@ -35,7 +35,7 @@ Route everything else by kind:
 
 - WIP, proposals, task status, acceptance state, and discoveries local to current work stay in the active task, spec, or `CONTEXT.md`.
 - Recurring behavior, conventions, behavioral corrections, and reusable procedures go to the owning guideline through `$codex-learn`.
-- Uncertain or conflicting observations remain candidates in the working artifact. If they invalidate an existing owner, set that owner to `review-needed`, preserve the evidence, and explain the uncertainty in `status_note`.
+- Uncertain or conflicting observations remain candidates in the working artifact. If they invalidate an existing owner, set that owner to `draft`, preserve the evidence, and explain the uncertainty in `status_note`.
 
 A natural-language request such as “update knowledge from what we just explored” is sufficient authorization to distill and write eligible facts immediately. Immediate promotion requires the capture gate plus one trigger: the user asks; a verified correction must land to avoid continuing from known-wrong canonical knowledge; confirmed source drift requires an owner trust/content update; or a lifecycle workflow reaches its promotion boundary. Otherwise keep the observation as a candidate. Checkpoint performs bulk maintenance and promotion; it is not the only write gate.
 
@@ -54,7 +54,7 @@ Never auto-write after every exploration. Never copy a transcript, chronology, o
    bash .codex/scripts/knowledge-check.sh --root .
    ```
 
-Fix in-scope mechanical failures before reporting success.
+Fix in-scope mechanical failures before reporting success. Bundle conformance is `okf validate .codex/knowledge` exiting 0 (non-strict; `--drift` not required) together with this checker exiting 0.
 
 ## Canonical Topic Frontmatter
 
@@ -65,7 +65,7 @@ Every topic uses the restricted grammar below. Required fields are `name`, `desc
 name: example-service-contract
 description: "Illustrative ownership and boundary facts for a synthetic service."
 type: domain
-status: active
+status: stable
 updated: 2026-07-29
 aliases:
   - "example service"
@@ -76,7 +76,14 @@ scope:
   - "path:examples/service/**"
 last_verified: 2026-07-29
 sources:
-  - "../../docs/example-service.md"
+  - resource: "../../docs/example-service.md"
+generated:
+  by: "codex-cli/example-model"
+  at: "2026-07-29T00:00:00Z"
+verified:
+  - by: "human:example-user"
+    at: "2026-07-29T00:00:00Z"
+stale_after: "2027-07-29T00:00:00Z"
 related:
   - "knowledge:example-adjacent-contract"
   - "guideline:example-service-safety"
@@ -92,12 +99,15 @@ Grammar:
 - `name` is a kebab-case slug matching the filename.
 - `description`, `verify`, and `status_note` are one-line double-quoted text.
 - `type` is one of `domain`, `architecture`, `integration`, `glossary`, `reference`, or `agent-context`.
-- `status` is one of `active`, `review-needed`, `superseded`, or `retired`.
+- `status` is `draft | stable | deprecated`, replacing the prior four-value vocabulary (`active` → `stable`, the under-review state → `draft`, `superseded`/`retired` → `deprecated`, keeping `supersedes` pointed at the successor).
 - `updated` changes only when topic content changes. `last_verified` changes only after checking evidence.
-- An `active` topic additionally requires `last_verified` and at least one of `sources` or `verify`.
-- Every non-active topic requires a one-line double-quoted `status_note` explaining the review need or lifecycle state.
-- Optional fields are `aliases`, `triggers`, `scope`, `last_verified`, `sources`, `related`, `supersedes`, `verify`, `status_note`, and `sensitivity`.
+- A `stable` topic additionally requires `last_verified`, at least one of `sources` or `verify`, `generated.by`/`generated.at`, and a `verified` list with at least one `human:<id>` actor.
+- Every `draft` or `deprecated` topic requires a one-line double-quoted `status_note` explaining the review need or lifecycle state.
+- Optional fields are `aliases`, `triggers`, `scope`, `last_verified`, `sources`, `related`, `supersedes`, `verify`, `status_note`, `generated`, `verified`, `stale_after`, and `sensitivity`.
 - Every list uses block form with two-space-indented, double-quoted items. Flow lists are forbidden.
+- `sources` items are one-key mappings: `- resource: "<path-or-url>"`.
+- `generated` is a mapping of `by` (the producing actor, `<kind>:<id>`, e.g. `codex-cli/example-model`) and `at` (an ISO instant). `verified` is a block list of `{by, at}` entries using the same `<kind>:<id>` actor convention.
+- `stale_after` is optional: an absolute ISO instant after which the topic should be re-verified.
 - `scope` items are typed `<selector>:<value>` strings; common selectors are `path`, `component`, `platform`, `environment`, `version`, and `symbol`.
 - `related` items are typed `knowledge:<slug>` or `guideline:<slug>`. `supersedes` items are typed `knowledge:<slug>`.
 - `sensitivity` is `public`, `internal`, or `restricted`.
@@ -112,7 +122,7 @@ Every `_maps/<domain>.md` file uses the same restricted scalar/list grammar and 
 name: example-service
 description: "Routes knowledge for an explicitly synthetic example service."
 type: map
-status: active
+status: stable
 updated: 2026-07-29
 triggers:
   - "example service"
@@ -125,10 +135,10 @@ sensitivity: internal
 ```
 
 - `name` matches the map filename.
-- `type` is exactly `map`; status is only `active` or `review-needed`.
-- An active map requires `last_verified` and at least one of `sources` or `verify`.
-- A review-needed map requires `status_note`.
-- Optional map fields are `aliases`, `triggers`, `scope`, `last_verified`, `sources`, `verify`, `status_note`, and `sensitivity`.
+- `type` is exactly `map`; status is only `stable` or `draft`.
+- A `stable` map requires `last_verified`, at least one of `sources` or `verify`, and `generated.by`/`generated.at` with a `verified` list containing at least one `human:<id>` actor.
+- A `draft` map requires `status_note`.
+- Optional map fields are `aliases`, `triggers`, `scope`, `last_verified`, `sources`, `verify`, `status_note`, `generated`, `verified`, `stale_after`, and `sensitivity`.
 - A map routes topics only. `related` and `supersedes` are forbidden on maps.
 
 ## Router Grammar And Scale
@@ -141,8 +151,8 @@ Every knowledge route is exactly one compact line with no date:
 
 - A small store may route root → topic directly.
 - Domain maps live at `_maps/<domain>.md`; the root routes to them with type `map`, and each map routes only to topics. Maps never link to other maps.
-- Every active topic must be reachable from the root exactly once through a direct route or one domain map.
-- A review-needed topic may remain unindexed while ownership is ambiguous. If routed for visibility, route it at most once and never present it as active authority.
-- Create domain maps when active topics exceed 24 or the root exceeds 1,200 visible words. Preserve deliberate direct/external routes while reorganizing.
+- Every `stable` topic must be reachable from the root exactly once through a direct route or one domain map.
+- A `draft` topic may remain unindexed while ownership is ambiguous. If routed for visibility, route it at most once and never present it as stable authority.
+- Create domain maps when stable topics exceed 24 or the root exceeds 1,200 visible words. Preserve deliberate direct/external routes while reorganizing.
 - A topic over 10 KiB is a split candidate, not an automatic rewrite. Keep using outline/section-first retrieval until a reviewed split preserves ownership and links.
 - Hooks route; they do not summarize the whole topic or expose restricted details.
