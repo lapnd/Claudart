@@ -367,7 +367,9 @@ CLAUDE_HOME_DEST2=$MERGE_ROOT/claude-home-dest
 BUNDLE2=$MERGE_ROOT/bundle2
 
 mkdir -p "$SRC2/.claude/knowledge" "$SRC2/.claude/rules" "$SRC2/.claude/tasks" "$SRC2/.claude/scripts"
+mkdir -p "$SRC2/.claude/architecture"
 mkdir -p "$DEST2/.claude/knowledge" "$DEST2/.claude/rules" "$DEST2/.claude/scripts"
+mkdir -p "$DEST2/.claude/architecture"
 
 cp "$REPO_ROOT/.claude/scripts/knowledge-check.sh" "$SRC2/.claude/scripts/knowledge-check.sh"
 cp "$REPO_ROOT/.claude/scripts/knowledge-check.sh" "$DEST2/.claude/scripts/knowledge-check.sh"
@@ -411,6 +413,14 @@ cat >"$DEST2/.claude/knowledge/INDEX.md" <<'EOF'
 EOF
 cat >"$DEST2/.claude/rules/existing-rule.md" <<'EOF'
 # Existing Rule (destination version)
+EOF
+# architecture/ is live state: the bundle carries it, and restore must place a
+# missing one while never overwriting a manifest the destination already owns.
+cat >"$DEST2/.claude/architecture/architecture.yaml" <<'EOF'
+version: 1
+owner: destination
+components:
+  - name: dest-only-component
 EOF
 cat >"$DEST2/.claude/JOURNAL.md" <<'EOF'
 # Claude Session Journal
@@ -471,6 +481,18 @@ EOF
 cat >"$SRC2/.claude/rules/new-rule.md" <<'EOF'
 # New Rule (absent on destination)
 EOF
+cat >"$SRC2/.claude/architecture/architecture.yaml" <<'EOF'
+version: 1
+owner: source
+components:
+  - name: src-only-component
+EOF
+cat >"$SRC2/.claude/architecture/graph.yaml" <<'EOF'
+version: 1
+owner: source
+nodes:
+  - id: absent-on-destination
+EOF
 mkdir -p "$SRC2/.claude/tasks"
 cat >"$SRC2/.claude/tasks/2026-01-01-001-grafted-task.md" <<'EOF'
 ---
@@ -505,6 +527,20 @@ run_script /bin/bash "$CLAUDE_BACKUP" \
   --sessions none --history no
 assert_status 0 "merge fixture: claudart-backup.sh succeeds on the populated source"
 
+# Full mode (--project-scope defaults to all) must carry architecture/ as live
+# state, at its original project/ path -- not quarantined under
+# project-derived/, which only holds routers and index caches.
+if [ -f "$BUNDLE2/project/.claude/architecture/architecture.yaml" ]; then
+  pass "merge fixture: full-mode bundle carries .claude/architecture/architecture.yaml"
+else
+  fail "merge fixture: full-mode bundle carries .claude/architecture/architecture.yaml"
+fi
+if grep -qF "project/.claude/architecture/architecture.yaml" "$BUNDLE2/MERGEPLAN" 2>/dev/null; then
+  pass "merge fixture: architecture manifest is listed in the bundle MERGEPLAN"
+else
+  fail "merge fixture: architecture manifest is listed in the bundle MERGEPLAN"
+fi
+
 # Snapshot every pre-existing destination file's cksum before touching anything.
 DEST2_BEFORE=$(cd "$DEST2" && find . -type f -exec cksum {} \; | LC_ALL=C sort)
 
@@ -534,6 +570,20 @@ if grep -qF "Already routed content." "$DEST2/.claude/knowledge/already-routed.m
   pass "never-overwrite: unrelated pre-existing topic untouched"
 else
   fail "never-overwrite: unrelated pre-existing topic untouched"
+fi
+
+if grep -qF "owner: destination" "$DEST2/.claude/architecture/architecture.yaml" 2>/dev/null &&
+  grep -qF "dest-only-component" "$DEST2/.claude/architecture/architecture.yaml" 2>/dev/null; then
+  pass "never-overwrite: destination's own architecture manifest untouched"
+else
+  fail "never-overwrite: destination's own architecture manifest untouched"
+fi
+
+# A manifest the destination does NOT have is recreated verbatim.
+if grep -qF "absent-on-destination" "$DEST2/.claude/architecture/graph.yaml" 2>/dev/null; then
+  pass "merge fixture: missing architecture manifest recreated by restore"
+else
+  fail "merge fixture: missing architecture manifest recreated by restore"
 fi
 
 # New unique task placed.

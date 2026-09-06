@@ -109,6 +109,15 @@ Do NOT begin implementing. Wait for the approval signal defined in `.claude/rule
 
 Once the user gives an approval signal, the contract in `.claude/rules/task-management.md` takes over — this command adds nothing to it. Flip `status: planning → in-progress`, execute Concrete Steps while maintaining the task file per "Progress Updates During Implementation", honor the `delegation:` field per `.claude/rules/agent-delegation.md`, and finish through the **Two-Phase Completion Gate**: report at `awaiting-review` and stop; the user — not you — confirms `done`.
 
+## Graph mode (--graph)
+
+Opt-in only: the user passes `--graph`, or the task's Concrete Steps have genuine independent work that could run in parallel (per `agent-delegation.md`'s disjointness test). This does not change the task file's required skeleton or approval flow — it adds graph metadata on top.
+
+- Under each relevant Concrete Step, add a six-space-indented block: `node: <kind>/<name> | kind: <kind>`, `requires: <node> (<EDGE>)` for each dependency, `paths: <glob queries>` the step touches, and (only for test steps) `proves: <node>` naming the node it proves. This is the same metadata syntax a spec ROADMAP uses (see `tests/graph/fixtures/healthy/ROADMAP.sample.md`).
+- Create a companion folder `.claude/tasks/<task-id>.graph/` holding `architecture.yaml` (may be the minimal seed: `version: 1`, `project: <name>`, `profile: <profile>`, `architecture:` → `budget: 0`) and a `ROADMAP.md` listing the same steps with their node metadata, so `bash .claude/scripts/claudart-graph.sh lint --dir .claude/tasks/<task-id>.graph` and `... next --dir .claude/tasks/<task-id>.graph` work unchanged.
+- **TDD rule**: any step of kind `domain`, `usecase`, `port`, `adapter`, `composition`, or `mock` requires a test step via a `TEST` edge (`requires: test/<name> (TEST)`) that must be observed failing first.
+- The executor records step completion with `bash .claude/scripts/claudart-graph.sh event <node> done --run --root <repo>` — the engine re-runs the step's `verify:` itself rather than trusting a self-report.
+
 ## Anti-Patterns
 
 - Do not write code while `status: planning` or `status: awaiting-review` — both are read-only locks (see `.claude/rules/task-management.md`).

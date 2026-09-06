@@ -41,6 +41,7 @@ updated: YYYY-MM-DD
 agent: claude # claude | codex | both
 commits: user # user | per-task | per-phase — the executor's git-commit grant, chosen at approval; push is never granted
 executor-tier: standard # fast | standard | strong — cheapest session tier expected to execute this roadmap reliably; see agent-delegation.md → Model & Effort Routing
+rotation: auto # auto | offer — auto: the executor checkpoints and launches its own successor via claudart-rotate.sh, then stops; offer: ask the user at each rotation trigger
 ---
 
 # <Mission Title>
@@ -114,6 +115,10 @@ Goal: <one line — what is demoable when this phase closes>
 - The executor may **append** genuinely missing implementation work discovered mid-flight (log the addition in LEDGER), but never appends a separate fix task plus replay/verification task for the same defect — verification stays with the implementation task. Supersede dead work only with the checked + struck form above; never rewrite phase goals or delete history. Scope changes belong to the user alone; the executor may record only an explicit bounded review patch under the Completion flow, exactly within the user's stated delta.
 - Reopening responsible work means un-ticking only the current non-superseded owner whose completion evidence was invalidated. If none exists, append one genuine implementation task under the rule above. Never un-tick a superseded row.
 
+### Graph-ready roadmaps (hexagonal missions)
+
+A mission that builds or extends a hexagon is planned as a dependency graph, not a flat checklist. `/spec` emits a **Hexagonal Decomposition** (the project's domains · use cases · ports with `direction` in/out · adapters naming the port each implements · contracts) and an `architecture.yaml` manifest alongside SPEC/ROADMAP, and the ROADMAP is written in graph format so `claudart-graph` can schedule it. `.claude/rules/graph-development.md` is the authority on node kinds, the TEST-first edge, and one-shared-contract-test-per-port — this rule does not restate it; it only records that such a roadmap must satisfy it. In graph format each task carries 6-space-indented `node:`/`kind:`/`requires:`/`proves:`/`paths:` metadata under the checkbox, a `test/*` node precedes and is required by every behaviour node, every outbound port has one shared contract test that all its adapters require, and each `verify:` is a real shell command (never prose, never a bare `S<n>` id). The emitted manifest + roadmap must `lint` clean (`bash .claude/scripts/claudart-graph.sh lint --dir <spec>` → `clean`, exit 0) before approval; `tests/graph/fixtures/spec-template/` is the minimal reference shape. When `architecture.yaml` is present the executor follows **Graph-driven iteration** below; a mission with no manifest keeps the plain six-step loop.
+
 ## LEDGER.md — append-only
 
 The roadmap holds _what_; the ledger holds _evidence and learnings_. Ticking never destroys history — a fresh session reads the ledger tail to learn what actually happened, in what order, and what to avoid.
@@ -126,6 +131,8 @@ The roadmap holds _what_; the ledger holds _evidence and learnings_. Ticking nev
 ```
 
 Events: `run-started`, `task-started`, `red-verified`, `task-completed`, `validation-failed`, `phase-validated`, `task-blocked`, `replanned`, `delegated`, `circuit-breaker`, `rotation-checkpoint`, `scope-change` (user-initiated only), `final-gate`. Never edit or delete prior entries.
+
+For a graph-driven mission (see The Loop below), `<spec>/graph/events.jsonl` — written only by the orchestrator, never by a worker — is the machine-readable twin of this ledger: a `task-completed` line with no matching `done` event for its node is a defect.
 
 An evidence line is a proof, not a note: it names the claim being proven, the exact command run, the 1-3 decisive output lines observed, and the revision it was observed at — a commit sha, or the bounded worktree fingerprint defined for final gates below. Bulky output goes to a file under `artifacts/` and is referenced by path, never pasted into the ledger. No evidence line, no tick. When a task carries a tier under `evidence-gauntlet.md`, a Tier 2+ tick also requires a `red-verified` entry — the test observed failing before the implementation existed, with the command and its decisive failure line. A test never seen failing is unproven, whatever it later scores. When a task was executed in an isolated worktree per `agent-delegation.md`'s Worktree Lifecycle, its `task-completed` evidence line also covers the merge: the merge command and the observable confirming it landed (branch commits present in the base branch, clean working tree) — no separate event type for this, the same evidence anatomy just has to include it.
 
@@ -190,6 +197,17 @@ Everything else stays autonomous. A task blocker stops that task; it stops the w
 5. **Tick and log.** Flip `- [ ]` → `- [x]`, re-read to confirm the intended task changed state, append a `task-completed` LEDGER entry with evidence, bump `updated:` in SPEC frontmatter. Clear any Current Acceptance Delta this evidence actually resolves. Route mission findings into NOTES; if the direct-promotion exception above applies, patch the knowledge owner + reachable map atomically and run `bash .claude/scripts/knowledge-check.sh`.
 6. **Phase boundary**: run the phase validation. On PASS, tick the SPEC scenarios it proves, clear the resolved delta, append `phase-validated`, then make a rotation offer. On FAIL, do not close the phase: append `validation-failed`, update Current Acceptance Delta, and reopen responsible work under the ROADMAP rule above. Never create a separate replay/verification task. Then continue under the convergence rules below.
 
+### Graph-driven iteration (when `architecture.yaml` exists)
+
+A spec folder containing `architecture.yaml` is **graph-driven**: `bash .claude/scripts/claudart-graph.sh` (see `/graph`) derives the dependency graph, the runnable set, and the evidence record from that manifest plus `ROADMAP.md`. A mission without the file keeps the six steps above exactly as written. When it is present those steps still hold, and these obligations layer on top:
+
+- **Orient (step 1).** After re-reading SPEC/ROADMAP/NOTES/LEDGER tail, run `claudart-graph.sh status --dir <spec>` and `lint --dir <spec>`. A lint exit `1` (findings) or `2` (manifest or ROADMAP rejected) blocks the iteration until it is fixed — never schedule on a dirty graph.
+- **Pick (step 2).** `next --dir <spec> --root <repo root>` **is** the runnable set; it replaces the by-hand disjointness judgement. Its `READY tests to write` come first (they must be observed RED), then its `READY implementations`. A `MERGE RISK a <-> b [...]` line means run both — each in its own git worktree — and merge them in the order `schedule` lists (its `unblocks=` ordering); it is never a reason to drop one from the wave. An `EXCLUSIVE` node runs alone at the first quiet moment.
+- **Execute (step 3).** A worker receives **only** `brief <node> --dir <spec>` — never the ROADMAP, never the manifest — and returns files changed, the verify command it ran, its observed exit, and residual risk. The worker writes nothing under the spec folder: no ticks, no LEDGER lines, no graph events, and never its own `done`. Append `task-started`/`delegated` to the LEDGER as usual.
+- **Verify and record (steps 4-5).** After merging the worker's branch (or when working solo) the **orchestrator** runs `event <node> done --run --dir <spec> --root <repo root> [--agent <tier>] [--model <m> --tokens-in N --tokens-out N --duration S]`. `--run` re-executes the node's `verify:` and records the exit the orchestrator observed: a worker's claimed exit is rejected (`CLAIMED-EXIT-REJECTED`), and a failing verify is recorded as `validation-failed`, so the task is **not** ticked. For a test node, `event <test> red --run` comes first and must exit nonzero — the observed red; its green is written automatically when the implementation it proves goes `done`, and `green` can never be recorded without a prior `red`. If the engine prints `RE-VERIFY on the integrated tree: ...`, re-run `event <node> done --run` for every node it names before continuing. Only after the event is recorded may the checkbox be ticked and the `task-completed` entry written — that entry cites the event's command, its exit, and `graph/evidence/<node>.log`.
+- **A merge conflict is a node.** When two worktree branches conflict, `schedule` names the synthesised `merge/<a>+<b>` node: resolve it as a node — `tier: strong`, its verify is "both nodes' test suites green after merge", recorded with `event merge/<a>+<b> done --run` — never by discarding one side. The engine does not add it to `ROADMAP.md`; the executor appends a task line for it under the append-genuinely-missing-work rule above and logs `replanned`.
+- **Phase boundary (step 6).** Alongside the phase validation, run `gate --dir <spec> --violations <measured count, or 0 while no extractor exists> [--mutation <score>] --check-evidence`; the phase closes only on `GATE OPEN` for that phase's nodes, and the gate lists exactly what is still missing. Run `progress --fail-on-regression` too: a test that was green and is red again is a regression that reopens work.
+
 ## Convergence & Circuit Breakers
 
 - **Progress means an acceptance surface cleared, or its remaining failure/diagnosis narrowed enough to change the next action.** Appending a task, ticking a checkbox, renaming/replacing its owner, or gathering more evidence that only confirms the same gap does not count.
@@ -212,6 +230,7 @@ Long sessions degrade (context pressure, compaction, host lag). Rotation is the 
 - The offer: report current phase, task inventory (`n/m`), and Current Acceptance Delta, then ask: _checkpoint and rotate now, or continue?_
 - **On yes**: append a `rotation-checkpoint` LEDGER entry (one-line state + exact next task), bump `updated:`, then run the `/checkpoint` flow — it syncs the specs INDEX, refreshes CONTEXT's spec pointer, and collects NOTES' `→ graduate:` flags — and tell the user: open a fresh session, orient with `/start`, and run `/spec-run <slug>`.
 - **On no**: continue the loop.
+- **`rotation: auto | offer`** in SPEC frontmatter selects what happens at a trigger. **`auto` is the default** (Constitution §16: the agent creates its own checkpoints and never asks the user to). Under `auto` the executor, at every trigger above: (1) finishes the in-flight task; (2) appends the `rotation-checkpoint` LEDGER entry (one-line state + exact next task) and runs the `/checkpoint` flow; (3) calls `bash .claude/scripts/claudart-rotate.sh <slug>` — it launches `claude -p "/start then run /spec-run <slug>" --permission-mode acceptEdits --allowedTools <toolkit>` detached, writes the transcript to `<spec>/artifacts/rotations/<ts>.log`, and appends that log path to the LEDGER; (4) **stops** this session — reports the successor's log path and does no further work; under `offer` the executor asks the prompt above and waits instead. The script is the guard against a runaway chain: it refuses when the spec is not `ready`/`running`, when a rotation log younger than 60 s exists (double launch), when the ceiling `CLAUDART_MAX_ROTATIONS` (default 12) is reached, or when `claude` is absent; its default `--allowedTools` is a scoped Bash prefix toolkit (no rm / curl / sudo / git push / git reset; extend with `CLAUDART_ROTATE_ALLOWED_TOOLS`) and it never passes `--dangerously-skip-permissions` by itself. A refusal under `auto` is reported to the user, and the session stops anyway — it does not fall back to continuing. If the script is absent, behave as `offer` and say so.
 - Do **not** write `.claude/HANDOFF.md` for spec work — SPEC + ROADMAP + NOTES + LEDGER _are_ the baton, and the loop is amnesia-first by design.
 
 ## Pausing & Interrupting
@@ -230,6 +249,8 @@ When in doubt, re-verify rather than re-do, and re-do rather than assume done.
 ## Completion — Final Gate
 
 When every roadmap task is completed or explicitly superseded and no unresolved blocked task remains, choose the gate from mission state rather than replaying checks mechanically.
+
+For a graph-driven mission the final gate is `bash .claude/scripts/claudart-graph.sh gate --dir <spec> --violations <measured count, or 0 while no extractor exists> [--mutation <score>] --check-evidence` exiting `0` (`GATE OPEN`) **plus** the scenario evidence below; neither substitutes for the other, and `progress --fail-on-regression` must also be clean before the gate is proposed.
 
 ### Full baseline
 

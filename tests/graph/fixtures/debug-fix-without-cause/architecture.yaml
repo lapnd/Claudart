@@ -1,0 +1,7 @@
+# Debug profile: no construction, a SEARCH. Nodes are claims; the scheduler picks the cheapest
+# unrefuted hypothesis; a refuted hypothesis prunes its children; a fix needs a CONFIRMED cause and a RED repro.
+version: 1
+project: acme-users
+profile: debug
+architecture:
+  budget: 0

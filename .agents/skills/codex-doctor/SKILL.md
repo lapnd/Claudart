@@ -45,8 +45,8 @@ For every `.agents/skills/*/SKILL.md` file:
 For every `.codex/agents/*.toml` file:
 
 - Confirm `name`, `description`, `model`, `model_reasoning_effort`, `sandbox_mode`, and `developer_instructions` keys are present.
-- Confirm review/explorer agents use `sandbox_mode = "read-only"` unless their purpose clearly requires writes.
-- Confirm any worker-style agent clearly describes its write scope expectations and warns that other agents may be editing in parallel.
+- Confirm explorers and review-only/audit-only agents use `sandbox_mode = "read-only"`. A write-capable worker or refiner is valid only when its declared purpose explicitly requires implementation.
+- Confirm every write-capable agent clearly defines its scope expectations, protects unrelated user work, requires validation of its own edits, and warns that other agents may be editing in parallel.
 
 ### 3. Guideline Path Coverage
 
@@ -198,6 +198,16 @@ Skip this section if `.codex/specs/` does not exist.
 For all files in `.codex/agents/`, compare their `description` and responsibilities.
 
 If two agents share more than 50% of trigger keywords or review scope, flag possible overlap. They may waste tokens or compete for the same work.
+
+### 10. Graph Wiring
+
+Mirror of the Claude `/doctor` Graph Wiring check, for the Codex layer (skip when the project has no `.codex/scripts/graph/` — it opted out, not failed):
+
+- Engine present and executable: `.codex/scripts/claudart-graph.sh` exists and `--help` exits 0 (exit 2 if `python3` is absent → Error).
+- Commands: `codex-graph` present; documents `audit`.
+- Rules: `.codex/guidelines/graph-development.md` and `constitution.md` exist and are referenced from the Codex index/guidelines entry.
+- Manifest home `.codex`-side present-or-explained; `events.jsonl` is the only engine-written file in any spec `graph/` folder.
+- Enforcers: `claudart-graph rules` lists the registry; every MUST clause carries an enforcer/judgement tag (`constitution-check.sh` enforces this).
 
 ## Output Format
 

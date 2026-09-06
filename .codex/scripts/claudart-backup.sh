@@ -351,6 +351,7 @@ merge_class() {
     user/memory/*) printf 'keyed-unit' ;;
     project/.claude/tasks/* | project/.codex/tasks/*) printf 'unique' ;;
     project/.claude/specs/* | project/.codex/specs/*) printf 'unique' ;;
+    project/.claude/architecture/* | project/.codex/architecture/*) printf 'unique' ;;
     user/sessions/*) printf 'unique' ;;
     project/.claude/.portability/*) printf 'union-log' ;;
     *) printf 'template' ;;

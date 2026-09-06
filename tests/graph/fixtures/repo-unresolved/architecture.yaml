@@ -1,0 +1,21 @@
+version: 1
+project: acme
+profile: hexagonal
+layout:
+  domain: internal/domain
+  usecases: internal/app
+  ports: internal/ports
+  adapters: internal/adapters
+  composition: cmd
+architecture:
+  budget: 0
+rules:
+  forbid:
+    - from: adapter
+      to: adapter
+    - from: domain
+      to: adapter
+    - from: domain
+      to: port
+    - from: usecase
+      to: adapter

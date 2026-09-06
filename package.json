@@ -3,15 +3,17 @@
   "scripts": {
     "format:md": "prettier --write \"**/*.md\"",
     "format:md:check": "prettier --check \"**/*.md\"",
-    "check:shell": "/bin/bash -n install.sh .claude/hooks/context-guard.sh .claude/scripts/knowledge-check.sh .codex/scripts/knowledge-check.sh .claude/scripts/claudart-backup.sh .codex/scripts/claudart-backup.sh .claude/scripts/claudart-restore.sh .codex/scripts/claudart-restore.sh tests/knowledge-check/run.sh tests/spec-workflow/run.sh tests/portability/run.sh tests/evidence-gauntlet/run.sh tests/install-live-state/run.sh tests/context-guard/run.sh tests/context-guard/mutants.sh",
+    "check:shell": "/bin/bash -n install.sh .claude/hooks/context-guard.sh .claude/scripts/knowledge-check.sh .codex/scripts/knowledge-check.sh .claude/scripts/claudart-backup.sh .codex/scripts/claudart-backup.sh .claude/scripts/claudart-restore.sh .codex/scripts/claudart-restore.sh tests/knowledge-check/run.sh tests/spec-workflow/run.sh tests/portability/run.sh tests/evidence-gauntlet/run.sh tests/install-live-state/run.sh tests/context-guard/run.sh tests/context-guard/mutants.sh .claude/scripts/claudart-graph.sh tests/graph/run.sh .claude/scripts/claudart-rotate.sh .claude/scripts/claudart-supervise.sh .claude/scripts/constitution-check.sh tests/constitution/run.sh",
     "test:knowledge": "/bin/bash tests/knowledge-check/run.sh",
     "test:spec-workflow": "/bin/bash tests/spec-workflow/run.sh",
     "test:portability": "/bin/bash tests/portability/run.sh",
     "test:evidence-gauntlet": "/bin/bash tests/evidence-gauntlet/run.sh",
     "test:install-live-state": "/bin/bash tests/install-live-state/run.sh",
     "test:context-guard": "/bin/bash tests/context-guard/run.sh",
-    "check": "npm run format:md:check && npm run check:shell && npm run test:knowledge && npm run test:spec-workflow && npm run test:portability && npm run test:evidence-gauntlet && npm run test:install-live-state && npm run test:context-guard",
-    "hooks:install": "git config core.hooksPath .githooks"
+    "test:constitution": "/bin/bash tests/constitution/run.sh",
+    "check": "npm run format:md:check && npm run check:shell && npm run test:knowledge && npm run test:spec-workflow && npm run test:portability && npm run test:evidence-gauntlet && npm run test:install-live-state && npm run test:context-guard && npm run test:constitution && npm run test:graph",
+    "hooks:install": "git config core.hooksPath .githooks",
+    "test:graph": "/bin/bash tests/graph/run.sh"
   },
   "devDependencies": {
     "prettier": "3.8.3"

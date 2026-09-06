@@ -1,0 +1,52 @@
+# Hexagonal manifest emitted by /spec for a graph-ready mission. This is a GENERIC example of the
+# shape /spec writes into a mission folder — the real one describes the adopting project's own
+# hexagon (its domains, ports, adapters), never this template's example catalog domain.
+# Greenfield pins architecture.budget: 0; a brownfield extract pins the measured count and ratchets down.
+version: 1
+project: example-catalog
+profile: hexagonal
+
+layout:
+  domain: internal/domain
+  usecases: internal/app
+  ports: internal/ports
+  adapters: internal/adapters
+  composition: cmd
+
+domains:
+  - name: catalog
+    path: internal/domain/catalog
+
+usecases:
+  - name: list-items
+    path: internal/app/listitems
+    domain: catalog
+
+ports:
+  - name: item-repository
+    direction: out
+    domain: catalog
+    path: internal/ports/item_repository
+  - name: list-items
+    direction: in
+    usecase: list-items
+
+adapters:
+  - name: memory-items
+    port: item-repository
+    path: internal/adapters/memory
+    datastore: true
+
+rules:
+  forbid:
+    - from: adapter
+      to: adapter
+    - from: usecase
+      to: adapter
+    - from: domain
+      to: port
+    - from: domain
+      to: adapter
+
+architecture:
+  budget: 0

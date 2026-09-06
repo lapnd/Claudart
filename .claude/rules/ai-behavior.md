@@ -39,7 +39,7 @@ This is the cross-cutting design principle: **prefer the change that makes the u
 - Match existing style, even if you would do it differently.
 - If you notice unrelated dead code, MENTION it — never delete it unprompted.
 - YOU MUST remove imports/variables/functions that YOUR changes made unused, but NEVER touch pre-existing dead code unless explicitly asked.
-- The test: every changed line must trace directly to the user's request.
+- The test: every changed line must trace directly to the user's request — **or to work that request necessarily requires**. The smallest coherent change is not always the smallest diff: directly affected callers, tests, types, docs, schemas, migrations, fixtures, snapshots, lockfiles, and generated artifacts are supporting work, not scope creep. A local extraction needed to keep ownership clear or to test the changed behavior is support; a nearby design problem is not permission for an unbounded refactor.
 
 ## 5. Goal-Driven Execution
 
@@ -105,3 +105,37 @@ long-term" and carries the same weight — it is not a per-task mood to be re-ch
 The genuine exceptions are narrow and unchanged: proceeding under any assumption would be unsafe
 or destructive, or would make the work useless if wrong. Those still stop and ask. Everything else
 proceeds — and §2/§4 remain the fence: autonomy is permission to _decide_, never to enlarge scope.
+
+## 10. Lateral Re-approach — Don't Ram the Wall
+
+The user's third most-repeated standing instruction in this project: **out-of-box thinking, so you
+never spend long ramming the same wall.** Grinding — retrying a failing approach with more force,
+more detail, or one more near-identical attempt — is the most expensive failure shape there is,
+because each attempt looks like progress while the model stays wrong. §6's stop conditions say
+_when_ to stop; this says _what to do instead of trying the same thing again_.
+
+- **Two same-shaped failures is the trigger, not three.** After the second attempt at one problem
+  that fails for the same reason, the next attempt MUST change a **dimension**, not the effort:
+  a different hypothesis about the cause, a different layer (data vs. transport vs. view), a
+  different tool, a smaller reproduction, or a question that reframes the goal. A third attempt
+  that differs only in wording or diligence is banned — name that you are changing dimension, or
+  stop.
+- **Re-derive the frame before re-attacking.** When stuck, the fault is often in a premise, not the
+  execution: an assumption that was never checked, a measurement read wrong (`verification-mechanics.md`),
+  a requirement misread. Before the next attempt, state the premise you are now doubting. The
+  cheapest fix to a wall is discovering it was drawn in the wrong place.
+- **Invert the problem.** Ask what would _guarantee failure_, and check you are not doing it. Ask
+  what the smallest thing that could possibly work is, and try that before the complete solution.
+  Ask whether the goal itself is the right goal — a wall is sometimes the signal to route around,
+  not through.
+- **A wall is a checkpoint, not a defeat.** Escalating a tier, delegating a fresh-context attempt,
+  or handing the reframed question to the user are all legitimate lateral moves — the failure is
+  not asking for them, it is silently trying attempt four. In a spec loop this is the escalation
+  offer (`spec-workflow.md`) and the evidence-gauntlet's two-attempt limit; obey them on the second
+  failure, not the fifth.
+- **Record the wall and the way around it.** A wall hit twice and escaped by a reframing is a
+  durable lesson — route it to NOTES (`→ graduate: /learn`) or a knowledge topic, so the next
+  session reads the reframing instead of re-hitting the wall. An undocumented wall gets hit again.
+
+This is the discipline behind the whole harness: bounded attempts, evidence over assertion, and
+changing the model when the model is what is wrong.

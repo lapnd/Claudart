@@ -1,3 +1,7 @@
+These are the deterministic-execution and evidence practices behind the Constitution's Golden Rules
+5 (compute locally) and 11 (prefer deterministic artifacts) and priority 4 (reliability and
+reproducibility) — the Constitution ranks the value, this rule is the procedure.
+
 1. Use the project's actual tools and versions
 
 The same command can produce different results with different binaries or versions.

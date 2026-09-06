@@ -104,12 +104,67 @@ For any added, changed, renamed, or retired cross-file contract, derive its comp
 
 ## Step 4 — Validate and hand off
 
-1. Read the current upstream workflow documentation and the selected layer's current validation/normalization definitions, then run the reconciliation flow they declare. In the current source, that flow is `doctor → refactor-memory → doctor` (Codex: `$codex-doctor → $codex-refactor-memory → $codex-doctor`): inventory the actual on-disk state read-only, reconcile it idempotently, then verify it. Current upstream is authoritative if this sequence changes later. Do not infer a version-specific path or invent migration, recall, or other commands absent from current upstream.
-2. Fix any wiring or mechanical contract failure. Park claims that cannot be safely resolved as `review-needed`; never invent evidence just to make the checker green.
-3. Summarize what was **added / replaced / merged / relocated / retired / normalized / skipped**, and list any conflicts you parked for the user to decide.
-4. Remind the user to review `git diff` before committing. **Do not commit, push, or merge yourself.**
-5. This protocol is **idempotent** — safe to re-run later to pull the next CLAUDART update (that is Scenario C).
+### 4.1 Mandatory fast verification — read-only
+
+Run bounded mechanical checks against the selected layers and the changed dependency closure. Validation may use `/tmp`, but it must not mutate the project tree.
+
+1. Check scope and patch integrity:
+
+   ```bash
+   git status --short
+   git diff --name-status
+   git diff --check
+   ```
+
+   Skip the Git-specific checks only outside a Git repository. Confirm every changed path was approved and that unrelated changes remain untouched.
+
+2. Confirm every approved add, replacement, merge, relocation, and retirement reached its intended final path.
+3. Compare every supposedly verbatim template-owned file against current upstream using `cmp`, checksums, or `git diff --no-index`, accounting only for approved relocation. Any unexplained drift fails verification.
+4. For merged loaders and indexes, confirm both the required current CLAUDART routes and the project-authored sections identified in the plan are still present.
+5. Confirm that referenced commands, skills, rules, guidelines, agents, scripts, indexes, and config paths exist; that no loader, rule, or guideline auto-loads `JOURNAL.md` or `HANDOFF.md`; that existing live-state bodies were not replaced; that changed shell scripts pass `bash -n`; that changed command/skill/agent/rule/guideline frontmatter still satisfies the current upstream contract; and that mirrored contracts stay consistent when both layers changed.
+6. Inspect current upstream `scripts/`. If it ships a documented read-only installation verifier that can target another root, run it exactly as documented. If none exists, that absence is not a failure — run the current upstream knowledge checker for each selected layer instead. With the current interface:
+
+   ```bash
+   bash /tmp/claudart-src/.claude/scripts/knowledge-check.sh --root "$PWD" --layer claude
+   bash /tmp/claudart-src/.codex/scripts/knowledge-check.sh  --root "$PWD" --layer codex
+   ```
+
+   Run only the selected layers. If current upstream `--help` differs, follow it instead. Prefer the trusted source script over an unreviewed downstream copy.
+
+A mechanical failure may be fixed immediately **only** when its fix is already inside the approved plan. Any additional write requires a new proposed diff and explicit approval. Park claims that cannot be safely resolved as `review-needed`; never invent evidence just to make a checker green.
+
+### 4.2 Semantic review and doctor are conditional
+
+Do **not** run doctor merely because an integration happened. If fast verification passes and none of the triggers below applies, stop after fast verification. Scenario A defaults to this fast path; Scenarios B and C also use it for purely mechanical additions, verbatim stale-template replacements, and approved relocations that do not change semantic ownership.
+
+When semantic judgment is needed, first review only the changed files and their dependency closure. Run the selected layer's full read-only doctor once, and only when at least one trigger exists:
+
+- competing instruction, routing, memory, or work systems were merged;
+- project-authored content moved between rules/guidelines, knowledge, state, tasks, specs, or loaders;
+- rule scope, agent responsibility, task/spec lifecycle, or knowledge ownership changed semantically;
+- history left a material `review-needed` ambiguity;
+- deterministic verification found a problem that cannot be decided mechanically;
+- the affected contract is repository-wide;
+- the user explicitly asked for a full health audit.
+
+When triggered, run `/doctor` for Claude or `$codex-doctor` for Codex. Doctor is diagnostic only — report its findings; do not convert them into automatic writes.
+
+### 4.3 Refactor-memory is opt-in
+
+Never run `/refactor-memory` or `$codex-refactor-memory` automatically after an integration. Run it only when a concrete finding is owned by that workflow, the exact additional files and intended changes are presented, and the user explicitly approves those writes.
+
+After an approved refactor-memory run, repeat the mandatory fast verification. Repeat doctor only when the original finding needs semantic confirmation or the user asks for it. **There is no default `doctor → refactor-memory → doctor` chain.**
+
+### 4.4 Report the result
+
+Summarize the scenario and selected layers; the paths **added / replaced / merged / relocated / retired / preserved / skipped / review-needed**; the verification commands run and their results; why doctor was or was not run; and any normalization still awaiting approval. Remind the user to review `git diff` before committing. **Do not commit, push, or merge yourself.**
+
+This protocol is **idempotent**: a later run derives a fresh delta from the then-current upstream and downstream state (that is Scenario C).
 
 ## Cleanup
 
-Remove the temp clone when done: `rm -rf /tmp/claudart-src`.
+Remove the temporary source only after every comparison and validation is complete:
+
+```bash
+rm -rf /tmp/claudart-src
+```

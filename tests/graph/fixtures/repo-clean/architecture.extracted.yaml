@@ -1,0 +1,48 @@
+# architecture.yaml - extracted by `claudart-graph extract`; the tree is the source, this file is the
+# pinned reading of it. `architecture.budget` is a ratchet: `drift` fails when the measured count
+# differs from it in either direction. A merge conflict on the budget is resolved by re-measuring the
+# merged tree (`claudart-graph drift --root .`), never by picking a side.
+version: 1
+project: repo-clean
+profile: hexagonal
+layout:
+  domain: internal/domain
+  usecases: internal/app
+  ports: internal/ports
+  adapters: internal/adapters
+  composition: cmd
+domains:
+  - name: user
+    path: internal/domain/user
+usecases:
+  - name: listusers
+    path: internal/app/listusers
+    domain: user
+ports:
+  - name: notification
+    direction: out
+    domain: user
+    path: internal/ports/notification
+  - name: user_repository
+    direction: out
+    domain: user
+    path: internal/ports/user_repository
+adapters:
+  - name: postgres
+    port: user_repository
+    path: internal/adapters/postgres
+  - name: smtp
+    port: notification
+    path: internal/adapters/smtp
+architecture:
+  budget: 0
+rules:
+  forbid:
+    - from: adapter
+      to: adapter
+    - from: domain
+      to: adapter
+    - from: domain
+      to: port
+    - from: usecase
+      to: adapter

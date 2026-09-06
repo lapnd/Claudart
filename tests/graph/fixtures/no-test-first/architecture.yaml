@@ -1,0 +1,85 @@
+# Skeletal hexagonal manifest (v2 after second review): ports carry direction, adapters
+# derive their role from their port. Brownfield: the extractor emits this from real code.
+version: 1
+project: acme-users
+
+layout:
+  domain: internal/domain
+  usecases: internal/app
+  ports: internal/ports
+  adapters: internal/adapters
+  composition: cmd
+  contracts: api/contracts
+  frontend: web/src
+
+domains:
+  - name: user
+    path: internal/domain/user
+
+usecases:
+  - name: list-users
+    path: internal/app/listusers
+    domain: user
+  - name: register-user
+    path: internal/app/registeruser
+    domain: user
+
+ports:
+  - name: user-repository
+    direction: out
+    domain: user
+    path: internal/ports/user_repository
+  - name: notification
+    direction: out
+    domain: user
+    path: internal/ports/notification
+  - name: list-users
+    direction: in
+    usecase: list-users
+  - name: register-user
+    direction: in
+    usecase: register-user
+
+adapters:
+  - name: postgres-user
+    port: user-repository
+    path: internal/adapters/postgres
+    datastore: true
+  - name: memory-user
+    port: user-repository
+    path: internal/adapters/memory
+  - name: smtp-notify
+    port: notification
+    path: internal/adapters/smtp
+  - name: http
+    port: [list-users, register-user]
+    path: internal/adapters/http
+  - name: frontend-users
+    port: user-api
+    path: web/src/features/users
+
+contracts:
+  - name: user-api
+    version: v1
+    type: openapi
+    path: api/contracts/user-api.v1.yaml
+
+mutation:
+  go: gremlins unleash
+  threshold: 0.80
+
+rules:
+  forbid:
+    - from: adapter
+      to: adapter
+    - from: usecase
+      to: adapter
+    - from: domain
+      to: usecase
+    - from: domain
+      to: port
+    - from: domain
+      to: adapter
+
+architecture:
+  budget: 0   # greenfield pins 0; brownfield pins the measured count and ratchets down
