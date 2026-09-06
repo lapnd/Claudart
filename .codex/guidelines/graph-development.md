@@ -72,7 +72,7 @@ This is the same gate as `evidence-gauntlet.md`'s `red-verified`; the graph is w
 per node.
 
 - MUST: architecture → tests → implementation. A behaviour node has a TEST edge; `done` needs an observed red first; `red` needs a nonzero exit; a test's `green` follows only a prior red. ⟦enforcer: NO-TEST-FIRST, TEST-PROVES-NOTHING, REFUSED-TRANSITION⟧
-- MUST NOT: skip, disable, weaken, or delete a test to reach green — a failing test is information (`ai-behavior.md` §6, `code-quality.md` §2). ⟦judgement⟧ (the engine enforces ordering; not weakening an assertion is yours)
+- MUST NOT: skip, disable, weaken, or delete a test to reach green — a failing test is information (`ai-behavior.md` §5, `code-quality.md` §2). ⟦judgement⟧ (the engine enforces ordering; not weakening an assertion is yours)
 - MUST: a strong-tier implementation records a mutation score; surviving mutants are killed or classified, never papered over. For Go, the mutation tool is **gremlins** (<https://gremlins.dev/latest/>); other stacks use their ecosystem's tool (`evidence-gauntlet.md` §5). ⟦enforcer: MUTATION-MISSING⟧
 - In the `debug` profile the same shape holds: a `fix` requires a CONFIRMED hypothesis and a red repro. ⟦enforcer: FIX-WITHOUT-CAUSE⟧
 
@@ -103,7 +103,7 @@ into a seeded manifest + a test-first refactor plan, then evolved the same way.
 ## 8. Cost and re-approach discipline
 
 - MUST: route each unit to the cheapest tier that clears it; a failed attempt at one tier followed by success one tier up cost both, and a task that retries more than once without escalating is grinding. ⟦enforcer: WRONG-TIER, HIGH-RETRY⟧
-- ⟦judgement⟧ Two same-shaped failures against one node change a **dimension**, never just the effort (`ai-behavior.md` §10, Lateral Re-approach): a wall hit twice becomes a NOTES `→ graduate` lesson, not a third identical attempt.
+- ⟦judgement⟧ Two same-shaped failures against one node change a **dimension**, never just the effort (`ai-behavior.md` §6, Lateral Re-approach): a wall hit twice becomes a NOTES `→ graduate` lesson, not a third identical attempt.
 
 ## Relationship to the rest of the harness
 

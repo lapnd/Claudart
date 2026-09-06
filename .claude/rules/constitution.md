@@ -38,7 +38,7 @@ When two options are equal on 1–4, choose the cheaper, faster, more determinis
 10. **Automate repetition** — a task done repeatedly becomes a script, tool, cache, or artifact.
 11. **Prefer deterministic artifacts** — turn recurring knowledge into code, not re-explanation.
 12. **Learn after every task** — every meaningful task can improve the workflow.
-13. **Improve the Constitution** — repeated lessons become better rules or automation (`ai-behavior.md` §10).
+13. **Improve the Constitution** — repeated lessons become better rules or automation (`ai-behavior.md` §6).
 14. **Design for the long term** — optimise the system, not merely the current change.
 15. **Hexagonal and modular by default** — clear boundaries, ports, adapters, dependency inversion.
 16. **Management enables parallelism** — process must not serialise independent work needlessly.

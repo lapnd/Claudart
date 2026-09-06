@@ -139,7 +139,7 @@ Bốn dấu hiệu nên viết lại thay vì dịch:
 
 Code bị xoá là bản dịch tốt nhất có thể.
 
-Hàng rào vẫn là `ai-behavior.md` §2/§4: chọn dạng Go tốt hơn **cho đúng hành vi đang port**, không phát minh năng lực mà nguồn chưa từng có. "Go làm theo cách này" là lý do; "biết đâu sau này cần" thì không.
+Hàng rào vẫn là `ai-behavior.md` §3/§4: chọn dạng Go tốt hơn **cho đúng hành vi đang port**, không phát minh năng lực mà nguồn chưa từng có. "Go làm theo cách này" là lý do; "biết đâu sau này cần" thì không.
 
 ### Thư viện: chỉ permissive, tuyệt đối không GPL/AGPL
 

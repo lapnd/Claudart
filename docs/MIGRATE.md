@@ -139,7 +139,7 @@ Four signals that a construct should be rewritten rather than translated:
 
 Deleted code is the best possible translation.
 
-The fence is still `ai-behavior.md` §2/§4: choose the better Go form of _the behavior being ported_, never invent capability the source never had. "Go does it this way" is a reason; "we might need it later" is not.
+The fence is still `ai-behavior.md` §3/§4: choose the better Go form of _the behavior being ported_, never invent capability the source never had. "Go does it this way" is a reason; "we might need it later" is not.
 
 ### Libraries: permissive only, never GPL/AGPL
 

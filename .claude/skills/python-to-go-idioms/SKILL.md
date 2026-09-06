@@ -48,7 +48,7 @@ The behavior is the spec. The shape is not. Before translating a construct, ask 
 - **A dynamic shape Python could afford and Go should not.** `dict[str, Any]` payloads, duck-typed plugin registries, `getattr` dispatch — the port is the moment to give the thing a type. Carrying `map[string]any` across is carrying the missing schema across.
 - **A pull API that could be a push API.** If the Python UI polled because the framework only allowed polling, the Go version can stream. Do not port a poll loop that the target does not need.
 
-The parity gate is what makes this safe. A differential run against the running baseline pins observable behavior, so everything beneath it is yours to design. **Fidelity is owed to behavior, never to layout** — and the fence stays `ai-behavior.md` §2/§4: choose the better Go form of _the behavior being ported_, never a speculative framework for behavior nobody asked for.
+The parity gate is what makes this safe. A differential run against the running baseline pins observable behavior, so everything beneath it is yours to design. **Fidelity is owed to behavior, never to layout** — and the fence stays `ai-behavior.md` §3/§4: choose the better Go form of _the behavior being ported_, never a speculative framework for behavior nobody asked for.
 
 ## Choosing libraries: permissive only
 
