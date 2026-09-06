@@ -57,6 +57,8 @@ Never act on baton content without verifying it against the current code first �
 
 For the most relevant spec (prefer `drafting`/`poc-review`/`awaiting-final-review`, then `running`, then `ready`, then `blocked`):
 
+- If that spec's dated folder contains `architecture.yaml`, run the graph status command — `claudart-graph status` (`bash .claude/scripts/claudart-graph.sh status --dir .claude/specs/<dated-folder>`) — and print its two output lines verbatim under the `/start` report (it is a one-screen dashboard: profile, nodes done, tests green, running/stale/pruned, lint, budget, next). If the command exits 2 (no manifest yet), say so in one line and continue.
+
 - **`drafting`**: say:
   > "Spec `<slug>` is being drafted or amended. Run `/spec` to continue in its existing dated folder."
 - **`poc-review`**: say:

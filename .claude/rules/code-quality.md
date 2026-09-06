@@ -19,6 +19,8 @@ Application/business code must maintain **at least 95%** automated coverage — 
 
 The 95% figure is the project **standard**; it detects drift across the codebase. What gates an individual change is **changed-line coverage**: every line that change touched must be executed by a test, enforced by a command that exits nonzero when the threshold is missed (`--cov-fail-under`, `diff-cover --fail-under`, equivalent). A command that prints a percentage and exits 0 is a report, not a gate.
 
+**Cost never buys down proof.** Where the Constitution's cost/efficiency principles (priority 7, Golden Rules 4-6) seem to argue for testing less, the §26 priority ladder settles it: correctness (1) and reliability/reproducibility (4) outrank efficiency (7). The 95% standard and the changed-line gate are not negotiable downward for cost; cost discipline governs _how_ the suite runs — reuse, local compute, no redundant reruns (Golden Rules 3, 8) — never _whether_ the change is proven.
+
 Coverage alone cannot tell a test that pins behavior from one that merely executes a line, so the bar is defended by **mutation** testing: introduce plausible bugs into the changed code and confirm the suite kills each one. A surviving mutant means a missing or vacuous assertion. `evidence-gauntlet.md` owns the full procedure, the tier calibration that decides how much of it applies, and the red-before-green ordering that makes a test's failure observable in the first place.
 
 ## 2. Test Quality

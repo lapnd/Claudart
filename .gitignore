@@ -27,3 +27,8 @@ node_modules/
 
 # Vendored third-party checkout (OpenAI Codex harness source, consulted for reference)
 codex/
+.claude/specs
+.claude/tasks
+# Python bytecode from the graph engine (generated on run)
+__pycache__/
+*.pyc

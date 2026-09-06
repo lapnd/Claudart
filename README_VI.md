@@ -2,7 +2,7 @@
 
 <div align="center">
   <h1>CLAUDART</h1>
-  <p><strong>Lớp vận hành bằng markdown cho Claude Code &amp; Codex CLI - memory, kế hoạch và review, tất cả nằm trong git.</strong></p>
+  <p><strong>Lớp vận hành bằng markdown cho Claude Code &amp; Codex CLI - memory, kế hoạch, review, và một đồ thị kiến trúc thực thi được — tất cả nằm trong git.</strong></p>
 
   <p>
     <a href="https://github.com/lapnd/Claudart/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/lapnd/Claudart?style=for-the-badge&color=orange"></a>
@@ -16,7 +16,7 @@
 
 Coding agent hay quên. Đóng terminal là kế hoạch biến mất. Session kế tiếp bắt đầu trong mù mờ, đọc lại nửa repo, rồi tranh luận lại một quyết định bạn đã chốt từ thứ Ba tuần trước. Trong lúc đó `CLAUDE.md` cứ phình to, vì chẳng ai đủ tin nó để xóa bất kỳ thứ gì.
 
-CLAUDART xử lý chuyện này bằng file. Một nhóm slash command nhỏ duy trì một bộ tài liệu markdown dưới `.claude/` và `.codex/`: điều đang đúng ngay lúc này, kế hoạch cho từng task, các fact và rule đáng giữ lại. Tất cả đều được commit vào git, review được trong PR, và đọc được mà không cần tooling nào. Không có vector database, không daemon. Không cần host, không cần trông coi.
+CLAUDART xử lý chuyện này bằng file. Một nhóm slash command nhỏ duy trì một bộ tài liệu markdown dưới `.claude/` và `.codex/`: điều đang đúng ngay lúc này, kế hoạch cho từng task, các fact và rule đáng giữ lại. Bên trên đó là một **lớp kiến trúc** tùy chọn — phần mềm bạn xây được mô tả thành một đồ thị phụ thuộc thực thi được mà agent lập kế hoạch và chứng minh dựa trên đó, nên cấu trúc và kỷ luật test do công cụ kiểm, không dựa vào niềm tin. Tất cả đều được commit vào git, review được trong PR, và đọc được mà không cần tooling nào. Không có vector database, không daemon. Không cần host, không cần trông coi.
 
 ## Cài đặt
 
@@ -39,23 +39,31 @@ Installation hiện hữu dùng `INTEGRATE.md` để derive delta thực tế v�
 
 ## CLAUDART giải quyết gì
 
-| Nỗi đau                                      | Cách CLAUDART xử lý                                                                                                                                                 |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Session nào cũng bắt đầu mù mờ               | `/start` đọc trạng thái hiện tại, task đang mở và các commit gần đây trước khi đụng vào bất kỳ thứ gì                                                               |
-| Kế hoạch mất khi session đóng                | `/plan` ghi kế hoạch vào task file để session sau có thể tiếp tục đúng chỗ bạn dừng                                                                                 |
-| Mission quá lớn cho một session hay một plan | `/spec` đóng băng ý định thành POC + roadmap bạn approve một lần; `/spec-run` chạy lặp tới final review                                                             |
-| Refactor không được phép đổi hành vi         | `/refactor` ghim baseline, viết behavior contract + blast radius, và chứng minh tương đương                                                                         |
-| Viết lại sang ngôn ngữ hoặc UI stack khác    | `/migrate` đóng băng API seam và bảng translation-rules của chính dự án, rồi chứng minh parity bằng cách chạy song song hai stack ([hướng dẫn](docs/MIGRATE_VI.md)) |
-| Session hiệu quả chạm trần context           | `/handoff` lưu suy luận của session - giả thuyết, evidence, dead ends - cho lần `/start` kế tiếp                                                                    |
-| Cùng quyết định bị tái khám phá hằng tuần    | `/learn` biến correction hành vi lặp lại thành rule có scope theo path                                                                                              |
-| Fact bền của dự án không có chỗ đúng để sống | `knowledge/` lập map; agent nạp map phù hợp, outline topic rồi chỉ section liên quan                                                                                |
-| `CLAUDE.md` phình thành bồn đốt token        | `/refactor-memory` gọt nó lại thành một index và đưa nội dung về đúng nơi                                                                                           |
-| Memory âm thầm mục ruỗng                     | `/doctor` chạy checker read-only được ship sẵn, rồi audit drift ngữ nghĩa và nội dung đặt sai tầng                                                                  |
-| Đổi máy, hoặc mang context sang project khác | `/backup` xuất bundle portable; `/restore` merge sang nơi khác mà không bao giờ ghi đè file có sẵn                                                                  |
+| Nỗi đau                                          | Cách CLAUDART xử lý                                                                                                                                                 |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Session nào cũng bắt đầu mù mờ                   | `/start` đọc trạng thái hiện tại, task đang mở và các commit gần đây trước khi đụng vào bất kỳ thứ gì                                                               |
+| Kế hoạch mất khi session đóng                    | `/plan` ghi kế hoạch vào task file để session sau có thể tiếp tục đúng chỗ bạn dừng                                                                                 |
+| Mission quá lớn cho một session hay một plan     | `/spec` đóng băng ý định thành POC + roadmap bạn approve một lần; `/spec-run` chạy lặp tới final review                                                             |
+| Cấu trúc trôi dạt mà không ai nhận ra            | `/graph` biến kiến trúc hexagonal mục tiêu thành đồ thị thực thi — phụ thuộc cấm, thiếu test, và nợ kiến trúc đều làm fail một check                                |
+| Codebase cũ gần như không có kiến trúc           | `/graph audit` quét nó, đo số vi phạm, và xuất ra một refactor plan test-first có thể chạy như một mission                                                          |
+| Refactor không được phép đổi hành vi             | `/refactor` ghim baseline, viết behavior contract + blast radius, và chứng minh tương đương                                                                         |
+| Viết lại sang ngôn ngữ hoặc UI stack khác        | `/migrate` đóng băng API seam và bảng translation-rules của chính dự án, rồi chứng minh parity bằng cách chạy song song hai stack ([hướng dẫn](docs/MIGRATE_VI.md)) |
+| Chạy tự chủ dài bị treo, hoặc chạm usage limit   | run tự checkpoint và rotate session kế nhiệm; một watchdog relaunch chuỗi bị treo và tiếp tục sau khi limit được gỡ                                                 |
+| Quy định mà không ai theo vì chẳng có gì enforce | mọi MUST kiến trúc gắn với một enforcer cơ học; `constitution-check` fail build khi một rule mất pháp chế                                                           |
+| Session hiệu quả chạm trần context               | `/handoff` lưu suy luận của session - giả thuyết, evidence, dead ends - cho lần `/start` kế tiếp                                                                    |
+| Cùng quyết định bị tái khám phá hằng tuần        | `/learn` biến correction hành vi lặp lại thành rule có scope theo path                                                                                              |
+| Fact bền của dự án không có chỗ đúng để sống     | `knowledge/` lập map; agent nạp map phù hợp, outline topic rồi chỉ section liên quan                                                                                |
+| `CLAUDE.md` phình thành bồn đốt token            | `/refactor-memory` gọt nó lại thành một index và đưa nội dung về đúng nơi                                                                                           |
+| Memory âm thầm mục ruỗng                         | `/doctor` chạy checker read-only được ship sẵn, rồi audit drift ngữ nghĩa và nội dung đặt sai tầng                                                                  |
+| Đổi máy, hoặc mang context sang project khác     | `/backup` xuất bundle portable; `/restore` merge sang nơi khác mà không bao giờ ghi đè file có sẵn                                                                  |
 
 Ba review agent được ship kèm các command - `clean-code-reviewer`, `security-auditor` và `ui-visual-critic`, mỗi cái chỉ chạy khi được yêu cầu rõ ràng (không bao giờ tự động, kể cả bên trong một task hay spec loop) - cùng một delegation protocol để giữ việc subagent song song có biên rõ ràng thay vì lan rộng mất kiểm soát.
 
-## Mô hình memory
+## Kiến trúc
+
+CLAUDART gồm hai lớp. Lớp thứ nhất luôn bật; lớp thứ hai là tùy chọn và bật lên ngay khi một dự án áp dụng `architecture.yaml`.
+
+### Lớp 1 — lớp vận hành (memory & workflow)
 
 Bốn loại memory, bốn vòng đời khác nhau:
 
@@ -74,6 +82,43 @@ vào context      (chỉ audit)         path phù hợp           chi tiết đ�
 
 Retrieval đi từ map và có budget: root `INDEX.md`, tối đa các domain map phù hợp, rồi frontmatter/outline topic và section nhỏ nhất đủ dùng. Đọc toàn file hay search history/source chỉ là fallback. `/doctor` và `/refactor-memory` tự gọi Bash checker không dependency; user không phải kẹp thêm command vào prompt thường ngày.
 
+Trên mọi rule là **Engineering Constitution** (`.claude/rules/constitution.md`) — một thang ưu tiên quyết định và mười sáu Golden Rule dàn xếp xung đột (đúng đắn trước hết, kỷ luật chi phí sau cùng và không bao giờ đè lên tính đúng).
+
+### Lớp 2 — lớp kiến trúc (phần mềm bạn xây)
+
+Kiến trúc của chính phần mềm thôi là văn xuôi agent diễn giải lại mỗi session, và trở thành một **đồ thị phụ thuộc thực thi được** mà nó tiêu thụ. Một manifest `architecture.yaml` nhỏ khai báo mục tiêu — mặc định hexagonal (ports & adapters) — và các task trong roadmap mang metadata đồ thị:
+
+```text
+architecture.yaml            ROADMAP.md (định dạng đồ thị)      events.jsonl (append-only)
+profile + layout + budget    node = claim · verifier · state   file duy nhất engine ghi
+rules.forbid (chiều)         edge = phụ thuộc thật              state là fold trên log này
+```
+
+Một engine không phụ thuộc gì (`claudart-graph`, Python stdlib, bản thân cũng hexagonal) đọc đó và:
+
+- **lint** đồ thị — chiều phụ thuộc cấm (adapter import adapter, domain chạm hạ tầng), chu trình, edge treo, và một ngân sách nợ kiến trúc chỉ được siết xuống;
+- **enforce TDD theo cấu trúc** — một node hành vi không thể `done` cho tới khi test của nó được _quan sát thấy fail_ trước; engine từ chối một green mà chưa từng có red trước đó;
+- **schedule** — các wave và đường tới hạn được tính từ edge, nên việc độc lập fan-out song song và merge hòa giải qua node tường minh;
+- **audit cây brownfield** — `/graph audit` đo số vi phạm thật và ghi ra manifest mồi cộng một refactor plan test-first;
+- **giữ trung thực** — mọi MUST kiến trúc trong rule gắn với một enforcer có tên, và `constitution-check` fail build nếu một rule mất pháp chế hoặc agent claim một kết quả engine không quan sát được.
+
+Dù greenfield hay brownfield, đồ thị tiến hóa liên tục: bắt đầu từ hexagon thô, tinh chỉnh, chạy lại fold, và các node được mở lại kéo theo dependent của chúng để chứng minh lại. Tham chiếu đầy đủ: **[docs/GRAPH_VI.md](docs/GRAPH_VI.md)**.
+
+## Các kịch bản sử dụng
+
+Tình huống khác nhau, điểm vào khác nhau — cùng một trạng thái dựa trên file bên dưới:
+
+- **Thay đổi hằng ngày** — `/start` để định hướng, `/plan add JWT middleware` để ghi một task agent thực thi sau khi bạn approve. Việc nhỏ, một session.
+- **Mission quá lớn cho một plan (greenfield)** — `/spec build the demo game` phỏng vấn bạn, đóng băng ý định thành POC + roadmap approve một lần; `/spec-run` rồi thực thi qua nhiều session tự chủ tới final review, tự checkpoint và rotate session kế nhiệm ở ranh giới phase.
+- **Build hexagonal có cấu trúc thật** — spec xuất `architecture.yaml` và roadmap định dạng đồ thị; `/graph` schedule các wave và chứng minh từng tầng test-first. Port bị đóng băng trước adapter; mọi adapter qua đúng một contract test dùng chung.
+- **Codebase cũ bạn thừa kế** — `/graph audit <path>` báo cáo kiến trúc thực sự _đang là_ gì, chấm điểm vi phạm, và trao bạn một refactor plan test-first; áp dụng bằng `/refactor` và siết dần ngân sách nợ.
+- **Refactor không được đổi hành vi** — `/refactor` ghim baseline, dựng lại behavior contract từ code trước thay đổi, và chứng minh tương đương bằng differential run.
+- **Viết lại xuyên ngôn ngữ hoặc UI stack** — `/migrate` (ví dụ NiceGUI→Go+Vue) đóng băng API seam và translation rules của dự án, rồi chứng minh parity bằng cách chạy cả hai stack.
+- **Session debug thuần** — profile `debug` mô hình hóa repro → hypothesis → fix → test thành node; một fix bị từ chối nếu không có nguyên nhân đã xác nhận và một red repro.
+- **Chứng minh một fix cụ thể** — `/prove` chạy evidence gauntlet: red trước green, coverage dòng đã đổi, mutation, và báo cáo bằng số thay vì tính từ.
+- **Chạy dài không giám sát** — đặt `rotation: auto`; executor tự rotate, và `claudart-supervise` poll sức khỏe, relaunch chuỗi bị treo, và back off rồi tiếp tục khi usage limit được gỡ — không mất việc khi limit hết.
+- **Giữ setup khỏe mạnh** — `/checkpoint` cuối session, `/doctor` khi thấy lệch, `/optimize` khi auto-compact nổ quá nhiều, `/backup` + `/restore` để di chuyển giữa máy hoặc dự án.
+
 ## Bắt đầu nhanh
 
 ```bash
@@ -84,6 +129,8 @@ Retrieval đi từ map và có budget: root `INDEX.md`, tối đa các domain ma
 /spec-run demo-game             # session mới thực thi mission đã approve tự chủ tới cổng final review
 /refactor migrate auth to v2    # mission refactor: baseline ghim + behavior contract chứng minh tương đương
 /migrate nicegui app to go+vue  # mission port: seam contract-first, translation rules, parity chạy song song
+/graph audit ./legacy-service   # quét cây có sẵn → vi phạm + refactor plan test-first
+/graph next demo-game           # cái gì đang chạy được trong đồ thị phụ thuộc của mission
 /prove sửa lỗi phân trang       # evidence-first: đỏ trước xanh, chạy gauntlet, báo cáo bằng số liệu
 /handoff                        # context gần đầy? lưu suy luận, resume fresh bằng /start
 /checkpoint                     # rebuild CONTEXT.md cuối session
@@ -94,12 +141,13 @@ Retrieval đi từ map và có budget: root `INDEX.md`, tối đa các domain ma
 /restore                        # nhập bundle đó ở nơi khác - dry run trước, không bao giờ ghi đè
 ```
 
-Codex CLI chạy cùng flow với `$codex-` thay cho `/` (ví dụ `$codex-start`).
+Codex CLI chạy cùng flow với `$codex-` thay cho `/` (ví dụ `$codex-start`, `$codex-graph`).
 
 ## Tài liệu
 
 **[docs/GUIDE.md](docs/GUIDE.md)** là cookbook (tiếng Anh) - chọn tình huống, làm theo công thức: walkthrough cụ thể cho từng command và kịch bản.
-**[docs/WORKFLOW_VI.md](docs/WORKFLOW_VI.md)** là manual - kiến trúc, lifecycle đầy đủ của task, toàn bộ command và layout thư mục. README này chỉ là phần giới thiệu.
+**[docs/WORKFLOW_VI.md](docs/WORKFLOW_VI.md)** là manual - kiến trúc, lifecycle đầy đủ của task, toàn bộ command và layout thư mục.
+**[docs/GRAPH_VI.md](docs/GRAPH_VI.md)** là tham chiếu đồ thị kiến trúc - manifest, metadata node, các kind, event log, và workflow red→green. README này chỉ là phần giới thiệu.
 
 Bản tiếng Anh: **[README.md](README.md)** và **[docs/WORKFLOW.md](docs/WORKFLOW.md)**.
 
@@ -111,9 +159,10 @@ Bản tiếng Anh: **[README.md](README.md)** và **[docs/WORKFLOW.md](docs/WORK
 | **Con người đọc được**         |           ✅           |               ❌                |          ❌           |          ❌           |              ⚠️ JSON + dashboard               |           ⚠️ text nguyên văn, binary DB            |
 | **Chạy offline / air-gapped**  |           ✅           |               ❌                |          ❌           |          ❌           |                   ❌ cần LLM                   |                         ✅                         |
 | **Memory review được bằng PR** |           ✅           |               ❌                |          ❌           |          ❌           |             ✅ JSON commit vào git             |            ❌ ChromaDB + SQLite binary             |
+| **Kiến trúc được enforce**     |    ✅ đồ thị + lint    |               ❌                |          ❌           |          ❌           |                       ❌                       |                         ❌                         |
 | **Tool hỗ trợ**                | Claude Code, Codex CLI |             chỉ API             |        chỉ API        |     chỉ LangGraph     | Claude, Codex, Cursor, Copilot, Gemini + 6 nữa | Claude Code, Codex CLI, Gemini CLI, MCP-compatible |
 
-Markdown thuần trong repo đã thắng lập luận này: `AGENTS.md` cung cấp một convention có version mà nhiều coding agent có thể dùng chung. CLAUDART xây workflow còn thiếu ở phía trên - orientation, planning, learning, hygiene và review.
+Markdown thuần trong repo đã thắng lập luận này: `AGENTS.md` cung cấp một convention có version mà nhiều coding agent có thể dùng chung. CLAUDART xây workflow còn thiếu ở phía trên - orientation, planning, learning, hygiene, review, và một kiến trúc mà công cụ kiểm được.
 
 ## License
 

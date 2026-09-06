@@ -11,6 +11,10 @@ tags: [architecture, hexagonal, code-organization, modularity]
 
 Code must be **well-designed, modular, clean, maintainable, and easy to extend** — across every language or framework in this workspace (Go, Python, TypeScript/JavaScript, Vue/Nuxt, Java, Rust, etc.).
 
+This is the architectural instance of the Constitution's Golden Rule 15 (hexagonal and modular by
+default) and priority 2 (architectural integrity); the Constitution ranks the value, this rule is
+how it is realised in code.
+
 Target architecture is **Hexagonal (Ports & Adapters)**:
 
 - **Domain** — business concepts and rules
@@ -79,6 +83,8 @@ Core business logic must be constructible and testable with small in-memory/fake
 
 Default limits: files under ~500 LOC (excluding comments/docstrings), functions typically 10–30 LOC, 50 LOC max without justification. Don't split files just to satisfy a number — the goal is cohesion, not fragmentation. Treat these as warning signs that the model needs rework, not more code: deep nesting, long switch/if-elif chains on profile/provider, duplicated validation, boolean-parameter explosions, large constructors, many dependencies, copy/paste implementations.
 
+**A metric is a prompt to investigate, never a verdict.** Crossing a limit obliges you to examine what the unit owns and why it changes — it does not by itself prove the code is unhealthy, and staying under every limit does not prove it is healthy. Long declarative mappings, schemas, parsers, algorithms, and straightforward pipelines can be perfectly cohesive; a short function with hidden effects can be harder to maintain than a longer explicit one. Never game a limit with trivial forwarding helpers, arbitrary file splits, or mixins that keep all of the original coupling — that satisfies the number while making the code worse.
+
 ## 11. Duplication and Abstraction
 
 Centralize a business rule that's duplicated across API/CLI/worker/frontend/repository layers by identifying its correct owner — but do not prematurely build a "common" abstraction for code that only happens to look similar. **Remove meaningful duplication, not superficial similarity.** Symmetrically, don't add unused interfaces, factories, generic frameworks, speculative extension points, or configuration nobody needs — design for known variation, not every hypothetical future. Represent variation that is _already real_ (providers, profiles, deployment models) explicitly rather than hiding it in conditionals.
@@ -92,6 +98,8 @@ Translate infrastructure errors into application/domain errors at the adapter bo
 Keep a symbol private/internal unless it's genuinely part of the module's contract — every export becomes maintenance surface. Name for intent (`CalculateEntitlement`, `CreateInvoice`), not implementation history or a generic suffix (`Manager`, `Helper`, `Util`, `Processor`, `Handler`) unless that word genuinely represents the concept. Frameworks (FastAPI, Django, Gin, Vue, GORM, cloud SDKs, K8s clients) stay implementation details at the edge — the architecture should allow replacing one without rewriting the domain.
 
 ## 14. Refactoring Existing Code
+
+**A refactor preserves the agreed observable contract; anything else is a behavior change.** Bug fixes, security corrections, performance-policy changes, and contract migrations may legitimately change behavior — identify and validate them as such instead of hiding them inside a structural change. Preserve outputs, error semantics, authorization, side effects, ordering, transaction boundaries, resource lifetimes, and compatibility obligations; private implementation details need not stay identical unless something legitimately depends on them. Passing the existing tests alone does not establish behavioral equivalence. Never silently keep a known-unsafe behavior on the grounds of compatibility — surface it, and separate its correction from the structural work.
 
 Distinguish three cases when touching existing structure:
 

@@ -21,7 +21,7 @@ In parallel: `.claude/CONTEXT.md`, `.claude/specs/INDEX.md` (if an active spec a
 
 Ensure `.claude/specs/done/` exists. Before deciding whether an existing spec is active, check its `SPEC.md` frontmatter status; a top-level spec folder with `status: done` or `status: cancelled` is stale archive state, not an active collision, and should be moved to `.claude/specs/done/` when syncing INDEX.
 
-For a new mission, create `.claude/specs/YYYY-MM-DD-<slug>/` using today's date and the slug rules from the rule file, write a minimal `SPEC.md` with `slug: <slug>` and `status: drafting`, and register it in `INDEX.md` with the dated folder link. For a resumed draft, keep its existing dated id and history. From here on, the folder is where everything lands — not chat.
+For a new mission, create `.claude/specs/YYYY-MM-DD-<slug>/` using today's date and the slug rules from the rule file, write a minimal `SPEC.md` with `slug: <slug>`, `status: drafting`, and `rotation: auto` (the executor rotates itself; write `rotation: offer` only when the user asks for a human gate at rotations), and register it in `INDEX.md` with the dated folder link. For a resumed draft, keep its existing dated id and history. From here on, the folder is where everything lands — not chat.
 
 **Drafting lock**: while `status` is `drafting` or `poc-review`, write no implementation code and normally write only the spec folder and its INDEX. The sole exception is an eligible knowledge mutation when the full capture gate and an immediate-promotion trigger in `knowledge-management.md` pass; update owner + reachable map atomically and run the checker.
 
@@ -54,6 +54,17 @@ Then write phases per the rule file. Hold the decision-complete bar: exact paths
 
 For a new mission, seed `LEDGER.md` with its header and no entries, and `NOTES.md` with what exploration surfaced: how to run, build, and verify the project (dev server, test commands), key files and helpers, non-obvious constraints, pitfalls, planning-time decisions with their rejected alternatives. Include `## Current Acceptance Delta` with `- None.`; it stays compact during execution and is never a second roadmap. For a resumed scope amendment, preserve LEDGER history and existing NOTES, then amend ROADMAP using its disposition rules rather than erasing completed or superseded work. NOTES is the executor's Memory Hints — a roadmap without it forces the executor to re-discover everything you just learned.
 
+#### Hexagonal decomposition — make the roadmap graph-ready
+
+When the mission builds or extends a hexagonal codebase (`code-organization.md`), emit the mission's architecture as a graph the executor can schedule and prove against, per `.claude/rules/graph-development.md` — that rule is the authority on node kinds, TEST-first edges, and one-shared-contract-test-per-port; this step only says what `/spec` produces. Skip this for a mission with no hexagon (a pure doc/config change); apply it in full for any feature system or service.
+
+1. **Write the Hexagonal Decomposition into SPEC.md (or the head of ROADMAP.md)** — the project's own hexagon, never this harness's: its **domains** · **use cases** · **ports** (each tagged `direction: in` or `out`) · **adapters** (each naming the port it implements) · **contracts** (the frozen API seams). A category with nothing in scope says so; an absent one reads as "not considered".
+2. **Write `architecture.yaml` in the spec folder** — `profile: hexagonal`, the `layout:` (where each layer lives in the tree), `rules.forbid` (at least the standard four: `adapter→adapter`, `usecase→adapter`, `domain→port`, `domain→adapter`), and `architecture.budget` (`0` greenfield; the measured count for a brownfield extract). Its `domains`/`usecases`/`ports`/`adapters`/`contracts` mirror the decomposition above.
+3. **Plan the ROADMAP in graph format**: `graph-format: 1`, `## Phase N` headings, and each task carrying 6-space-indented `node:`/`kind:`/`requires:`/`proves:`/`paths:` metadata. Put a **`test/*` node before every behaviour node** (domain, use case, port, adapter, composition), and make the behaviour node `requires:` it as a `(TEST)` edge — the red-before-green ordering is the edge, not a convention. Write **one shared contract test per outbound port** (a `test/*` node whose `proves:` is that `port/*`), and make **every adapter of that port `requires:` that same test** as a `(TEST)` edge. `verify:` on every node is a real shell command, never prose and never a bare `S<n>` scenario id.
+4. **Tier-annotate** exactly as above (`(tier: fast|standard|strong)`), and set SPEC `executor-tier:` to the cheapest tier covering the roadmap.
+
+The reference shape to copy is `tests/graph/fixtures/spec-template/` (`architecture.yaml` + `ROADMAP.sample.md`) — a minimal generic hexagon that lints clean. Verify the emitted manifest + roadmap before presenting: `bash .claude/scripts/claudart-graph.sh lint --dir .claude/specs/YYYY-MM-DD-<slug>` must print `clean` and exit 0. A dirty graph at approval is a defective spec — fix it in the files, do not hand the executor a graph that will not schedule.
+
 ### Step 6 — Fresh-eyes check, then present for review
 
 Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretending you are the cheaper executor. Any task that needs interview context, any scenario that isn't binary, any duplicated leaf/composite verification with no distinct observable, any ambiguous coverage, or any "as discussed" — fix it in the file now. Flip `status: drafting → poc-review`, sync INDEX, and report:
@@ -65,6 +76,7 @@ Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretendin
 **POC**: `artifacts/<file>` — open it and check it still matches your intent
 **Scenarios**: <n> acceptance scenarios | **Roadmap**: <m> phases, <k> tasks
 **Commit policy**: `commits: user` — the loop never commits; say "per-task" or "per-phase" before approving if you want git checkpoints during the run
+**Rotation**: `rotation: auto` — the executor checkpoints and launches its own successor session at phase boundaries; say "offer" before approving if you want to be asked each time
 **Runnable on**: `<executor-tier>` — run /spec-run from a session of that tier; escalation is the same command from a stronger session
 **Open questions**: <list, or "none">
 

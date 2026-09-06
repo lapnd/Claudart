@@ -38,7 +38,7 @@ For each missing path, report which command would create it (e.g., "missing → 
 For every `.md` file under `.claude/commands/`, `.claude/agents/`, `.claude/rules/`:
 
 - Verify the file starts with a YAML frontmatter block delimited by `---`.
-- For agents: confirm `name`, `description`, `tools`, and `model` keys are present. If `description` should auto-trigger the agent, confirm it contains `PROACTIVELY` (note when missing — may be intentional).
+- For agents: confirm `name`, `description`, `tools`, and `model` keys are present. If `description` should auto-trigger the agent, confirm it contains `PROACTIVELY` (note when missing — may be intentional). Explorers and review-only/audit-only agents must not carry `Edit`; allow `Edit` only when the agent's declared purpose explicitly requires implementation. Every write-capable agent must define its scope, say it protects unrelated user work, require validation of its own edits, and account for other agents editing in parallel.
 - For rules: confirm `paths:` (a list of glob patterns), `description:`, `when_to_use:`, and `tags:` keys are present.
 - For rule `paths:`, confirm paths use YAML flow sequence style, e.g. `paths: ["src/**/*.ts", "test/**/*.ts"]`. Flag block-list style (`paths:` followed by `- item`) because frontmatter conventions should stay compact and grep-friendly.
 - For rule `tags:`, confirm tags use inline YAML array style on one line, e.g. `tags: [architecture, nestjs, boundaries]`. Flag block-list style (`tags:` followed by `- item`) because tag indexing depends on single-line frontmatter.
@@ -172,6 +172,18 @@ Skip this section if `.claude/specs/` does not exist.
 
 - For all files in `.claude/agents/`, compare their `description:` fields.
 - If two agents share >50% of trigger keywords (e.g., both contain "review", "code", "PROACTIVELY"), flag as **possible overlap** — they may both auto-trigger on the same situation and waste tokens.
+
+### 10. Graph Wiring
+
+Check the development-graph layer is installed and coherent (only when the project uses it — a
+project with no `.claude/scripts/graph/` is not failing this check, it simply opted out):
+
+- **Engine present and executable**: `.claude/scripts/claudart-graph.sh` exists and is executable; `bash .claude/scripts/claudart-graph.sh --help` exits 0. If `python3` is absent the engine exits 2 — report that as an Error, not a silent pass.
+- **Commands wired**: `.claude/commands/graph.md` exists (and, on the Codex side, `codex-graph`); `graph.md` documents `audit`.
+- **Rules reachable**: `graph-development.md` and `constitution.md` exist under `.claude/rules/` and are referenced from `.claude/CLAUDE.md` (the constitution as an `@`-import, graph-development as a trigger line).
+- **Manifest home**: `.claude/architecture/` is present, or its absence is explained (a project with no adopted manifest yet).
+- **One engine-written file**: in every `.claude/specs/*/graph/`, `events.jsonl` is the ONLY file the engine writes — flag any other hand-authored `.json`/state file there as drift (the graph state is a fold over that log, D18).
+- **Enforcers legislated**: `bash .claude/scripts/claudart-graph.sh rules` lists the enforcer registry; every MUST clause in `graph-development.md`/`constitution.md` carries an `⟦enforcer:⟧`/`⟦judgement⟧` tag (this is what `constitution-check.sh` enforces mechanically).
 
 ## Output Format
 

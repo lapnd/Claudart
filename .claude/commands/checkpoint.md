@@ -157,6 +157,7 @@ Skip entirely if `.claude/specs/` does not exist.
 6. Flag stalled specs per the Staleness Thresholds table in `.claude/rules/task-management.md`, mapped as: `running` ↔ `in-progress`, `poc-review`/`awaiting-final-review` ↔ `awaiting-review`, `drafting` ↔ `planning`. List flagged specs in the report.
 7. Scan each Active spec's `NOTES.md` for `→ graduate:` flags: route `knowledge/` flags into Step 6c and surface `/learn` flags as proposals. Clear only successfully promoted or deliberately reclassified claims; retain unresolved candidates.
 8. Do NOT tick roadmap boxes, write LEDGER entries, or change any spec `status` — those transitions belong to `/spec`, `/spec-run`, and the user.
+9. **Graph engine retro-snapshot**: for each active spec whose folder has `architecture.yaml`, run `bash .claude/scripts/claudart-graph.sh retro --dir <folder>` and, only if any lines appear under `FLAGS for /learn:`, append them plus the one-line `status` output (`bash .claude/scripts/claudart-graph.sh status --dir <folder>`) to that spec's `LEDGER.md` under a heading `### <UTC time> — retro-snapshot` — get the timestamp from `date -u +"%Y-%m-%d %H:%MZ"`, never typed.
 
 ### Step 6c — Bulk-maintain eligible knowledge
 

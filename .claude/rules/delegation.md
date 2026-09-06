@@ -18,9 +18,11 @@ Apply: Before accepting delegated work, verify the diff, changed files, branch b
 
 4. Route every unit to the cheapest tier that clears it
 
-Cost is a standing constraint of this workspace, not a per-task preference, and it is never
-re-litigated. The default is NEVER the strongest model: an expensive session spending its own
-context on mechanical work is the most common waste here, and it is invisible unless it is named.
+This is the delegation-specific instance of the Constitution's cost discipline (priority 7; Golden
+Rules 4-6 and 9 — the canonical statement lives there, not here). What this rule adds is the
+operational default: NEVER the strongest model. An expensive session spending its own context on
+mechanical work is the most common waste here, and it is invisible unless it is named. Cost is a
+standing constraint, never re-litigated — but per the priority ladder it never overrides correctness.
 
 Apply: Choose the tier from the work, before spawning.
 

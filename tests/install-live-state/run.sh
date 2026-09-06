@@ -4,9 +4,9 @@
 #
 # CLAUDART dogfoods itself: it uses CLAUDART to improve CLAUDART, so this
 # repo's own checked-in tree always carries real CONTEXT/JOURNAL/tasks/specs/
-# knowledge content for THIS repo's sessions. install.sh must never copy that
-# content into someone else's project — on a fresh install, on --upgrade, or
-# under --force — only template-owned files may travel.
+# knowledge/architecture content for THIS repo's sessions. install.sh must
+# never copy that content into someone else's project — on a fresh install,
+# on --upgrade, or under --force — only template-owned files may travel.
 #
 # This test exercises the ACTUAL copy_tree/copy_file/is_live_state_path
 # functions as shipped in install.sh (extracted by section marker, not
@@ -77,8 +77,8 @@ extract_functions() {
 # category, under both the Claude and Codex layers.
 build_fixture() {
   _root=$1
-  mkdir -p "$_root/.claude/commands" "$_root/.claude/tasks" "$_root/.claude/specs" "$_root/.claude/knowledge"
-  mkdir -p "$_root/.codex/guidelines" "$_root/.codex/tasks" "$_root/.codex/specs" "$_root/.codex/knowledge"
+  mkdir -p "$_root/.claude/commands" "$_root/.claude/tasks" "$_root/.claude/specs" "$_root/.claude/knowledge" "$_root/.claude/architecture"
+  mkdir -p "$_root/.codex/guidelines" "$_root/.codex/tasks" "$_root/.codex/specs" "$_root/.codex/knowledge" "$_root/.codex/architecture"
 
   echo "template command" > "$_root/.claude/commands/start.md"
   echo "dogfood context" > "$_root/.claude/CONTEXT.md"
@@ -86,10 +86,12 @@ build_fixture() {
   echo "dogfood task" > "$_root/.claude/tasks/2026-08-14-001-evidence-gauntlet.md"
   echo "dogfood spec index" > "$_root/.claude/specs/INDEX.md"
   echo "dogfood knowledge" > "$_root/.claude/knowledge/codex-mirror-pattern.md"
+  echo "dogfood architecture" > "$_root/.claude/architecture/architecture.yaml"
 
   echo "template guideline" > "$_root/.codex/guidelines/ai-behavior.md"
   echo "dogfood context" > "$_root/.codex/CONTEXT.md"
   echo "dogfood task" > "$_root/.codex/tasks/index.md"
+  echo "dogfood architecture" > "$_root/.codex/architecture/architecture.yaml"
 }
 
 # Runs copy_tree ".claude" and copy_tree ".codex" from a sourced function set
@@ -118,6 +120,31 @@ run_fresh_install() {
   ) >/dev/null 2>&1
 }
 
+# Same, but as an --upgrade over an existing install (FORCE=false,
+# UPGRADE=true). Upgrade is the flag that DOES overwrite template-owned files,
+# so it is the run where a misclassified live-state path would land silently.
+run_upgrade_install() {
+  _funcs=$1
+  _tmpdir=$2
+  _dest=$3
+
+  # shellcheck disable=SC1090
+  (
+    TMPDIR="$_tmpdir"
+    DEST="$_dest"
+    FORCE=false
+    UPGRADE=true
+    SKIPPED=0
+    COPIED=0
+    UPGRADED=0
+    UNCHANGED=0
+    EXCLUDED=0
+    . "$_funcs"
+    copy_tree ".claude"
+    copy_tree ".codex"
+  ) >/dev/null 2>&1
+}
+
 WORK=$(mktemp -d) || exit 2
 trap 'rm -rf "$WORK"' EXIT
 
@@ -125,6 +152,7 @@ FUNCS_CURRENT="$WORK/funcs-current.sh"
 FUNCS_PREFIX="$WORK/funcs-prefix.sh"
 FIXTURE="$WORK/fixture"
 DEST_CURRENT="$WORK/dest-current"
+DEST_UPGRADE="$WORK/dest-upgrade"
 DEST_PREFIX="$WORK/dest-prefix"
 
 build_fixture "$FIXTURE"
@@ -168,8 +196,10 @@ for live in \
   .claude/tasks/2026-08-14-001-evidence-gauntlet.md \
   .claude/specs/INDEX.md \
   .claude/knowledge/codex-mirror-pattern.md \
+  .claude/architecture/architecture.yaml \
   .codex/CONTEXT.md \
   .codex/tasks/index.md \
+  .codex/architecture/architecture.yaml \
 ; do
   if [ -f "$DEST_CURRENT/$live" ]; then
     fail "fresh install never copies $live"
@@ -177,6 +207,31 @@ for live in \
     pass "fresh install never copies $live"
   fi
 done
+
+# ── --upgrade over an existing install: same exclusion must hold ──────────
+# The destination looks like a real CLAUDART install (template files present,
+# no live state of its own), which is exactly the shape --upgrade targets.
+mkdir -p "$DEST_UPGRADE/.claude/commands" "$DEST_UPGRADE/.codex/guidelines"
+echo "old template command" > "$DEST_UPGRADE/.claude/commands/start.md"
+echo "old template guideline" > "$DEST_UPGRADE/.codex/guidelines/ai-behavior.md"
+run_upgrade_install "$FUNCS_CURRENT" "$FIXTURE" "$DEST_UPGRADE"
+
+for live in \
+  .claude/architecture/architecture.yaml \
+  .codex/architecture/architecture.yaml \
+; do
+  if [ -f "$DEST_UPGRADE/$live" ]; then
+    fail "--upgrade never installs $live"
+  else
+    pass "--upgrade never installs $live"
+  fi
+done
+
+if grep -q "template command" "$DEST_UPGRADE/.claude/commands/start.md" 2>/dev/null; then
+  pass "--upgrade still refreshes template-owned .claude/commands/start.md"
+else
+  fail "--upgrade still refreshes template-owned .claude/commands/start.md"
+fi
 
 for tmpl in .claude/commands/start.md .codex/guidelines/ai-behavior.md; do
   if [ -f "$DEST_CURRENT/$tmpl" ]; then

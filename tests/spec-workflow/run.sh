@@ -151,6 +151,25 @@ for author in "$CODEX_AUTHOR" "$CLAUDE_AUTHOR"; do
     "spec authoring annotates task tiers for model routing"
 done
 
+# D39 — rotation policy: `auto` is the default and the successor is launched by the script;
+# `offer` keeps the human prompt. The conditional must be spelled out in both the rule and the
+# executor command so a cheap session cannot "forget" to stop.
+CLAUDE_RUN=$REPO_ROOT/.claude/commands/spec-run.md
+assert_contains "$CLAUDE_RULE" "rotation: auto # auto | offer" \
+  "rule frontmatter template carries rotation: auto as the default"
+assert_not_contains "$CLAUDE_RULE" '`offer` (the default)' \
+  "rule no longer calls offer the default"
+for f in "$CLAUDE_RULE" "$CLAUDE_RUN"; do
+  assert_contains "$f" 'claudart-rotate.sh' \
+    "$(basename "$f") names the rotation launcher"
+  assert_contains "$f" 'under `offer`' \
+    "$(basename "$f") spells the offer conditional (ask instead of launch)"
+  assert_contains "$f" 'stop' \
+    "$(basename "$f") says the current session stops after launching"
+done
+assert_contains "$CLAUDE_AUTHOR" "rotation: auto" \
+  "/spec writes rotation: auto by default"
+
 printf '1..%s\n' $((PASS_COUNT + FAIL_COUNT))
 if [ "$FAIL_COUNT" -ne 0 ]; then
   exit 1

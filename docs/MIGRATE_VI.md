@@ -73,7 +73,7 @@ Không cần chuẩn bị: bảng dịch idiom, cấu trúc package Go, danh sá
 
 ```
 you>  /start
-you>  /migrate port app NiceGUI trong app/ sang Go backend + Vue SPA, hexagonal, modular
+you>  /migrate port app NiceGUI trong python/src sang Go backend + Vue SPA, hexagonal, modular
 ```
 
 Agent đọc `.claude/rules/stack-migration.md`, tạo `.claude/specs/YYYY-MM-DD-<slug>/`, và bắt đầu phỏng vấn. **Khi spec đang `drafting`, agent không được viết một dòng code implementation nào** — đây là khoá cứng, không phải phép lịch sự.
