@@ -3,6 +3,20 @@ paths: ["**/*"]
 description: Evidence-first proof discipline for code changes — tier calibration by blast radius, observed-red-before-green ordering, a gauntlet of executable layers (changed-line coverage, mutation, property-based tests), absolute anti-gaming rules, and fail-closed checkers. Supplies the proof half that code-quality.md's coverage bar assumes.
 when_to_use: When a change needs proof rather than assertion — a task or roadmap item that names a tier, any bug fix, any security- or money-sensitive surface, or an invocation of /prove. Read before writing the first test, not after the implementation.
 tags: [testing, evidence, tdd, mutation, verification]
+level: law
+authority: core
+status: approved
+since: 2026-08-18
+stale_after: 2027-08-18T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-08-18T00:00:00Z
+enforcer: judgement
+layers_on: [ai-behavior, code-quality]
+load: trigger
+order: 110
+trigger: "read when a change needs proof rather than assertion: any bug fix, any money/auth/data-loss/concurrency/public-API surface, a task or roadmap item naming a tier, or `/prove`. Read it **before writing the first test**, not after the implementation."
+digest: "declare a tier by blast radius; watch every new test fail before implementing it (`red-verified`) — a test you never saw fail proves nothing; changed-line coverage is the gate and must exit nonzero when missed, while the global 95% is context; mutation testing is what defends the coverage number, and surviving mutants are killed or classified as equivalent, never papered over; home-grown checkers fail closed and get a negative control proving they can fail; never weaken a test, chase coverage, or report a layer you didn't run."
 ---
 
 # Evidence Gauntlet

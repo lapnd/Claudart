@@ -3,6 +3,21 @@ paths: ["**/*"]
 description: Cross-runtime port missions — porting a codebase to another language, runtime, or UI framework while preserving observable behavior; translation-unit sizing, contract-first seam, UI-fused source decomposition, and parity proof.
 when_to_use: When a mission ports code across a language/runtime/UI-framework boundary (Python→Go, NiceGUI→Vue, Django→Nest, Streamlit→SPA), when running /migrate, or when a spec folder carries a source-baseline plus a separate target stack.
 tags: [migration, porting, parity, architecture]
+level: law
+authority: standard
+status: approved
+since: 2026-09-03
+stale_after: 2027-09-03T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-09-03T00:00:00Z
+enforcer: judgement
+supersedes_in_scope: [spec-workflow]
+layers_on: [code-organization, graph-development]
+load: trigger
+order: 50
+trigger: "read when a mission ports code across a language, runtime, or UI-framework boundary (`/migrate`, or a spec carrying a source baseline plus a separate target stack)."
+digest: "layers onto the spec Refactor Missions overlay and wins where they differ; one translation unit per task, fed the source code rather than a prose retelling; freeze the target API contract before any target code; decompose a UI-fused source into domain/transport/view and enumerate every implicit server-held state before translating; fidelity is owed to behavior, never to structure — take the better target-native data structure, concurrency shape, or library rather than transliterating, and never add a GPL/AGPL dependency; parity is a differential run against the running baseline, not green unit tests; a smoke path exists from Phase 1, and the mission is not done until cutover is executed or scheduled."
 ---
 
 # Stack Migration (Cross-Runtime Port)

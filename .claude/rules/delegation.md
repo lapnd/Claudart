@@ -1,3 +1,17 @@
+---
+level: law
+authority: standard
+status: approved
+since: 2026-09-03
+stale_after: 2027-09-03T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-09-03T00:00:00Z
+enforcer: judgement
+layers_on: [constitution]
+load: auto
+---
+
 1. Resolve the target before delegating
 
 An agent can successfully modify the wrong file or wrong branch.

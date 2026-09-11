@@ -3,6 +3,19 @@ paths: ["**/*"]
 description: Code organization and architecture rules — hexagonal (ports & adapters) boundaries, module structure, and size/complexity limits, applied to any language written in this workspace.
 when_to_use: When creating new source files or modules, adding a package/domain, organizing or restructuring existing code, or reviewing code for architectural boundaries.
 tags: [architecture, hexagonal, code-organization, modularity]
+level: law
+authority: standard
+status: approved
+since: 2026-08-12
+stale_after: 2027-08-12T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-08-12T00:00:00Z
+enforcer: judgement
+load: trigger
+order: 90
+trigger: "read when creating new source files/modules, organizing or restructuring code, or reviewing architectural boundaries."
+digest: "domain-oriented modules over filename-prefix families or generic `utils`/`helpers`/`common` dirs; dependencies point toward the domain, with infrastructure behind ports/adapters; no just-in-case abstractions; files ~500 LOC / functions ~50 LOC are the size ceiling, not a target."
 ---
 
 # Code Organization & Architecture

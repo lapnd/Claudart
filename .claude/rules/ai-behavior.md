@@ -3,6 +3,19 @@ paths: ["**/*"]
 description: Universal AI execution guidelines for scoped, autonomous, evidence-driven Claude Code and Codex work across stacks and domains.
 when_to_use: Every task, regardless of stack or domain.
 tags: [behavior, universal, autonomy, verification]
+level: law
+authority: standard
+status: approved
+since: 2026-04-28
+stale_after: 2027-04-28T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-04-28T00:00:00Z
+enforcer: judgement
+layers_on: [constitution]
+load: always
+order: 20
+trigger: "for universal AI behavior guidelines."
 ---
 
 # AI Execution Guidelines

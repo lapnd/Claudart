@@ -3,6 +3,18 @@ paths: ["**/*"]
 description: The Engineering Constitution — the decision-priority ladder and sixteen Golden Rules that sit above every other rule in any project CLAUDART operates on. Cost/determinism/LLM-boundary discipline that never overrides correctness.
 when_to_use: Every task. When principles conflict, this ladder decides; the Golden Rules are the standing defaults.
 tags: [constitution, priority, cost, determinism, universal]
+level: constitution
+authority: core
+status: approved
+since: 2026-09-06
+stale_after: 2027-09-06T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-09-06T00:00:00Z
+enforcer: check:.claude/scripts/constitution-check.sh
+load: always
+order: 10
+trigger: "for the decision-priority ladder and sixteen Golden Rules that sit above every other rule."
 ---
 
 # Engineering Constitution

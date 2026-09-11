@@ -3,7 +3,7 @@
 
 ## Active
 
-- [governed-intelligence-poc](2026-09-06-governed-intelligence-poc/SPEC.md) — running — updated 2026-09-06
+- [governed-intelligence-poc](2026-09-06-governed-intelligence-poc/SPEC.md) — running — updated 2026-09-06 — laws with lifecycle + compiled CLAUDE.md block + OKF knowledge layer
 
 ## Done
 

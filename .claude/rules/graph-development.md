@@ -3,6 +3,20 @@ paths: ["**/*"]
 description: Graph-driven development — the architecture of the software being built is an executable dependency graph of nodes (claim + verifier + state) that AI plans, schedules, and proves against, layered on the hexagonal target of code-organization.md.
 when_to_use: When a spec mission carries an architecture.yaml + a graph-format ROADMAP, when running claudart-graph, when decomposing a hexagon into nodes/edges, or when scheduling or verifying graph-driven work.
 tags: [architecture, hexagonal, graph, tdd, scheduling]
+level: law
+authority: standard
+status: approved
+since: 2026-09-06
+stale_after: 2027-09-06T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-09-06T00:00:00Z
+enforcer: check:.claude/scripts/constitution-check.sh
+layers_on: [code-organization, evidence-gauntlet]
+load: trigger
+order: 80
+trigger: "read when a spec mission carries an `architecture.yaml` + a graph-format ROADMAP, when running `claudart-graph`, or when decomposing/scheduling/verifying a hexagon as a node graph."
+digest: "the adopting project's hexagonal architecture is an executable dependency graph of nodes (claim + verifier + state) folded from an append-only event log the orchestrator alone writes; kinds are hexagonal roles from the manifest profile; contract/port before implementation and one shared contract test per outbound port; TDD is an edge — behaviour requires an observed-red test, never weaken a test; a port/contract/domain change is a scope change; every MUST is tagged to an enforcer (`claudart-graph rules`) or marked judgement; layers on `code-organization.md` and `evidence-gauntlet.md`."
 ---
 
 # Graph-Driven Development

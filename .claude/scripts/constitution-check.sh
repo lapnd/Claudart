@@ -15,8 +15,16 @@
 #                              when CC_ROADMAP names a file; otherwise skips with a printed note
 #                              (npm check has no active spec).
 #   2. no verbatim duplication — no rule file under $CC_RULES_DIR contains a verbatim run of >= 12
-#                              consecutive words (WORD_RUN below) copied from $CC_CONSTITUTION, the
-#                              constitution file itself excluded. Shingle/n-gram scan.
+#                              consecutive words (WORD_RUN below) copied from $CC_CONSTITUTION's
+#                              PROSE BODY, the constitution file itself excluded. Shingle/n-gram
+#                              scan. The source corpus is the constitution's body only: its own YAML
+#                              frontmatter is machine-generated law-record metadata (level/authority/
+#                              status/since/stale_after/verified/enforcer per .claude/scripts/law/
+#                              SCHEMA.md), and every law record repeats those field names, dates and
+#                              enforcer paths by construction — matching them is a false positive,
+#                              not plagiarism. Each RULE file is still scanned in full, frontmatter
+#                              included, so a rule that copies constitution prose into a description,
+#                              trigger or digest is still caught.
 #   3. auto-import budget     — the SUM of line counts of the `@.claude/rules/<x>.md` files imported
 #                              by $CC_CLAUDE_MD is <= $CC_IMPORT_BUDGET, and each imported file is
 #                              <= 150 lines.
@@ -27,9 +35,10 @@
 #                              `claudart-graph.sh rules`.
 #
 # MEASURED BUDGET (hardcoded so growth trips the check — re-measure if imports change):
-#   On 2026-09-06 $CC_CLAUDE_MD imported .claude/rules/constitution.md (47 lines) +
-#   .claude/rules/ai-behavior.md (141 lines) = 188 lines. Default budget 200 = 188 rounded up with
-#   a small headroom. Per-file cap 150 (ai-behavior.md at 141 is the current high-water mark).
+#   Re-measured 2026-09-06 after the law-record frontmatter migration: $CC_CLAUDE_MD imports
+#   .claude/rules/constitution.md (59 lines) + .claude/rules/ai-behavior.md (83 lines) = 142 lines.
+#   Both limits are unchanged — 142 <= 200 and 83 <= the per-file cap of 150 — so neither was
+#   raised; ai-behavior.md at 83 is the current high-water mark.
 
 set -u
 
@@ -138,7 +147,17 @@ def shingles(text):
     return {tuple(words[i:i + run]): i for i in range(0, len(words) - run + 1)}, words
 
 const_real = os.path.realpath(constitution)
-const_text = open(constitution, encoding="utf-8").read()
+def body(text):
+    """The Markdown body, with any leading `---` YAML frontmatter block removed."""
+    lines = text.split("\n")
+    if not lines or lines[0].strip() != "---":
+        return text
+    for idx in range(1, len(lines)):
+        if lines[idx].strip() == "---":
+            return "\n".join(lines[idx + 1:])
+    return text
+
+const_text = body(open(constitution, encoding="utf-8").read())
 const_grams, _ = shingles(const_text)
 const_set = set(const_grams)
 

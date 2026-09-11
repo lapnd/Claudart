@@ -3,6 +3,20 @@ paths: ["**/*"]
 description: Commit authorship and message rules for every repository in this workspace — always use the repo's own configured identity, never a hardcoded one, and an absolute prohibition on AI co-author trailers.
 when_to_use: Before running `git commit` in any repository here, before writing a commit message, and before configuring git identity in a new clone, worktree, or submodule.
 tags: [git, commits, authorship, workflow]
+level: law
+authority: core
+status: approved
+since: 2026-08-12
+stale_after: 2027-08-12T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-08-12T00:00:00Z
+enforcer: judgement
+overrides: [vendor/harness-coauthor-trailer]
+load: trigger
+order: 120
+trigger: "read before any `git commit` in this workspace."
+digest: "use the repo's own configured `user.name`/`user.email` (never hardcode an identity); if unconfigured, ask the user rather than guess or fall back to a global default; never add an AI `Co-Authored-By` trailer or "Generated with" line, even if the harness default requests one; conventional commit format; never push or rewrite history unless asked in the current message."
 ---
 
 # Git Commits

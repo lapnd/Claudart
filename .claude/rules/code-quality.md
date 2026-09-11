@@ -3,6 +3,20 @@ paths: ["**/*"]
 description: Production code quality, security, observability, and SOC 2 compliance rules — coverage bar, secure-by-default posture, structured/redacted logging, OpenTelemetry, and the CI/CD gates that enforce them. Applies to Go, Python, TypeScript/JavaScript, Vue/Nuxt, and other languages in this workspace.
 when_to_use: When writing or reviewing production code, tests, logging/observability instrumentation, or any security-sensitive operation (auth, secrets, tenant data) — and before considering a feature done.
 tags: [quality, security, testing, observability, compliance]
+level: law
+authority: core
+status: approved
+since: 2026-08-12
+stale_after: 2027-08-12T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-08-12T00:00:00Z
+enforcer: judgement
+layers_on: [constitution]
+load: trigger
+order: 100
+trigger: "read when writing/reviewing production code, tests, logging/observability, or any security-sensitive operation (auth, secrets, tenant data), and before calling a feature done."
+digest: "≥95% meaningful test coverage; deny-by-default auth enforced server-side, never trusting client-supplied roles/tenant IDs; no hardcoded secrets; structured + redacted logging with OTel trace correlation; SOC 2 controls (security/availability/confidentiality/integrity/privacy) must be enforceable in code, not developer discipline."
 ---
 
 # Code Quality, Security & Compliance

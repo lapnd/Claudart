@@ -3,6 +3,19 @@ paths: ["**/*"]
 description: How agents create, maintain, resume, and complete persistent implementation plans stored in `.claude/tasks/`. Replaces session-only plan mode with cross-session task documents.
 when_to_use: Whenever the user invokes `/plan`, when a task file is open or referenced, or when resuming work that may have an active task in `.claude/tasks/`.
 tags: [tasks, planning, persistence, cross-session]
+level: law
+authority: standard
+status: approved
+since: 2026-05-13
+stale_after: 2027-05-13T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-05-13T00:00:00Z
+enforcer: judgement
+load: trigger
+order: 30
+trigger: "read when creating or resuming a task (`/plan`, or an active task in CONTEXT / `tasks/index.md`)."
+digest: "`planning` and `awaiting-review` are read-only locks — no code edits; never flip a task to `done` or archive it yourself — report at `awaiting-review` and stop."
 ---
 
 # Task Management

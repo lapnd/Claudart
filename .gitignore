@@ -33,4 +33,5 @@ codex/
 __pycache__/
 *.pyc
 # Built okf binary (okf-agent-memory CLI), fetched/built on demand by okf-install.sh
+.claude/worktrees/
 .claude/scripts/bin/

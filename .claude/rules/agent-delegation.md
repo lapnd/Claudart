@@ -3,6 +3,20 @@ paths: ["**/*"]
 description: Claude Code subagent delegation — project guidance on HOW to delegate well (decomposition, worker prompts, anti-shadow-run, persistence), layered on top of the Agent tool's built-in WHEN-to-delegate mechanics.
 when_to_use: When delegating to subagents, or planning a task that may parallelize — for the project's decomposition, worker-prompt, anti-shadow-run, and finding-persistence guidance.
 tags: [subagents, delegation, parallelism, orchestration]
+level: law
+authority: standard
+status: approved
+since: 2026-05-31
+stale_after: 2027-05-31T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-05-31T00:00:00Z
+enforcer: judgement
+overrides: [vendor/harness-delegation-default]
+load: trigger
+order: 60
+trigger: "read before spawning subagents."
+digest: "worker prompts are self-contained; never shadow-run a delegated question; record each delegation in the owning task/spec artifact at spawn time; a parallel coding worktree is merged and confirmed before it is ever deleted, and never pushed unless already authorized elsewhere."
 ---
 
 # Agent Delegation

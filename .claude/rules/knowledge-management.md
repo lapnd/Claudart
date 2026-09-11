@@ -3,6 +3,19 @@ paths: ["**/*"]
 description: Bounded routing, capture, schema, lifecycle, and validation contract for durable descriptive knowledge under `.claude/knowledge/`.
 when_to_use: Whenever project knowledge is read, searched, created, updated, routed, normalized, or reviewed.
 tags: [knowledge, memory, routing, validation]
+level: law
+authority: standard
+status: approved
+since: 2026-07-30
+stale_after: 2027-07-30T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-07-30T00:00:00Z
+enforcer: judgement
+load: trigger
+order: 70
+trigger: "read before writing to `.claude/knowledge/` or routing beyond the root INDEX."
+digest: "patch the existing owner, update topic + route atomically, run `bash .claude/scripts/knowledge-check.sh` after any mutation; never auto-delete knowledge."
 ---
 
 # Knowledge Management

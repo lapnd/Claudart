@@ -1,3 +1,16 @@
+---
+level: law
+authority: standard
+status: approved
+since: 2026-09-03
+stale_after: 2027-09-03T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-09-03T00:00:00Z
+enforcer: judgement
+load: auto
+---
+
 ## 1. Never trust a PASS until the check can FAIL
 
 A verification that only passes has not proved that it works.

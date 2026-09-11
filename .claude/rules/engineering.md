@@ -1,3 +1,16 @@
+---
+level: law
+authority: standard
+status: approved
+since: 2026-09-03
+stale_after: 2027-09-03T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-09-03T00:00:00Z
+enforcer: judgement
+load: auto
+---
+
 These are the deterministic-execution and evidence practices behind the Constitution's Golden Rules
 5 (compute locally) and 11 (prefer deterministic artifacts) and priority 4 (reliability and
 reproducibility) — the Constitution ranks the value, this rule is the procedure.

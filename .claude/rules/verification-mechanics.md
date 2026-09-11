@@ -3,6 +3,17 @@ paths: ["**/*"]
 description: How to read a result correctly — reading exit status, keeping a baseline valid, separating detection from attribution, and pinning what a gate actually means. The mechanics that decide whether evidence means what you think it means.
 when_to_use: Before believing any command result, comparison, or baseline; before concluding a change caused a behaviour; before trusting a gate that passed. Read alongside evidence-gauntlet.md, which chooses the layers this rule teaches you to read.
 tags: [verification, evidence, baselines, tooling, attribution]
+level: law
+authority: core
+status: approved
+since: 2026-09-03
+stale_after: 2027-09-03T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-09-03T00:00:00Z
+enforcer: judgement
+layers_on: [ai-behavior, evidence-gauntlet]
+load: auto
 ---
 
 # Verification Mechanics

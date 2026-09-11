@@ -3,6 +3,21 @@ paths: ["**/*"]
 description: Dated mission-scale spec workspaces in `.claude/specs/` with `done/` archives — a POC-frozen SPEC plus a decision-complete ROADMAP that any later session (often a cheaper model) executes autonomously until final review, with self-QA, circuit breakers, and session rotation.
 when_to_use: Whenever the user invokes `/spec` or `/spec-run`, when a spec folder under `.claude/specs/` is open or referenced, or when resuming mission-scale work that spans many sessions.
 tags: [specs, loop-engineering, autonomy, cross-session, missions]
+level: law
+authority: standard
+status: approved
+since: 2026-07-06
+stale_after: 2027-07-06T00:00:00Z
+verified:
+  - by: human:lapnd
+    at: 2026-07-06T00:00:00Z
+enforcer: judgement
+supersedes_in_scope: [task-management]
+layers_on: [ai-behavior]
+load: trigger
+order: 40
+trigger: "read when a spec mission is active or requested (`/spec`, `/spec-run`, `/refactor`, `/migrate`, or an active folder in `.claude/specs/`)."
+digest: "never write implementation code while a spec is `drafting`/`poc-review`; never mark a mission done without its final gate; the spec folder, not chat, is the source of truth."
 ---
 
 # Spec Workflow (Loop Engineering)
