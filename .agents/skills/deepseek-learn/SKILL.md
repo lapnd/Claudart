@@ -49,7 +49,7 @@ Guideline frontmatter uses `paths:`, `description:`, `when_to_use:`, and `tags:`
 - Uncertain or conflicting observation → keep it as a candidate, or mark a contradicted canonical owner `review-needed` with evidence and `status_note`.
 - Retired chronology → leave it in JOURNAL; do not rewrite JOURNAL.
 
-`$deepseek-learn` may write an eligible fact immediately. `$deepseek-checkpoint` performs bulk maintenance but is not an exclusive knowledge write gate.
+`/deepseek-learn` may write an eligible fact immediately. `/deepseek-checkpoint` performs bulk maintenance but is not an exclusive knowledge write gate.
 
 ## 5. Output Standard
 

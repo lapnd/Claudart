@@ -1,7 +1,7 @@
 ---
 paths: ["**/*"]
 description: How agents create, maintain, resume, and complete persistent implementation plans stored in `.deepseek/tasks/`. Replaces session-only plan mode with cross-session task documents.
-when_to_use: Whenever the user invokes `$deepseek-plan`, when a task file is open or referenced, or when resuming work that may have an active task in `.deepseek/tasks/`.
+when_to_use: Whenever the user invokes `/deepseek-plan`, when a task file is open or referenced, or when resuming work that may have an active task in `.deepseek/tasks/`.
 tags: [tasks, planning, persistence, cross-session]
 ---
 
@@ -29,7 +29,7 @@ Mission-scale work runs one layer up, in `.deepseek/specs/` (see `spec-workflow.
 - **Naming**: `YYYY-MM-DD-NNN-<kebab-slug>.md`. Date is creation date (UTC). NNN is a zero-padded 3-digit sequence number starting at 001, incrementing per day (001, 002, … 999). Slug is 2-5 words, lowercase, hyphen-separated.
 - **One task per file.** Never split a single task across files. Do not nest folders inside `tasks/` beyond `done/`.
 - **`done/` is archive.** Files move here on completion or cancellation; they are never deleted.
-- **`index.md` is a dashboard**, maintained by `$deepseek-plan` and `$deepseek-checkpoint`. Task files are the source of truth; `index.md` is a convenience cache.
+- **`index.md` is a dashboard**, maintained by `/deepseek-plan` and `/deepseek-checkpoint`. Task files are the source of truth; `index.md` is a convenience cache.
 
 ## Required Task File Structure
 
@@ -222,7 +222,7 @@ When the user gives a completion signal — "approved", "confirmed", "looks good
    YYYY-MM-DD | completed | <slug> — <one-line outcome>, see tasks/done/<filename>
    ```
 5. Update `.deepseek/tasks/index.md`: remove from Active, add to Recently Done.
-6. If a recurring pattern emerged, propose `$deepseek-learn` to graduate it into a guideline.
+6. If a recurring pattern emerged, propose `/deepseek-learn` to graduate it into a guideline.
 7. Leave task-local outcomes in the archived task. At this lifecycle boundary, promote only descriptive claims that pass the full knowledge gate; update owner + reachable route atomically and run the checker after a mutation. Keep unresolved claims as candidates in the archive.
 
 ### Phase 2b — User reports a problem (`awaiting-review → in-progress`)
@@ -264,7 +264,7 @@ Never assume the file is still accurate without verification. Memory Hints are a
 ## `index.md` Format
 
 ```markdown
-<!-- .deepseek/tasks/index.md — dashboard of task documents. Maintained by $deepseek-plan and $deepseek-checkpoint. -->
+<!-- .deepseek/tasks/index.md — dashboard of task documents. Maintained by /deepseek-plan and /deepseek-checkpoint. -->
 
 ## Active
 
@@ -283,7 +283,7 @@ Never assume the file is still accurate without verification. Memory Hints are a
 
 ## Staleness Thresholds
 
-Canonical numbers for flagging stalled tasks. `$deepseek-start` surfaces them, `$deepseek-checkpoint` acts on them, `$deepseek-doctor` audits them — none of those files redefine the numbers.
+Canonical numbers for flagging stalled tasks. `/deepseek-start` surfaces them, `/deepseek-checkpoint` acts on them, `/deepseek-doctor` audits them — none of those files redefine the numbers.
 
 | Status            | `updated:` older than | Flag as                                                                                                                                              |
 | ----------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -295,7 +295,7 @@ Canonical numbers for flagging stalled tasks. `$deepseek-start` surfaces them, `
 
 CONTEXT.md and task files are complementary, not exclusive:
 
-- **CONTEXT.md** holds two things: (a) a one-line pointer to the currently-focused task (`Working task \`<slug>\` (see .deepseek/tasks/<file>)`) so `$deepseek-start` sees task work at a glance, and (b) ad-hoc work the user asked for **without** a `$deepseek-plan` — quick fixes, transient tweaks, mid-flight pivots that don't justify a full task document.
+- **CONTEXT.md** holds two things: (a) a one-line pointer to the currently-focused task (`Working task \`<slug>\` (see .deepseek/tasks/<file>)`) so `/deepseek-start`sees task work at a glance, and (b) ad-hoc work the user asked for **without** a`/deepseek-plan` — quick fixes, transient tweaks, mid-flight pivots that don't justify a full task document.
 - **Task file** holds the full body: Purpose, Plan of Work, Concrete Steps, Decisions, Memory Hints, etc.
 - **`tasks/index.md`** is the canonical dashboard for _all_ active tasks; CONTEXT only mentions the one in focus.
 

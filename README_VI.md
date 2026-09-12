@@ -84,24 +84,24 @@ Sau khi cài hoặc đối soát, chạy một lần chuỗi kiểm tra và chu�
 
 | Claude Code        | Codex CLI                | DeepSeek (dsh)              | Pi                          |
 | ------------------ | ------------------------ | --------------------------- | --------------------------- |
-| `/doctor`          | `$codex-doctor`          | `$deepseek-doctor`          | `/skill:pi-doctor`          |
-| `/refactor-memory` | `$codex-refactor-memory` | `$deepseek-refactor-memory` | `/skill:pi-refactor-memory` |
-| `/doctor`          | `$codex-doctor`          | `$deepseek-doctor`          | `/skill:pi-doctor`          |
+| `/doctor`          | `$codex-doctor`          | `/deepseek-doctor`          | `/skill:pi-doctor`          |
+| `/refactor-memory` | `$codex-refactor-memory` | `/deepseek-refactor-memory` | `/skill:pi-refactor-memory` |
+| `/doctor`          | `$codex-doctor`          | `/deepseek-doctor`          | `/skill:pi-doctor`          |
 
-Sau đó bắt đầu phiên làm việc bình thường bằng `/start`, `$codex-start`, `$deepseek-start` hoặc `/skill:pi-start`.
+Sau đó bắt đầu phiên làm việc bình thường bằng `/start`, `$codex-start`, `/deepseek-start` hoặc `/skill:pi-start`.
 
 ## Quy trình hằng ngày
 
 | Mục đích                                               | Claude Code        | Codex CLI                | DeepSeek (dsh)              | Pi                          |
 | ------------------------------------------------------ | ------------------ | ------------------------ | --------------------------- | --------------------------- |
-| Định hướng phiên                                       | `/start`           | `$codex-start`           | `$deepseek-start`           | `/skill:pi-start`           |
-| Tạo kế hoạch triển khai bền vững                       | `/plan <task>`     | `$codex-plan <task>`     | `$deepseek-plan <task>`     | `/skill:pi-plan <task>`     |
-| Mô tả công việc lớn, kéo dài nhiều phiên               | `/spec <mission>`  | `$codex-spec <mission>`  | `$deepseek-spec <mission>`  | `/skill:pi-spec <mission>`  |
-| Thực thi đặc tả đã được phê duyệt                      | `/spec-run <slug>` | `$codex-spec-run <slug>` | `$deepseek-spec-run <slug>` | `/skill:pi-spec-run <slug>` |
-| Lưu phần điều tra đang dở                              | `/handoff`         | `$codex-handoff`         | `$deepseek-handoff`         | `/skill:pi-handoff`         |
-| Xây dựng lại trạng thái hiện tại tại điểm dừng phù hợp | `/checkpoint`      | `$codex-checkpoint`      | `$deepseek-checkpoint`      | `/skill:pi-checkpoint`      |
-| Biến cách làm lặp lại thành quy tắc                    | `/learn`           | `$codex-learn`           | `$deepseek-learn`           | `/skill:pi-learn`           |
-| Kiểm tra bản cài đặt                                   | `/doctor`          | `$codex-doctor`          | `$deepseek-doctor`          | `/skill:pi-doctor`          |
+| Định hướng phiên                                       | `/start`           | `$codex-start`           | `/deepseek-start`           | `/skill:pi-start`           |
+| Tạo kế hoạch triển khai bền vững                       | `/plan <task>`     | `$codex-plan <task>`     | `/deepseek-plan <task>`     | `/skill:pi-plan <task>`     |
+| Mô tả công việc lớn, kéo dài nhiều phiên               | `/spec <mission>`  | `$codex-spec <mission>`  | `/deepseek-spec <mission>`  | `/skill:pi-spec <mission>`  |
+| Thực thi đặc tả đã được phê duyệt                      | `/spec-run <slug>` | `$codex-spec-run <slug>` | `/deepseek-spec-run <slug>` | `/skill:pi-spec-run <slug>` |
+| Lưu phần điều tra đang dở                              | `/handoff`         | `$codex-handoff`         | `/deepseek-handoff`         | `/skill:pi-handoff`         |
+| Xây dựng lại trạng thái hiện tại tại điểm dừng phù hợp | `/checkpoint`      | `$codex-checkpoint`      | `/deepseek-checkpoint`      | `/skill:pi-checkpoint`      |
+| Biến cách làm lặp lại thành quy tắc                    | `/learn`           | `$codex-learn`           | `/deepseek-learn`           | `/skill:pi-learn`           |
+| Kiểm tra bản cài đặt                                   | `/doctor`          | `$codex-doctor`          | `/deepseek-doctor`          | `/skill:pi-doctor`          |
 
 Dùng kế hoạch tác vụ cho phần triển khai có nhiều bước hoặc nhiều file. Dùng đặc tả khi công việc có nhiều giai đoạn, cần bản thử nghiệm hoặc tiêu chí nghiệm thu, hay phải tiếp tục qua nhiều phiên.
 

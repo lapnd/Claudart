@@ -77,8 +77,8 @@ This map is orientation only; the current source tree and its references are aut
 
 **DeepSeek layer** (`.deepseek/` + `.agents/skills/`):
 
-- DeepSeek-native skills under `.agents/skills/deepseek-*`;
-- `.deepseek/guidelines/`, `.deepseek/knowledge/`, `.deepseek/scripts/`, `.deepseek/agents/`, and `.deepseek/config.toml` (shipped empty on purpose);
+- DeepSeek-native skills under `.agents/skills/deepseek-*`, invoked as `/deepseek-<name>`;
+- `.deepseek/guidelines/`, `.deepseek/knowledge/`, `.deepseek/scripts/`, and `.deepseek/personas/` (prompt sources for a subagent `persona`; dsh does not auto-discover them);
 - `.deepseek/CONTEXT.md`, `.deepseek/JOURNAL.md`, `.deepseek/tasks/`, and `.deepseek/specs/`;
 - `.deepseek/DEEPSEEK.md` as the source template for the canonical downstream root `DEEPSEEK.md`. DeepSeek harnesses also read root `AGENTS.md`, which the Codex layer owns, so the two layers coexist by using separate root loaders.
 
@@ -236,11 +236,11 @@ When semantic judgment is needed, first review only the changed files and their 
 - the affected contract is repository-wide;
 - the user explicitly requested a full health audit.
 
-When triggered, run `/doctor` for Claude, `$codex-doctor` for Codex, `$deepseek-doctor` for DeepSeek, or `/skill:pi-doctor` for Pi. Doctor is diagnostic only. Report findings; do not turn them into automatic writes.
+When triggered, run `/doctor` for Claude, `$codex-doctor` for Codex, `/deepseek-doctor` for DeepSeek, or `/skill:pi-doctor` for Pi. Doctor is diagnostic only. Report findings; do not turn them into automatic writes.
 
 ### 4.3 Refactor-memory is opt-in
 
-Never run `/refactor-memory`, `$codex-refactor-memory`, `$deepseek-refactor-memory`, or `/skill:pi-refactor-memory` automatically after integration. Run it only when a concrete finding is owned by that workflow, the exact additional files and intended changes are presented, and the user explicitly approves those writes.
+Never run `/refactor-memory`, `$codex-refactor-memory`, `/deepseek-refactor-memory`, or `/skill:pi-refactor-memory` automatically after integration. Run it only when a concrete finding is owned by that workflow, the exact additional files and intended changes are presented, and the user explicitly approves those writes.
 
 After an approved refactor-memory run, repeat mandatory fast verification. Repeat doctor only when the original finding requires semantic confirmation or the user explicitly requests it. There is no default `doctor → refactor-memory → doctor` chain.
 

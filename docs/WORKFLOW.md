@@ -21,7 +21,7 @@ CLAUDART provides four independent layers.
 | -------------- | ------------------------------- | ---------------------------------------------- | ----------------------- |
 | Claude Code    | `.claude/`                      | `/start`, `/plan`, and so on                   | `.claude/CLAUDE.md`     |
 | Codex CLI      | `.codex/`, `.agents/skills/`    | `$codex-start`, `$codex-plan`, and so on       | `.codex/AGENTS.md`      |
-| DeepSeek (dsh) | `.deepseek/`, `.agents/skills/` | `$deepseek-start`, `$deepseek-plan`, and so on | `.deepseek/DEEPSEEK.md` |
+| DeepSeek (dsh) | `.deepseek/`, `.agents/skills/` | `/deepseek-start`, `/deepseek-plan`, and so on | `.deepseek/DEEPSEEK.md` |
 | Pi             | `.pi/`, `.agents/skills/`       | `/skill:pi-start`, `/skill:pi-plan`, and so on | `.pi/PI.md`             |
 
 Install one layer or several. The workflows have the same intent, but their command and delegation files are written for the mechanics of each tool.
@@ -37,9 +37,11 @@ Codex, `dsh`, and Pi converge on the same two conventions, so CLAUDART treats bo
 
 ### Specialist agents and delegation differ by layer
 
-The Claude, Codex, and DeepSeek layers ship three specialist agents. The DeepSeek copies are Markdown with YAML frontmatter — the Claude-compatible format those harnesses read — and `.deepseek/guidelines/agent-delegation.md` states delegation policy without assuming a specific harness's spawn mechanics.
+The Claude and Codex layers ship three specialist agents their harnesses load directly.
 
-The Pi layer ships none, on purpose. Pi has no built-in subagents, and `.pi/agents/skills` is Pi's own path. `.pi/guidelines/agent-delegation.md` says so plainly and routes that work two ways instead: do the unit inline, or hand a written brief to a separate Pi instance in another terminal.
+**DeepSeek** has real subagents — `@deepseek-ai/dsh-tool-subagent` over a `spawn`, `fork`, `acp`, `codex`, `claude-code`, or `dsh-sdk` backend, with `maxDepth` defaulting to 3 — but no on-disk agent discovery. `.deepseek/guidelines/agent-delegation.md` documents that surface, and the three specialist prompts live in `.deepseek/personas/` as sources for a `persona` you wire up in the harness profile.
+
+**Pi** ships none, on purpose. Pi's README states it "skips features like sub agents and plan mode" and points at spawning separate pi instances via tmux, extensions, or a package. `.pi/guidelines/agent-delegation.md` says so plainly and routes that work two ways: do the unit inline, or hand a written brief to a second Pi instance. Pi's answer to plan mode — "write plans to files" — is what CLAUDART's task and spec layers already provide.
 
 ## 2. Install or integrate
 
@@ -91,7 +93,7 @@ Run this sequence once after installation or upgrade:
 ```text
 Claude:   /doctor → /refactor-memory → /doctor
 Codex:    $codex-doctor → $codex-refactor-memory → $codex-doctor
-DeepSeek: $deepseek-doctor → $deepseek-refactor-memory → $deepseek-doctor
+DeepSeek: /deepseek-doctor → /deepseek-refactor-memory → /deepseek-doctor
 Pi:       /skill:pi-doctor → /skill:pi-refactor-memory → /skill:pi-doctor
 ```
 
@@ -117,7 +119,7 @@ user review and closure
 
 ### Start with orientation
 
-Run `/start`, `$codex-start`, `$deepseek-start`, or `/skill:pi-start`.
+Run `/start`, `$codex-start`, `/deepseek-start`, or `/skill:pi-start`.
 
 The start command reads:
 
@@ -141,9 +143,9 @@ A specification replaces task plans within its approved scope. Do not create tas
 
 ### End or pause cleanly
 
-Use `/checkpoint`, `$codex-checkpoint`, `$deepseek-checkpoint`, or `/skill:pi-checkpoint` at a meaningful stopping point. Checkpoint rebuilds current state, synchronizes indexes, records retired history, and distills eligible durable facts.
+Use `/checkpoint`, `$codex-checkpoint`, `/deepseek-checkpoint`, or `/skill:pi-checkpoint` at a meaningful stopping point. Checkpoint rebuilds current state, synchronizes indexes, records retired history, and distills eligible durable facts.
 
-Use `/handoff`, `$codex-handoff`, `$deepseek-handoff`, or `/skill:pi-handoff` only when a difficult investigation must continue in a fresh session. Handoff records the current hypothesis, evidence, failed approaches, constraints, and exact next step. It is not a general session summary.
+Use `/handoff`, `$codex-handoff`, `/deepseek-handoff`, or `/skill:pi-handoff` only when a difficult investigation must continue in a fresh session. Handoff records the current hypothesis, evidence, failed approaches, constraints, and exact next step. It is not a general session summary.
 
 ## 4. Memory and knowledge
 
@@ -237,7 +239,7 @@ The normal `/doctor` and `/refactor-memory` commands call the relevant checker a
 
 ## 5. Persistent task workflow
 
-Use `/plan <task>`, `$codex-plan <task>`, `$deepseek-plan <task>`, or `/skill:pi-plan <task>` when the work should survive the current conversation.
+Use `/plan <task>`, `$codex-plan <task>`, `/deepseek-plan <task>`, or `/skill:pi-plan <task>` when the work should survive the current conversation.
 
 The command creates a dated task file under `.claude/tasks/`, `.codex/tasks/`, `.deepseek/tasks/`, or `.pi/tasks/`. A useful task file records:
 
@@ -288,7 +290,7 @@ A task file is a resumable plan, not proof that the repository has remained unch
 
 ## 6. Specification workflow
 
-Use `/spec <mission>`, `$codex-spec <mission>`, `$deepseek-spec <mission>`, or `/skill:pi-spec <mission>` when one task file is not enough.
+Use `/spec <mission>`, `$codex-spec <mission>`, `/deepseek-spec <mission>`, or `/skill:pi-spec <mission>` when one task file is not enough.
 
 A specification workspace lives under:
 
@@ -319,7 +321,7 @@ The approved specification also records the commit policy. The default is no aut
 
 ### Execution
 
-Run `/spec-run <slug>`, `$codex-spec-run <slug>`, `$deepseek-spec-run <slug>`, or `/skill:pi-spec-run <slug>` in a fresh session when practical.
+Run `/spec-run <slug>`, `$codex-spec-run <slug>`, `/deepseek-spec-run <slug>`, or `/skill:pi-spec-run <slug>` in a fresh session when practical.
 
 Each iteration:
 
@@ -372,16 +374,16 @@ The shipped Codex configuration limits concurrent subagent threads to six per se
 
 | Claude Code          | Codex CLI                  | DeepSeek (dsh)                | Pi                            | Purpose                                                                                 |
 | -------------------- | -------------------------- | ----------------------------- | ----------------------------- | --------------------------------------------------------------------------------------- |
-| `/start`             | `$codex-start`             | `$deepseek-start`             | `/skill:pi-start`             | Orient a session from current state, indexes, knowledge routing, and recent Git history |
-| `/plan <task>`       | `$codex-plan <task>`       | `$deepseek-plan <task>`       | `/skill:pi-plan <task>`       | Create a persistent implementation task                                                 |
-| `/spec <mission>`    | `$codex-spec <mission>`    | `$deepseek-spec <mission>`    | `/skill:pi-spec <mission>`    | Create and approve a multi-phase specification                                          |
-| `/spec-run <slug>`   | `$codex-spec-run <slug>`   | `$deepseek-spec-run <slug>`   | `/skill:pi-spec-run <slug>`   | Execute an approved specification to final review                                       |
-| `/project-discovery` | `$codex-project-discovery` | `$deepseek-project-discovery` | `/skill:pi-project-discovery` | Turn a rough project idea into structured project documents                             |
-| `/checkpoint`        | `$codex-checkpoint`        | `$deepseek-checkpoint`        | `/skill:pi-checkpoint`        | Rebuild current state, synchronize indexes, and distill durable information             |
-| `/handoff`           | `$codex-handoff`           | `$deepseek-handoff`           | `/skill:pi-handoff`           | Preserve an unfinished investigation for the next session                               |
-| `/learn`             | `$codex-learn`             | `$deepseek-learn`             | `/skill:pi-learn`             | Promote recurring behavior into rules or guidelines                                     |
-| `/doctor`            | `$codex-doctor`            | `$deepseek-doctor`            | `/skill:pi-doctor`            | Run structural and semantic health checks                                               |
-| `/refactor-memory`   | `$codex-refactor-memory`   | `$deepseek-refactor-memory`   | `/skill:pi-refactor-memory`   | Normalize and reorganize the memory structure in place                                  |
+| `/start`             | `$codex-start`             | `/deepseek-start`             | `/skill:pi-start`             | Orient a session from current state, indexes, knowledge routing, and recent Git history |
+| `/plan <task>`       | `$codex-plan <task>`       | `/deepseek-plan <task>`       | `/skill:pi-plan <task>`       | Create a persistent implementation task                                                 |
+| `/spec <mission>`    | `$codex-spec <mission>`    | `/deepseek-spec <mission>`    | `/skill:pi-spec <mission>`    | Create and approve a multi-phase specification                                          |
+| `/spec-run <slug>`   | `$codex-spec-run <slug>`   | `/deepseek-spec-run <slug>`   | `/skill:pi-spec-run <slug>`   | Execute an approved specification to final review                                       |
+| `/project-discovery` | `$codex-project-discovery` | `/deepseek-project-discovery` | `/skill:pi-project-discovery` | Turn a rough project idea into structured project documents                             |
+| `/checkpoint`        | `$codex-checkpoint`        | `/deepseek-checkpoint`        | `/skill:pi-checkpoint`        | Rebuild current state, synchronize indexes, and distill durable information             |
+| `/handoff`           | `$codex-handoff`           | `/deepseek-handoff`           | `/skill:pi-handoff`           | Preserve an unfinished investigation for the next session                               |
+| `/learn`             | `$codex-learn`             | `/deepseek-learn`             | `/skill:pi-learn`             | Promote recurring behavior into rules or guidelines                                     |
+| `/doctor`            | `$codex-doctor`            | `/deepseek-doctor`            | `/skill:pi-doctor`            | Run structural and semantic health checks                                               |
+| `/refactor-memory`   | `$codex-refactor-memory`   | `/deepseek-refactor-memory`   | `/skill:pi-refactor-memory`   | Normalize and reorganize the memory structure in place                                  |
 
 ## 9. Installed layout
 
@@ -440,8 +442,7 @@ DEEPSEEK.md
 .deepseek/
 ├── CONTEXT.md
 ├── JOURNAL.md
-├── config.toml
-├── agents/
+├── personas/
 ├── guidelines/
 ├── knowledge/
 │   └── INDEX.md
@@ -453,7 +454,7 @@ DEEPSEEK.md
     └── INDEX.md
 ```
 
-`.deepseek/config.toml` ships empty on purpose: project-local configuration support varies by DeepSeek harness, so only add a key you have confirmed your harness reads.
+`.deepseek/personas/` holds the three specialist prompts as text. dsh has no on-disk agent or persona discovery — a child's persona and tool access are set through `persona` and `toolFilter` on a `@deepseek-ai/dsh-tool-subagent` instance in the harness profile — so these files are sources you point at, not definitions that load themselves. CLAUDART writes no `.deepseek/config.toml`: dsh's project configuration is `.dsh/settings.yaml`, which belongs to dsh.
 
 A Pi installation centers on:
 

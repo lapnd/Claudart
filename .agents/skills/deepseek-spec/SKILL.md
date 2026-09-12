@@ -1,24 +1,24 @@
 ---
 name: deepseek-spec
-description: Create a dated mission-scale spec workspace in .deepseek/specs/ — interview the user, freeze the intent in a reviewable POC artifact, then write a decision-complete SPEC + ROADMAP that a later (often cheaper) session can execute autonomously via $deepseek-spec-run.
+description: Create a dated mission-scale spec workspace in .deepseek/specs/ — interview the user, freeze the intent in a reviewable POC artifact, then write a decision-complete SPEC + ROADMAP that a later (often cheaper) session can execute autonomously via /deepseek-spec-run.
 ---
 
 # DeepSeek Spec
 
-You are the expensive planning session. Everything you learn from the user in this conversation dies with it — the spec folder you produce is the only thing the executor will ever see. Spend the tokens here so `$deepseek-spec-run` doesn't have to.
+You are the expensive planning session. Everything you learn from the user in this conversation dies with it — the spec folder you produce is the only thing the executor will ever see. Spend the tokens here so `/deepseek-spec-run` doesn't have to.
 
 Before doing anything, read `.deepseek/guidelines/spec-workflow.md`. That guideline defines the folder schema, the SPEC/ROADMAP/NOTES/LEDGER formats, the decision-complete bar, the status state machine, and the standing-approval semantics. This skill does not duplicate that contract; it orchestrates drafting.
 
 ## Inputs
 
-- The user's request after `$deepseek-spec` is the mission description. If empty, ask: "What's the mission?"
-- If the request is actually a single feature or fix, say so and suggest `$deepseek-plan` instead. If it is a raw product idea with no repo and no scope at all, suggest `$deepseek-project-discovery` first — `$deepseek-spec` can then build on its `docs/project/` output.
+- The user's request after `/deepseek-spec` is the mission description. If empty, ask: "What's the mission?"
+- If the request is actually a single feature or fix, say so and suggest `/deepseek-plan` instead. If it is a raw product idea with no repo and no scope at all, suggest `/deepseek-project-discovery` first — `/deepseek-spec` can then build on its `docs/project/` output.
 
 ## Procedure
 
 ### Step 1 — Read project context
 
-Read: `.deepseek/CONTEXT.md`, `.deepseek/specs/INDEX.md` (if an active spec already covers this mission, surface it and ask whether to continue it instead), `.deepseek/knowledge/INDEX.md`, `docs/project/` if present, and `git log -5 --oneline`. If the user continues an existing `drafting` spec — including an approved final-review scope amendment returned by `$deepseek-spec-run` — reuse its dated folder; never create a duplicate mission folder.
+Read: `.deepseek/CONTEXT.md`, `.deepseek/specs/INDEX.md` (if an active spec already covers this mission, surface it and ask whether to continue it instead), `.deepseek/knowledge/INDEX.md`, `docs/project/` if present, and `git log -5 --oneline`. If the user continues an existing `drafting` spec — including an approved final-review scope amendment returned by `/deepseek-spec-run` — reuse its dated folder; never create a duplicate mission folder.
 
 If planning needs a knowledge route beyond the root index, read `.deepseek/guidelines/knowledge-management.md` in full and stay within its map/topic/section budget. Do not treat a proposed product state in discovery docs or SPEC as current project knowledge.
 
@@ -30,7 +30,7 @@ For a new mission, create `.deepseek/specs/YYYY-MM-DD-<slug>/` using today's dat
 
 ### Step 2 — Interview, capture-as-you-go
 
-Interview like `$deepseek-project-discovery` (plain questions in chat, one highest-leverage question at a time, options with trade-offs) — but aim every question at one target: **what must a POC prove for the user to say "yes, that's it"?**
+Interview like `/deepseek-project-discovery` (plain questions in chat, one highest-leverage question at a time, options with trade-offs) — but aim every question at one target: **what must a POC prove for the user to say "yes, that's it"?**
 
 **Write every confirmed decision into `SPEC.md` as it lands** — after every few answers, not at the end. The chat does not survive compaction; the spec folder does. Keep the draft's working split visible: confirmed / rejected (→ Must-NOT-Have) / open. By the time you start the POC, the core intent is already on disk.
 
@@ -69,11 +69,11 @@ Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretendin
 **Open questions**: <list, or "none">
 
 Review SPEC.md (especially Must-NOT-Have) and ROADMAP.md. When you approve, that is a STANDING
-approval: $deepseek-spec-run will execute the whole roadmap without asking again until the final review.
-Say "go" to approve — then open a fresh session, $deepseek-start, and $deepseek-spec-run <slug> (or the dated folder id if there are multiple active specs with the same short slug).
+approval: /deepseek-spec-run will execute the whole roadmap without asking again until the final review.
+Say "go" to approve — then open a fresh session, /deepseek-start, and /deepseek-spec-run <slug> (or the dated folder id if there are multiple active specs with the same short slug).
 ```
 
-Do NOT begin implementing, even after approval — on "go", flip `status → ready`, sync INDEX, and stop. Execution belongs to `$deepseek-spec-run`.
+Do NOT begin implementing, even after approval — on "go", flip `status → ready`, sync INDEX, and stop. Execution belongs to `/deepseek-spec-run`.
 
 ## Anti-Patterns
 

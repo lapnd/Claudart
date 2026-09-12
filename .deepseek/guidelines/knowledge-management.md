@@ -9,7 +9,7 @@ tags: [knowledge, retrieval, evidence, memory]
 
 `.deepseek/knowledge/` stores durable **descriptive** project facts. Topic Markdown is the source of truth; `INDEX.md` and `_maps/*.md` are compact routers. This file is the source of truth for the knowledge contract.
 
-Read this guideline in full only when the current task retrieves, writes, audits, or refactors knowledge, or when the user asks for a knowledge update or prior-project evidence. Routine `$deepseek-start` reads only the root `INDEX.md`; it does not load this guideline, detail topics, domain maps, or the checker.
+Read this guideline in full only when the current task retrieves, writes, audits, or refactors knowledge, or when the user asks for a knowledge update or prior-project evidence. Routine `/deepseek-start` reads only the root `INDEX.md`; it does not load this guideline, detail topics, domain maps, or the checker.
 
 ## Route With A Fixed Budget
 
@@ -34,7 +34,7 @@ Promote a claim to knowledge only when all four tests pass:
 Route everything else by kind:
 
 - WIP, proposals, task status, acceptance state, and discoveries local to current work stay in the active task, spec, or `CONTEXT.md`.
-- Recurring behavior, conventions, behavioral corrections, and reusable procedures go to the owning guideline through `$deepseek-learn`.
+- Recurring behavior, conventions, behavioral corrections, and reusable procedures go to the owning guideline through `/deepseek-learn`.
 - Uncertain or conflicting observations remain candidates in the working artifact. If they invalidate an existing owner, set that owner to `review-needed`, preserve the evidence, and explain the uncertainty in `status_note`.
 
 A natural-language request such as “update knowledge from what we just explored” is sufficient authorization to distill and write eligible facts immediately. Immediate promotion requires the capture gate plus one trigger: the user asks; a verified correction must land to avoid continuing from known-wrong canonical knowledge; confirmed source drift requires an owner trust/content update; or a lifecycle workflow reaches its promotion boundary. Otherwise keep the observation as a candidate. Checkpoint performs bulk maintenance and promotion; it is not the only write gate.

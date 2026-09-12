@@ -1,6 +1,10 @@
 # CLAUDART Pi Instructions
 
-This repository contains CLAUDART, a markdown-based operating layer for AI coding agents. Treat `PI.md` as the Pi-native project memory index.
+This repository contains CLAUDART, a markdown-based operating layer for AI coding agents. This file is the Pi layer's instructions index.
+
+Pi does not auto-load this file by name. Per directory it loads the first match of `AGENTS.override.md`, `AGENTS.md`, `AGENTS.MD`, `CLAUDE.md`, `CLAUDE.MD`, starting at `~/.pi/agent/` and walking from ancestors down to the current directory. The project's root `AGENTS.md` carries a CLAUDART route line pointing here; follow it, then follow what this file routes to.
+
+Skills live in `.agents/skills/` (searched in `cwd` and ancestors up to the git root) and are invoked as `/skill:<name>`. Pi asks to trust a project folder before loading project-local resources and `.agents/skills`, so a fresh clone needs that approval once before these commands appear.
 
 ## Context Loading
 

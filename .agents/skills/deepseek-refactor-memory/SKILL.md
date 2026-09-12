@@ -10,9 +10,9 @@ Refactor the repository-local DeepSeek operating layer without losing project co
 For a knowledge contract upgrade, use this sequence:
 
 ```text
-$deepseek-doctor
-$deepseek-refactor-memory
-$deepseek-doctor
+/deepseek-doctor
+/deepseek-refactor-memory
+/deepseek-doctor
 ```
 
 The first doctor run establishes a read-only baseline; refactor performs one controlled in-place normalization; the final doctor run verifies the result.
@@ -35,7 +35,7 @@ The first doctor run establishes a read-only baseline; refactor performs one con
 - `.deepseek/JOURNAL.md`: append-only history, never auto-loaded.
 - `.deepseek/tasks/` and `.deepseek/specs/`: working plans, proposals, acceptance state, and mission-local discoveries.
 - `.deepseek/HANDOFF.md`: optional single-use conversational baton.
-- `.agents/skills/` and `.deepseek/agents/`: executable workflows and bounded specialist roles.
+- `.agents/skills/`: executable workflows discovered by dsh. `.deepseek/personas/`: prompt sources for a subagent `persona`, never auto-discovered.
 
 Route content by meaning before reorganizing files. Do not move WIP or a proposed future state into knowledge. Do not turn a descriptive fact into a guideline merely to keep it always loaded.
 
@@ -45,7 +45,7 @@ Route content by meaning before reorganizing files. Do not move WIP or a propose
 2. Identify logical ownership boundaries such as contracts/docs, data/repositories, API/controllers, UI/components, jobs, runtime/deploy, and AI/model workflows. For docs-first repositories, identify document layers, templates, workflows, and source-of-truth contracts.
 3. Discover linters, formatters, test runners, and validation commands. Delegate style enforcement to those tools instead of copying their rules into `DEEPSEEK.md`.
 4. Inspect the active `DEEPSEEK.md`, deprecated memory files, current guidelines, and stable decisions in CONTEXT. Split candidates by type before moving them: behavior → guideline; fact → knowledge; WIP/proposal → task/spec/CONTEXT.
-5. Ensure `.deepseek/guidelines/` exists, then extract detailed behavior into the smallest set of domain guidelines with clear ownership and useful `paths:`. Do not create files for symmetry or force a weak concept into an unrelated owner. Use `.deepseek/guidelines/*.md` for semantic guidance; never place it in `.deepseek/rules/`, whose optional `*.rules` files are reserved for DeepSeek permission or environment rules.
+5. Ensure `.deepseek/guidelines/` exists, then extract detailed behavior into the smallest set of domain guidelines with clear ownership and useful `paths:`. Do not create files for symmetry or force a weak concept into an unrelated owner. Use `.deepseek/guidelines/*.md` for semantic guidance.
 6. Keep each rule verifiable, scoped, loophole-closed, and unambiguous about critical constraints. Use stable file/symbol references rather than long code snippets or fragile line excerpts.
 7. Never write secrets, tokens, keys, production credentials, or real `.env` values into any memory tier.
 
@@ -101,7 +101,7 @@ After the normalization batch, run `bash .deepseek/scripts/knowledge-check.sh --
 
 - Validate every `SKILL.md` frontmatter and confirm the workflow remains executable with its referenced guidelines and one-hop resources. Repair stale references and generated markers without making skills duplicate canonical guideline contracts.
 - Keep skills concise and load detailed contracts from their canonical guideline instead of copying them.
-- For every `.deepseek/agents/*.md`, require YAML frontmatter with `name`, `description`, and `tools`. Keep explorers and review-only/audit-only agents free of write tools. Allow workspace writes only when the declared purpose explicitly requires implementation, as with a refiner or worker. If the project declares agents in a harness-native format instead, validate against that harness's documented keys and do not convert a deliberate choice.
+- For every `.deepseek/personas/*.md`, require YAML frontmatter with `name` and `description`. Never describe them as auto-loaded agents: dsh sets a child's persona and tool access through `persona` and `toolFilter` on a `dsh-tool-subagent` instance in the harness profile.
 - Confirm every write-capable agent defines ownership boundaries, protects unrelated user work, validates its changes, and says it must not revert edits made by others in parallel. Replace hardcoded grep lists with repository discovery and project tooling. If two agents' responsibilities overlap by more than 50%, propose a merge but do not perform it without user confirmation.
 - Parent review remains required for delegated results.
 - Apply safe wiring and frontmatter fixes. Ask before merges, deletions, or meaning-changing rewrites.
@@ -126,7 +126,7 @@ Before completion:
 5. Confirm guideline globs match intended files, frontmatter is valid, semantic findings use the required classifications, and `agent-delegation.md` is wired when agents exist.
 6. Confirm task/spec seed shape and archive placeholders without altering their live documents.
 7. Run the available skill validator for every skill changed by this refactor.
-8. If `.deepseek/config.toml` declares any key, confirm the harness in use actually reads it and that a concurrency cap, when present, stays conservative. The shipped file is empty by design; leave it that way unless the project documents a verified key.
+8. Never add a `.deepseek/config.toml`. dsh reads its project configuration from `.dsh/settings.yaml`, which belongs to dsh; CLAUDART does not write it.
 9. Run `git diff --stat`, `git diff --check`, `git status --short`, line/token estimates for the active memory index and CONTEXT, and relevant repository formatters.
 
 Summarize files created/changed, cross-tier moves, final `DEEPSEEK.md` size, checker results before/after, semantic findings and source debt, skills/agents audited, candidates left `review-needed`, ambiguous unindexed files preserved, removed placeholders/deprecated files, validation run, and decisions still needed. Suggest reviewing the full diff. Do not commit, push, merge, rebase, tag, or trigger CI/CD without explicit user permission.

@@ -1,4 +1,4 @@
-<!-- .deepseek/knowledge/INDEX.md — root router for durable descriptive project knowledge. $deepseek-start reads only this file. Mutations follow .deepseek/guidelines/knowledge-management.md and update the topic plus its reachable route atomically. -->
+<!-- .deepseek/knowledge/INDEX.md — root router for durable descriptive project knowledge. /deepseek-start reads only this file. Mutations follow .deepseek/guidelines/knowledge-management.md and update the topic plus its reachable route atomically. -->
 
 # Project Knowledge
 

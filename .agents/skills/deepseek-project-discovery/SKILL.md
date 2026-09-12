@@ -451,7 +451,7 @@ After writing the docs, report:
 2. Files created or updated.
 3. Highest-confidence decisions.
 4. Biggest remaining open questions.
-5. Recommended next skill or workflow, such as `$deepseek-refactor-memory`, `$deepseek-checkpoint`, or implementation planning.
+5. Recommended next skill or workflow, such as `/deepseek-refactor-memory`, `/deepseek-checkpoint`, or implementation planning.
 6. Knowledge routing result:
    - If the completed pack contains a descriptive, durable-beyond-current-work, current, evidenced reference fact and the user asked to capture knowledge, read `.deepseek/guidelines/knowledge-management.md` in full. Patch the existing owner first, or create one focused `reference` topic when no owner exists; point `sources` to the relevant discovery docs instead of duplicating them, update the reachable route atomically, and run `bash .deepseek/scripts/knowledge-check.sh --root .`.
    - If the user did not ask for knowledge capture, offer that reference update as an optional natural-language next step; no checkpoint is required.

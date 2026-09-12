@@ -7,7 +7,9 @@ tags: [delegation, decomposition, parallelism, single-agent]
 
 # Agent Delegation
 
-**Pi has no built-in subagents.** It ships a small core — `read`, `write`, `edit`, `bash`, extended by skills, prompt templates, extensions and packages — and deliberately skips sub-agent spawning and plan mode. There is no spawn API to call, no explorer/worker roles, and no per-delegate model selection.
+**Pi has no built-in subagents.** It ships a small core — `read`, `write`, `edit`, `bash`, extended by skills, prompt templates, extensions and packages — and deliberately skips both sub-agents and plan mode. Pi's own README is explicit: _"Pi ships with powerful defaults but skips features like sub agents and plan mode"_, and on sub-agents, _"There's many ways to do this. Spawn pi instances via tmux, or build your own with extensions, or install a package that does it your way."_ There is no spawn API to call, no explorer/worker roles, and no per-delegate model selection.
+
+The same README answers plan mode with _"Write plans to files"_ — which is exactly what `/deepseek-plan`'s Pi counterpart, `/skill:pi-plan`, and the task/spec layers already do. CLAUDART's persistent task documents are the plan-mode replacement on this harness, not a workaround for a missing one.
 
 That does not make this guideline empty. The failure modes delegation exists to prevent — losing track of what a unit owns, re-deriving the same answer twice, accepting an unverified result, letting findings evaporate when the context window compacts — all still apply to a single long-running session. This file is how CLAUDART handles them without subagents.
 
@@ -17,7 +19,9 @@ Do not invent a spawn mechanism. If a project instruction, a habit from another 
 
 **1. Do the unit inline (the default).** Most work that another harness would delegate is simply the next thing to do. Decompose it explicitly — see below — and work through the parts in order, keeping the task or spec file updated as you go.
 
-**2. Hand it to a separate Pi instance.** For genuinely independent work that would otherwise bloat this session's context, start a second Pi in another terminal or tmux pane, scoped to its own unit. This is manual and the user drives it: propose it, name the unit, and let them decide. The two sessions share nothing but the repository, so everything the second instance needs must be written down — that is what the Unit Brief below is for.
+**2. Hand it to a separate Pi instance.** For genuinely independent work that would otherwise bloat this session's context, start a second Pi in another terminal or tmux pane, scoped to its own unit — the route Pi's own README recommends. This is manual and the user drives it: propose it, name the unit, and let them decide. The two sessions share nothing but the repository, so everything the second instance needs must be written down — that is what the Unit Brief below is for.
+
+An extension or a third-party pi package can add real sub-agents (Pi ships a `subagent/` extension example that registers such a tool). If this project has installed one, treat its documented contract as authoritative and apply the decomposition, prompt, and integration rules below to it. Do not assume it exists: check the available tools rather than the presence of this paragraph.
 
 Prefer (1) unless the unit is large enough that carrying it inline would force a compaction, or the user explicitly wants parallel terminals.
 

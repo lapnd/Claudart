@@ -279,7 +279,7 @@ fi
 if [[ "$INSTALL_DEEPSEEK" == true ]]; then
   # The dollar-prefixed skill names are intentional literals.
   # shellcheck disable=SC2016
-  printf '  DeepSeek     →  open project, run $deepseek-doctor → $deepseek-refactor-memory → $deepseek-doctor once\n'
+  printf '  DeepSeek     →  open project, run /deepseek-doctor → /deepseek-refactor-memory → /deepseek-doctor once\n'
 fi
 if [[ "$INSTALL_PI" == true ]]; then
   printf '  Pi           →  open project, run /skill:pi-doctor → /skill:pi-refactor-memory → /skill:pi-doctor once\n'

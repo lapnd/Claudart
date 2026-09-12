@@ -11,20 +11,20 @@ Before doing anything, read `.deepseek/guidelines/task-management.md`. That guid
 
 ## Inputs
 
-- The user's request after `$deepseek-plan` is the task description. If invoked with no argument, ask one short clarifying question: "What's the task?"
+- The user's request after `/deepseek-plan` is the task description. If invoked with no argument, ask one short clarifying question: "What's the task?"
 - If the request is ambiguous (multiple reasonable interpretations) or missing critical detail (target files, success criteria), ask up to 3 clarifying questions BEFORE writing the file. Better to ask than to write a useless plan.
 
 ## Procedure
 
 ### Step 1: Confirm a task file is the right tool
 
-Skip `$deepseek-plan` and answer in chat if any of these apply:
+Skip `/deepseek-plan` and answer in chat if any of these apply:
 
 - Pure question or explanation (no code change).
 - One-line fix or rename.
 - Trivial change (under 3 files, under 30 minutes, no decisions to record).
 
-Use `$deepseek-plan` when the work crosses sessions, touches multiple files, requires decisions worth recording, or the user explicitly asked for one.
+Use `/deepseek-plan` when the work crosses sessions, touches multiple files, requires decisions worth recording, or the user explicitly asked for one.
 
 ### Step 2: Read project context
 
@@ -68,7 +68,7 @@ Use the exact skeleton in `.deepseek/guidelines/task-management.md`. Fill every 
 - **Context & Orientation**: this is the handoff to future-self. Fill all three subsections:
   - _Related Code_: every file path the plan touches or reads, with one-line reason.
   - _Related Docs_: project docs (`docs/...`) AND external references (URLs, RFCs).
-  - _Memory Hints_: free-form notes — non-obvious task/WIP context and uncertain discoveries that a fresh agent would otherwise re-discover. Keep these as candidates by default. A claim may move to knowledge immediately only under the task guideline's exception and the full capture gate in `knowledge-management.md`; patch the owner plus route atomically and run the checker. `$deepseek-checkpoint` bulk-evaluates remaining candidates; `$deepseek-learn` owns behavior, not fact promotion.
+  - _Memory Hints_: free-form notes — non-obvious task/WIP context and uncertain discoveries that a fresh agent would otherwise re-discover. Keep these as candidates by default. A claim may move to knowledge immediately only under the task guideline's exception and the full capture gate in `knowledge-management.md`; patch the owner plus route atomically and run the checker. `/deepseek-checkpoint` bulk-evaluates remaining candidates; `/deepseek-learn` owns behavior, not fact promotion.
 - **Plan of Work**: 1-3 paragraphs of prose narrating the sequence and rationale.
 - **Concrete Steps**: ordered checklist. Each step is one self-contained action with target file, expected outcome, and a `(verify: <observable check>)`. Steps should be small enough that completing one is a meaningful save point, and written at plan altitude — decisions and verification, never code.
 - **Validation & Acceptance**: observable success criteria — tests to pass, commands to run, behaviors to verify.

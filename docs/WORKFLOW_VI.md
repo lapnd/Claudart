@@ -21,7 +21,7 @@ CLAUDART cung cấp bốn lớp độc lập.
 | -------------- | ------------------------------- | ----------------------------------------- | ----------------------- |
 | Claude Code    | `.claude/`                      | `/start`, `/plan`, v.v.                   | `.claude/CLAUDE.md`     |
 | Codex CLI      | `.codex/`, `.agents/skills/`    | `$codex-start`, `$codex-plan`, v.v.       | `.codex/AGENTS.md`      |
-| DeepSeek (dsh) | `.deepseek/`, `.agents/skills/` | `$deepseek-start`, `$deepseek-plan`, v.v. | `.deepseek/DEEPSEEK.md` |
+| DeepSeek (dsh) | `.deepseek/`, `.agents/skills/` | `/deepseek-start`, `/deepseek-plan`, v.v. | `.deepseek/DEEPSEEK.md` |
 | Pi             | `.pi/`, `.agents/skills/`       | `/skill:pi-start`, `/skill:pi-plan`, v.v. | `.pi/PI.md`             |
 
 Bạn có thể cài một lớp hoặc nhiều lớp. Các lớp có cùng mục tiêu, nhưng command và quy tắc delegation được viết theo cách vận hành riêng của từng công cụ.
@@ -37,9 +37,11 @@ Codex, `dsh` và Pi cùng quy về hai quy ước giống nhau, nên CLAUDART co
 
 ### Agent chuyên biệt và delegation khác nhau theo lớp
 
-Lớp Claude, Codex và DeepSeek đều có ba agent chuyên biệt. Bản DeepSeek ở dạng Markdown kèm YAML frontmatter — định dạng tương thích Claude mà các harness đó đọc được — và `.deepseek/guidelines/agent-delegation.md` nêu chính sách delegation mà không giả định cơ chế spawn của một harness cụ thể.
+Lớp Claude và Codex có ba agent chuyên biệt mà harness của chúng nạp trực tiếp.
 
-Lớp Pi cố ý không có agent nào. Pi không có subagent tích hợp, và `.pi/agents/skills` là đường dẫn của chính Pi. `.pi/guidelines/agent-delegation.md` nói rõ điều đó và chuyển hướng công việc theo hai cách: làm ngay trong phiên, hoặc giao một bản mô tả đã viết sẵn cho một phiên Pi khác ở terminal khác.
+**DeepSeek** có subagent thật — `@deepseek-ai/dsh-tool-subagent` chạy trên backend `spawn`, `fork`, `acp`, `codex`, `claude-code` hoặc `dsh-sdk`, với `maxDepth` mặc định 3 — nhưng không tự phát hiện agent trên đĩa. `.deepseek/guidelines/agent-delegation.md` mô tả bề mặt đó, còn ba prompt chuyên biệt nằm trong `.deepseek/personas/` để bạn trỏ tới khi cấu hình `persona`.
+
+**Pi** cố ý không có agent nào. README của Pi ghi rõ nó "skips features like sub agents and plan mode" và chỉ sang việc chạy các phiên pi riêng qua tmux, extension hoặc package. `.pi/guidelines/agent-delegation.md` nói rõ điều đó và chuyển hướng công việc theo hai cách: làm ngay trong phiên, hoặc giao một bản mô tả đã viết sẵn cho một phiên Pi khác. Câu trả lời của Pi cho plan mode — "write plans to files" — chính là thứ lớp task và spec của CLAUDART đã cung cấp.
 
 ## 2. Cài đặt hoặc tích hợp
 
@@ -88,7 +90,7 @@ Sau khi cài hoặc nâng cấp, chạy một lần chuỗi sau:
 ```text
 Claude:   /doctor → /refactor-memory → /doctor
 Codex:    $codex-doctor → $codex-refactor-memory → $codex-doctor
-DeepSeek: $deepseek-doctor → $deepseek-refactor-memory → $deepseek-doctor
+DeepSeek: /deepseek-doctor → /deepseek-refactor-memory → /deepseek-doctor
 Pi:       /skill:pi-doctor → /skill:pi-refactor-memory → /skill:pi-doctor
 ```
 
@@ -114,7 +116,7 @@ user review và đóng công việc
 
 ### Bắt đầu bằng bước định hướng
 
-Chạy `/start`, `$codex-start`, `$deepseek-start` hoặc `/skill:pi-start`.
+Chạy `/start`, `$codex-start`, `/deepseek-start` hoặc `/skill:pi-start`.
 
 Command start đọc:
 
@@ -138,9 +140,9 @@ Trong phạm vi đã được phê duyệt, spec thay thế task plan. Không t�
 
 ### Kết thúc hoặc tạm dừng đúng cách
 
-Dùng `/checkpoint`, `$codex-checkpoint`, `$deepseek-checkpoint` hoặc `/skill:pi-checkpoint` tại một điểm dừng phù hợp. Checkpoint xây dựng lại trạng thái hiện tại, đồng bộ các index, ghi lịch sử đã kết thúc và chắt lọc những fact đủ điều kiện để lưu lâu dài.
+Dùng `/checkpoint`, `$codex-checkpoint`, `/deepseek-checkpoint` hoặc `/skill:pi-checkpoint` tại một điểm dừng phù hợp. Checkpoint xây dựng lại trạng thái hiện tại, đồng bộ các index, ghi lịch sử đã kết thúc và chắt lọc những fact đủ điều kiện để lưu lâu dài.
 
-Chỉ dùng `/handoff`, `$codex-handoff`, `$deepseek-handoff` hoặc `/skill:pi-handoff` khi một phần điều tra khó cần được tiếp tục trong phiên mới. Handoff ghi giả thuyết hiện tại, bằng chứng, các hướng đã loại, ràng buộc và bước tiếp theo chính xác. Nó không phải bản tóm tắt chung cho mọi phiên.
+Chỉ dùng `/handoff`, `$codex-handoff`, `/deepseek-handoff` hoặc `/skill:pi-handoff` khi một phần điều tra khó cần được tiếp tục trong phiên mới. Handoff ghi giả thuyết hiện tại, bằng chứng, các hướng đã loại, ràng buộc và bước tiếp theo chính xác. Nó không phải bản tóm tắt chung cho mọi phiên.
 
 ## 4. Bộ nhớ và knowledge
 
@@ -234,7 +236,7 @@ Trong quy trình bình thường, `/doctor` và `/refactor-memory` tự gọi ch
 
 ## 5. Quy trình task bền vững
 
-Dùng `/plan <task>`, `$codex-plan <task>`, `$deepseek-plan <task>` hoặc `/skill:pi-plan <task>` khi công việc cần tồn tại lâu hơn cuộc trò chuyện hiện tại.
+Dùng `/plan <task>`, `$codex-plan <task>`, `/deepseek-plan <task>` hoặc `/skill:pi-plan <task>` khi công việc cần tồn tại lâu hơn cuộc trò chuyện hiện tại.
 
 Command tạo một task file có ngày tháng dưới `.claude/tasks/`, `.codex/tasks/`, `.deepseek/tasks/` hoặc `.pi/tasks/`. Một task file hữu ích cần ghi:
 
@@ -285,7 +287,7 @@ Task file là kế hoạch có thể tiếp tục, không phải bằng chứng 
 
 ## 6. Quy trình spec
 
-Dùng `/spec <mission>`, `$codex-spec <mission>`, `$deepseek-spec <mission>` hoặc `/skill:pi-spec <mission>` khi một task file không đủ.
+Dùng `/spec <mission>`, `$codex-spec <mission>`, `/deepseek-spec <mission>` hoặc `/skill:pi-spec <mission>` khi một task file không đủ.
 
 Workspace của spec nằm tại:
 
@@ -316,7 +318,7 @@ Spec đã duyệt cũng ghi commit policy. Mặc định agent không tự commi
 
 ### Thực thi
 
-Khi phù hợp, chạy `/spec-run <slug>`, `$codex-spec-run <slug>`, `$deepseek-spec-run <slug>` hoặc `/skill:pi-spec-run <slug>` trong một phiên mới.
+Khi phù hợp, chạy `/spec-run <slug>`, `$codex-spec-run <slug>`, `/deepseek-spec-run <slug>` hoặc `/skill:pi-spec-run <slug>` trong một phiên mới.
 
 Mỗi vòng lặp:
 
@@ -363,22 +365,22 @@ Project có ba agent chuyên biệt chỉ chạy khi được gọi rõ ràng:
 
 Không agent nào tự chạy, kể cả trong quá trình thực thi task hoặc spec.
 
-Cấu hình Codex đi kèm giới hạn tối đa sáu thread subagent trong một phiên. Lớp DeepSeek ship `config.toml` rỗng vì mức hỗ trợ cấu hình cấp dự án khác nhau tùy harness; giới hạn delegation của nó nằm trong `.deepseek/guidelines/agent-delegation.md`. Lớp Pi không có subagent nào — xem `.pi/guidelines/agent-delegation.md`. Delegation mặc định chỉ sâu một cấp, trừ khi user yêu cầu recursion rõ ràng.
+Cấu hình Codex đi kèm giới hạn tối đa sáu thread subagent trong một phiên. dsh có subagent thật qua `@deepseek-ai/dsh-tool-subagent`, với `maxDepth` mặc định là 3 — chi tiết trong `.deepseek/guidelines/agent-delegation.md`. Pi không có subagent tích hợp — xem `.pi/guidelines/agent-delegation.md`. Delegation mặc định chỉ sâu một cấp, trừ khi user yêu cầu recursion rõ ràng.
 
 ## 8. Tham chiếu command
 
 | Claude Code          | Codex CLI                  | DeepSeek (dsh)                | Pi                            | Mục đích                                                                                  |
 | -------------------- | -------------------------- | ----------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------- |
-| `/start`             | `$codex-start`             | `$deepseek-start`             | `/skill:pi-start`             | Định hướng phiên từ trạng thái hiện tại, index, knowledge routing và lịch sử Git gần nhất |
-| `/plan <task>`       | `$codex-plan <task>`       | `$deepseek-plan <task>`       | `/skill:pi-plan <task>`       | Tạo task triển khai bền vững                                                              |
-| `/spec <mission>`    | `$codex-spec <mission>`    | `$deepseek-spec <mission>`    | `/skill:pi-spec <mission>`    | Tạo và phê duyệt spec nhiều phase                                                         |
-| `/spec-run <slug>`   | `$codex-spec-run <slug>`   | `$deepseek-spec-run <slug>`   | `/skill:pi-spec-run <slug>`   | Thực thi spec đã duyệt tới cổng final review                                              |
-| `/project-discovery` | `$codex-project-discovery` | `$deepseek-project-discovery` | `/skill:pi-project-discovery` | Biến ý tưởng dự án còn thô thành tài liệu có cấu trúc                                     |
-| `/checkpoint`        | `$codex-checkpoint`        | `$deepseek-checkpoint`        | `/skill:pi-checkpoint`        | Xây dựng lại trạng thái hiện tại, đồng bộ index và chắt lọc thông tin bền vững            |
-| `/handoff`           | `$codex-handoff`           | `$deepseek-handoff`           | `/skill:pi-handoff`           | Lưu phần điều tra đang dở cho phiên kế tiếp                                               |
-| `/learn`             | `$codex-learn`             | `$deepseek-learn`             | `/skill:pi-learn`             | Đưa hành vi lặp lại vào rule hoặc guideline                                               |
-| `/doctor`            | `$codex-doctor`            | `$deepseek-doctor`            | `/skill:pi-doctor`            | Chạy kiểm tra cấu trúc và ngữ nghĩa                                                       |
-| `/refactor-memory`   | `$codex-refactor-memory`   | `$deepseek-refactor-memory`   | `/skill:pi-refactor-memory`   | Chuẩn hóa và sắp xếp lại cấu trúc bộ nhớ ngay tại chỗ                                     |
+| `/start`             | `$codex-start`             | `/deepseek-start`             | `/skill:pi-start`             | Định hướng phiên từ trạng thái hiện tại, index, knowledge routing và lịch sử Git gần nhất |
+| `/plan <task>`       | `$codex-plan <task>`       | `/deepseek-plan <task>`       | `/skill:pi-plan <task>`       | Tạo task triển khai bền vững                                                              |
+| `/spec <mission>`    | `$codex-spec <mission>`    | `/deepseek-spec <mission>`    | `/skill:pi-spec <mission>`    | Tạo và phê duyệt spec nhiều phase                                                         |
+| `/spec-run <slug>`   | `$codex-spec-run <slug>`   | `/deepseek-spec-run <slug>`   | `/skill:pi-spec-run <slug>`   | Thực thi spec đã duyệt tới cổng final review                                              |
+| `/project-discovery` | `$codex-project-discovery` | `/deepseek-project-discovery` | `/skill:pi-project-discovery` | Biến ý tưởng dự án còn thô thành tài liệu có cấu trúc                                     |
+| `/checkpoint`        | `$codex-checkpoint`        | `/deepseek-checkpoint`        | `/skill:pi-checkpoint`        | Xây dựng lại trạng thái hiện tại, đồng bộ index và chắt lọc thông tin bền vững            |
+| `/handoff`           | `$codex-handoff`           | `/deepseek-handoff`           | `/skill:pi-handoff`           | Lưu phần điều tra đang dở cho phiên kế tiếp                                               |
+| `/learn`             | `$codex-learn`             | `/deepseek-learn`             | `/skill:pi-learn`             | Đưa hành vi lặp lại vào rule hoặc guideline                                               |
+| `/doctor`            | `$codex-doctor`            | `/deepseek-doctor`            | `/skill:pi-doctor`            | Chạy kiểm tra cấu trúc và ngữ nghĩa                                                       |
+| `/refactor-memory`   | `$codex-refactor-memory`   | `/deepseek-refactor-memory`   | `/skill:pi-refactor-memory`   | Chuẩn hóa và sắp xếp lại cấu trúc bộ nhớ ngay tại chỗ                                     |
 
 ## 9. Cấu trúc sau khi cài
 
@@ -437,8 +439,7 @@ DEEPSEEK.md
 .deepseek/
 ├── CONTEXT.md
 ├── JOURNAL.md
-├── config.toml
-├── agents/
+├── personas/
 ├── guidelines/
 ├── knowledge/
 │   └── INDEX.md
@@ -450,7 +451,7 @@ DEEPSEEK.md
     └── INDEX.md
 ```
 
-`.deepseek/config.toml` cố ý để rỗng: mức hỗ trợ cấu hình cấp dự án khác nhau tùy harness DeepSeek, nên chỉ thêm key khi bạn đã xác nhận harness của mình đọc nó.
+`.deepseek/personas/` chứa ba prompt chuyên biệt dưới dạng văn bản. dsh không tự phát hiện agent hay persona trên đĩa — persona và quyền dùng tool của một child được đặt qua `persona` và `toolFilter` trên một instance `@deepseek-ai/dsh-tool-subagent` trong profile của harness — nên đây là nguồn để bạn trỏ tới, không phải định nghĩa tự nạp. CLAUDART không ghi `.deepseek/config.toml`: cấu hình cấp dự án của dsh là `.dsh/settings.yaml`, thuộc về dsh.
 
 Một bản cài Pi tập trung trong:
 

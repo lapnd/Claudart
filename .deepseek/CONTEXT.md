@@ -1,8 +1,8 @@
 <!--
 .deepseek/CONTEXT.md — current state of work (DeepSeek session).
 
-Maintained by $deepseek-checkpoint. This file is declarative: it describes what is true RIGHT NOW.
-Old work is removed, not archived. Permanent decisions graduate to .deepseek/guidelines/ via $deepseek-learn.
+Maintained by /deepseek-checkpoint. This file is declarative: it describes what is true RIGHT NOW.
+Old work is removed, not archived. Permanent decisions graduate to .deepseek/guidelines/ via /deepseek-learn.
 History lives in git log + .deepseek/JOURNAL.md (the latter is NOT auto-loaded into DeepSeek sessions).
 
 Hard ceiling: 150 lines. Target: under 100.
@@ -13,7 +13,7 @@ Never mention "uncommitted changes" or reference git status — it will be stale
 
 ## In Progress
 
-- _(nothing yet — run `$deepseek-checkpoint` at the end of a session to populate this)_
+- _(nothing yet — run `/deepseek-checkpoint` at the end of a session to populate this)_
 
 ## Open Questions / Blockers
 

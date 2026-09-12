@@ -84,24 +84,24 @@ After installation or reconciliation, run the health and normalization sequence 
 
 | Claude Code        | Codex CLI                | DeepSeek (dsh)              | Pi                          |
 | ------------------ | ------------------------ | --------------------------- | --------------------------- |
-| `/doctor`          | `$codex-doctor`          | `$deepseek-doctor`          | `/skill:pi-doctor`          |
-| `/refactor-memory` | `$codex-refactor-memory` | `$deepseek-refactor-memory` | `/skill:pi-refactor-memory` |
-| `/doctor`          | `$codex-doctor`          | `$deepseek-doctor`          | `/skill:pi-doctor`          |
+| `/doctor`          | `$codex-doctor`          | `/deepseek-doctor`          | `/skill:pi-doctor`          |
+| `/refactor-memory` | `$codex-refactor-memory` | `/deepseek-refactor-memory` | `/skill:pi-refactor-memory` |
+| `/doctor`          | `$codex-doctor`          | `/deepseek-doctor`          | `/skill:pi-doctor`          |
 
-Then begin a normal session with `/start`, `$codex-start`, `$deepseek-start`, or `/skill:pi-start`.
+Then begin a normal session with `/start`, `$codex-start`, `/deepseek-start`, or `/skill:pi-start`.
 
 ## Daily workflow
 
 | Purpose                                           | Claude Code        | Codex CLI                | DeepSeek (dsh)              | Pi                          |
 | ------------------------------------------------- | ------------------ | ------------------------ | --------------------------- | --------------------------- |
-| Orient a session                                  | `/start`           | `$codex-start`           | `$deepseek-start`           | `/skill:pi-start`           |
-| Create a persistent implementation plan           | `/plan <task>`     | `$codex-plan <task>`     | `$deepseek-plan <task>`     | `/skill:pi-plan <task>`     |
-| Define large, multi-session work                  | `/spec <mission>`  | `$codex-spec <mission>`  | `$deepseek-spec <mission>`  | `/skill:pi-spec <mission>`  |
-| Execute an approved specification                 | `/spec-run <slug>` | `$codex-spec-run <slug>` | `$deepseek-spec-run <slug>` | `/skill:pi-spec-run <slug>` |
-| Preserve an unfinished investigation              | `/handoff`         | `$codex-handoff`         | `$deepseek-handoff`         | `/skill:pi-handoff`         |
-| Rebuild current state at a natural stopping point | `/checkpoint`      | `$codex-checkpoint`      | `$deepseek-checkpoint`      | `/skill:pi-checkpoint`      |
-| Turn recurring behavior into a rule               | `/learn`           | `$codex-learn`           | `$deepseek-learn`           | `/skill:pi-learn`           |
-| Check the installation                            | `/doctor`          | `$codex-doctor`          | `$deepseek-doctor`          | `/skill:pi-doctor`          |
+| Orient a session                                  | `/start`           | `$codex-start`           | `/deepseek-start`           | `/skill:pi-start`           |
+| Create a persistent implementation plan           | `/plan <task>`     | `$codex-plan <task>`     | `/deepseek-plan <task>`     | `/skill:pi-plan <task>`     |
+| Define large, multi-session work                  | `/spec <mission>`  | `$codex-spec <mission>`  | `/deepseek-spec <mission>`  | `/skill:pi-spec <mission>`  |
+| Execute an approved specification                 | `/spec-run <slug>` | `$codex-spec-run <slug>` | `/deepseek-spec-run <slug>` | `/skill:pi-spec-run <slug>` |
+| Preserve an unfinished investigation              | `/handoff`         | `$codex-handoff`         | `/deepseek-handoff`         | `/skill:pi-handoff`         |
+| Rebuild current state at a natural stopping point | `/checkpoint`      | `$codex-checkpoint`      | `/deepseek-checkpoint`      | `/skill:pi-checkpoint`      |
+| Turn recurring behavior into a rule               | `/learn`           | `$codex-learn`           | `/deepseek-learn`           | `/skill:pi-learn`           |
+| Check the installation                            | `/doctor`          | `$codex-doctor`          | `/deepseek-doctor`          | `/skill:pi-doctor`          |
 
 Use a task plan for multi-step or multi-file implementation. Use a specification when the work contains several phases, needs a proof-of-concept or acceptance scenarios, or must continue across many sessions.
 
@@ -121,7 +121,7 @@ The important boundary is simple: **rules say how the agent should work; knowled
 
 ## Specialized agents
 
-These agents never run automatically. They ship with the Claude, Codex, and DeepSeek layers. The Pi layer omits them: Pi has no built-in subagents, so `.pi/guidelines/agent-delegation.md` routes that work inline or to a separate Pi instance instead.
+These agents never run automatically. The Claude and Codex layers ship them as definitions their harness loads. The DeepSeek layer ships the same prompts in `.deepseek/personas/` as sources for a subagent `persona`, because dsh has no on-disk agent discovery. The Pi layer omits them: Pi has no built-in subagents, so `.pi/guidelines/agent-delegation.md` routes that work inline or to a separate Pi instance instead.
 
 | Agent               | Role                                                                                                                    |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
