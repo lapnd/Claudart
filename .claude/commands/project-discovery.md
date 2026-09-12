@@ -452,7 +452,7 @@ After writing the docs, report:
 4. Biggest remaining open questions.
 5. Recommended next command or workflow, such as `/init`, `/refactor-memory`, or implementation planning.
 6. Knowledge routing result:
-   - If the completed pack contains a descriptive, durable-beyond-current-work, current, evidenced reference fact and the user asked to capture knowledge, read `.claude/rules/knowledge-management.md` in full. Patch the existing owner first, or create one focused `reference` topic when no owner exists; point `sources` to the relevant discovery docs instead of duplicating them, update the reachable route atomically, and run `bash .claude/scripts/knowledge-check.sh`.
+   - If the completed pack contains a descriptive, durable-beyond-current-work, current, evidenced reference fact and the user asked to capture knowledge, read `.claude/skills/knowledge-management/SKILL.md` in full. Patch the existing owner first, or create one focused `reference` topic when no owner exists; point `sources` to the relevant discovery docs instead of duplicating them, update the reachable route atomically, and run `bash .claude/scripts/knowledge-check.sh`.
    - If the user did not ask for knowledge capture, offer that reference update as an optional natural-language next step; no checkpoint is required.
    - Keep proposed product behavior, implementation intent, and unresolved assumptions in `docs/project/` as candidates. Do not register them as active knowledge merely because discovery documented them.
    - Report the topic updated or created, the checker result, or `none` with the reason no claim passed the capture gate.

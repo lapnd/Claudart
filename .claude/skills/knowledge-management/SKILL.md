@@ -1,8 +1,7 @@
 ---
-paths: ["**/*"]
+name: knowledge-management
 description: Bounded routing, capture, schema, lifecycle, and validation contract for durable descriptive knowledge under `.claude/knowledge/`.
 when_to_use: Whenever project knowledge is read, searched, created, updated, routed, normalized, or reviewed.
-tags: [knowledge, memory, routing, validation]
 ---
 
 # Knowledge Management

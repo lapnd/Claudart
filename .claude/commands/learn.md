@@ -2,6 +2,8 @@
 description: Reflect on completed work, promote validated behavioral learning, and route durable descriptive facts correctly
 ---
 
+> **First step:** Load the `knowledge-management` skill before anything else; this command routes descriptive facts into knowledge.
+
 Please execute a Retrospective & Learning Protocol on the work you just completed.
 
 Based on the "Agent Self-Evolution & Context Maintenance" section in `.claude/CLAUDE.md`, perform this protocol. `/learn` may run mid-session. It primarily owns behavioral learning; it is not a required detour before an eligible descriptive fact can enter knowledge.
@@ -44,7 +46,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
      - Existing domain (perfect match) → Update the exact file in `.claude/rules/`.
      - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with complete YAML frontmatter and append the `@` import to `.claude/CLAUDE.md`.
      - Global standard (applies universally) → Update `.claude/CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
-     - Descriptive fact → apply `.claude/rules/knowledge-management.md`. Promote it directly only if it is durable beyond the current work, current, evidenced, and correctly scoped. Patch the existing owner and reachable map atomically; leave WIP/proposals in the task/spec/CONTEXT surface and uncertainty/conflict as a candidate or `review-needed`.
+     - Descriptive fact → apply `.claude/skills/knowledge-management/SKILL.md`. Promote it directly only if it is durable beyond the current work, current, evidenced, and correctly scoped. Patch the existing owner and reachable map atomically; leave WIP/proposals in the task/spec/CONTEXT surface and uncertainty/conflict as a candidate or `review-needed`.
 
 4. If knowledge changed, run `bash .claude/scripts/knowledge-check.sh`. Report checker failures and never claim the mutation healthy while they remain.
 

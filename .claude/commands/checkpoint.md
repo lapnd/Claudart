@@ -2,6 +2,8 @@
 description: Rewrite current context, sync task/spec indexes, append meaningful history, and bulk-maintain eligible durable descriptive knowledge
 ---
 
+> **First step:** Load the `task-management` and `knowledge-management` skills before anything else; this command syncs task state and may promote knowledge.
+
 You are about to write a session checkpoint. The output is **not a log of what happened** — it is a **declarative snapshot of what is true right now**. Lifelong append is the failure mode this command exists to prevent.
 
 ## Hard Rules (read before doing anything)
@@ -16,7 +18,7 @@ You are about to write a session checkpoint. The output is **not a log of what h
    - Ad-hoc non-task change the user requested without creating a `/plan` (a quick tweak, a transient pivot): CONTEXT is its **only** home, so it gets a **micro-handoff** — intent in the user's words + files of interest + next step (see Step 4) — not just a one-line pointer.
      Checkpoint _syncs_ `tasks/index.md` AND ensures CONTEXT references the focus task — but never copies a task's Steps/Decisions/Surprises into CONTEXT.
 7. **Subagent threads are not durable project memory.** Do not store subagent ids, nicknames, or transient thread state in CONTEXT. Store only durable outcomes: decisions, unresolved blockers, validated findings, changed ownership boundaries, and next steps.
-8. **Checkpoint is bulk maintenance, not the only knowledge write gate.** Follow `.claude/rules/knowledge-management.md`; eligible facts may already have been promoted through a natural-language mid-session update.
+8. **Checkpoint is bulk maintenance, not the only knowledge write gate.** Follow `.claude/skills/knowledge-management/SKILL.md`; eligible facts may already have been promoted through a natural-language mid-session update.
 
 ## Procedure
 
@@ -50,7 +52,7 @@ Add to `.claude/CONTEXT.md` only what's true _now_:
 - Open questions / blockers currently unresolved
 - The single most useful thing the next session should do first
 
-A descriptive fact that passes `.claude/rules/knowledge-management.md` does not belong in CONTEXT merely because this session discovered it — flag it for **Step 6c**. Scope may be local. WIP, proposed, uncertain, or conflicting claims stay in the owning work surface.
+A descriptive fact that passes `.claude/skills/knowledge-management/SKILL.md` does not belong in CONTEXT merely because this session discovered it — flag it for **Step 6c**. Scope may be local. WIP, proposed, uncertain, or conflicting claims stay in the owning work surface.
 
 Be terse: task references, decisions, and blockers are one short sentence each. Only _active_ `(no task)` work earns the 3-line micro-handoff, and only while it is live — the moment it ships or is abandoned, drop it this same checkpoint (JOURNAL it if it was a real decision/completion). That triage is what keeps CONTEXT under the ceiling.
 
@@ -134,12 +136,12 @@ This step is independent of CONTEXT.md. Skip entirely if `.claude/tasks/` does n
 3. Detect any task in the top-level `tasks/` folder whose `status` is `done` or `cancelled`. These have been user-confirmed (or cancelled) and not yet archived. For each:
    - Ensure `Outcomes & Retrospective` is filled (read the body to confirm). If empty, flag in the report — do NOT auto-fill; the user or implementing agent should write it.
    - Move the file to `.claude/tasks/done/`.
-   - Append the completion line to `.claude/JOURNAL.md` in the Phase 2a format from `.claude/rules/task-management.md` (use type `cancelled` instead of `completed` for cancelled tasks).
-   - Before archiving, scan the task's `### Memory Hints` and `### Related Docs` for knowledge candidates. Route only claims that pass `.claude/rules/knowledge-management.md`; a durable fact may have local scope, while task/WIP/proposal state stays with the task.
+   - Append the completion line to `.claude/JOURNAL.md` in the Phase 2a format from `.claude/skills/task-management/SKILL.md` (use type `cancelled` instead of `completed` for cancelled tasks).
+   - Before archiving, scan the task's `### Memory Hints` and `### Related Docs` for knowledge candidates. Route only claims that pass `.claude/skills/knowledge-management/SKILL.md`; a durable fact may have local scope, while task/WIP/proposal state stays with the task.
    - **DO NOT archive `awaiting-review` tasks.** Those are explicitly waiting for user confirmation; archiving them defeats the gate. They stay in the top-level `tasks/` folder and appear in the Active list.
-4. Rewrite `.claude/tasks/index.md` from scratch per the canonical **"`index.md` Format"** in `.claude/rules/task-management.md` — Active includes `awaiting-review` (with its ⏳ marker); Recently Done covers the last 14 days.
+4. Rewrite `.claude/tasks/index.md` from scratch per the canonical **"`index.md` Format"** in `.claude/skills/task-management/SKILL.md` — Active includes `awaiting-review` (with its ⏳ marker); Recently Done covers the last 14 days.
 5. Enforce that section's 100-line ceiling and trim ladder.
-6. **Flag stalled tasks**: apply the **Staleness Thresholds** table in `.claude/rules/task-management.md` (stalled `in-progress`, stuck `awaiting-review`, abandoned `planning`) and list each flagged task in the report.
+6. **Flag stalled tasks**: apply the **Staleness Thresholds** table in `.claude/skills/task-management/SKILL.md` (stalled `in-progress`, stuck `awaiting-review`, abandoned `planning`) and list each flagged task in the report.
 
 ### Step 6b2 — Sync .claude/specs/INDEX.md
 
@@ -153,14 +155,14 @@ Skip entirely if `.claude/specs/` does not exist.
    - Before archiving, scan `NOTES.md` for `→ graduate:` flags: route `knowledge/` flags into Step 6c and surface `/learn` flags as proposals. Clear only a claim that was successfully promoted or deliberately reclassified; keep unresolved candidates flagged in NOTES.
    - DO NOT archive `awaiting-final-review` specs. Those are explicitly waiting for user confirmation; archiving them defeats the final gate. They stay in the top-level specs folder and appear in the Active list.
 4. List `.claude/specs/done/*/SPEC.md`. For each, read frontmatter only (`slug`, `status`, `created`, `updated`). If any archived spec is not `done` or `cancelled`, flag it in the report and do not move it automatically.
-5. Rewrite `INDEX.md` per the canonical format in `.claude/rules/spec-workflow.md` — Active entries link to top-level dated folders and include every status except `done`/`cancelled` (with the ⏳ marker on `poc-review` and `awaiting-final-review`); Done entries link to `done/<folder-id>/SPEC.md` and include `done`/`cancelled`.
-6. Flag stalled specs per the Staleness Thresholds table in `.claude/rules/task-management.md`, mapped as: `running` ↔ `in-progress`, `poc-review`/`awaiting-final-review` ↔ `awaiting-review`, `drafting` ↔ `planning`. List flagged specs in the report.
+5. Rewrite `INDEX.md` per the canonical format in `.claude/skills/spec-workflow/SKILL.md` — Active entries link to top-level dated folders and include every status except `done`/`cancelled` (with the ⏳ marker on `poc-review` and `awaiting-final-review`); Done entries link to `done/<folder-id>/SPEC.md` and include `done`/`cancelled`.
+6. Flag stalled specs per the Staleness Thresholds table in `.claude/skills/task-management/SKILL.md`, mapped as: `running` ↔ `in-progress`, `poc-review`/`awaiting-final-review` ↔ `awaiting-review`, `drafting` ↔ `planning`. List flagged specs in the report.
 7. Scan each Active spec's `NOTES.md` for `→ graduate:` flags: route `knowledge/` flags into Step 6c and surface `/learn` flags as proposals. Clear only successfully promoted or deliberately reclassified claims; retain unresolved candidates.
 8. Do NOT tick roadmap boxes, write LEDGER entries, or change any spec `status` — those transitions belong to `/spec`, `/spec-run`, and the user.
 
 ### Step 6c — Bulk-maintain eligible knowledge
 
-Read `.claude/rules/knowledge-management.md` and skip if no candidate from this session, task closeout, or spec NOTES passes its capture gates.
+Read `.claude/skills/knowledge-management/SKILL.md` and skip if no candidate from this session, task closeout, or spec NOTES passes its capture gates.
 
 Distill rather than copy work history. Keep task/spec state and proposals in their owning artifacts, route behavioral lessons to `/learn`, and leave uncertain/conflicting claims as candidates or mark an existing owner `review-needed`. Never write secrets.
 

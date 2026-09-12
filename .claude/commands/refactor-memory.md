@@ -2,6 +2,8 @@
 description: Consolidate Claude memory and perform one idempotent in-place normalization of knowledge topics and maps
 ---
 
+> **First step:** Load the `knowledge-management` skill before inspecting or changing knowledge.
+
 Analyze the existing Claude memory layer in this repository and refactor it into a coherent Claude-native Modular Rules System.
 
 The target shape is:
@@ -224,7 +226,7 @@ For `.claude/specs/`:
 
 For `.claude/knowledge/`:
 
-- Read `.claude/rules/knowledge-management.md`; it is the semantic source of truth. If the folder or root router is missing, create the lean canonical scaffold.
+- Read `.claude/skills/knowledge-management/SKILL.md`; it is the semantic source of truth. If the folder or root router is missing, create the lean canonical scaffold.
 - Perform **one in-place normalization pass** over every topic and `_maps/*.md`, including unindexed files. Preserve every body verbatim and preserve curated root/map titles, hooks, grouping, ordering, and external routes.
 - Normalize frontmatter and routes to the rule's current grammar without inventing aliases, triggers, scope, relations, evidence, or lifecycle. `updated` changes only where this pass edits content; `last_verified` changes only after an actual evidence check.
 - Verify concrete claims against current sources/repository evidence. For a current canonical claim with sufficient evidence, set `status: active`, set `last_verified` to the verification date, and retain at least one `sources` or `verify` anchor. With insufficient or conflicting evidence, set `status: review-needed` and add a concise `status_note`; do not fabricate certainty. Preserve an explicitly evidenced `superseded` or `retired` lifecycle and its explanation.
@@ -254,7 +256,7 @@ Include these rules:
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing rules change → update the relevant file in `.claude/rules/`.
 - New domains/layers → CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) AND APPEND its `@` import to `.claude/CLAUDE.md`'s Domain Rules section.
-- Durable descriptive facts that pass `.claude/rules/knowledge-management.md` → patch the canonical owner and reachable map atomically, then run the checker. Scope may be local; task/spec state stays local.
+- Durable descriptive facts that pass `.claude/skills/knowledge-management/SKILL.md` → patch the canonical owner and reachable map atomically, then run the checker. Scope may be local; task/spec state stays local.
 - Global changes → update `.claude/CLAUDE.md` directly.
 - Shared live state → update `.claude/CONTEXT.md` through `/checkpoint`, not through refactor-memory.
 

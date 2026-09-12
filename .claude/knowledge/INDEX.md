@@ -1,4 +1,4 @@
-<!-- .claude/knowledge/INDEX.md — root router for durable descriptive knowledge. /start reads only this file. Follow .claude/rules/knowledge-management.md for routing, mutation, and validation. -->
+<!-- .claude/knowledge/INDEX.md — root router for durable descriptive knowledge. /start reads only this file. Follow .claude/skills/knowledge-management/SKILL.md for routing, mutation, and validation. -->
 
 # Project Knowledge
 

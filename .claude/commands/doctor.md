@@ -2,6 +2,8 @@
 description: Validate the CLAUDART installation in this repository and report any drift, broken rules, or missing wiring
 ---
 
+> **First step:** Load the `knowledge-management` skill before auditing `.claude/knowledge/`.
+
 Please run a health check on this repository's CLAUDART installation. Your job is **diagnostic only** — do NOT auto-fix anything. Report findings; the user will run `/refactor-memory` or edit files manually based on your output.
 
 ## What to Check
@@ -14,16 +16,19 @@ Before the semantic audit, run:
 bash .claude/scripts/knowledge-check.sh
 ```
 
-Record its exit status and every finding. The checker is read-only and owns mechanical knowledge validation; do not reproduce or reinterpret its parser. Exit `1` means contract findings were reported; preserve their stated severity and continue the semantic audit. Exit `2` means checker usage, precondition, or internal/runtime failure; report **High** and continue only with the semantic audit. If the script is missing, report **High** and continue with the bounded semantic audit using `.claude/rules/knowledge-management.md`. A missing or exit-`2` checker means this installation cannot be declared healthy.
+Record its exit status and every finding. The checker is read-only and owns mechanical knowledge validation; do not reproduce or reinterpret its parser. Exit `1` means contract findings were reported; preserve their stated severity and continue the semantic audit. Exit `2` means checker usage, precondition, or internal/runtime failure; report **High** and continue only with the semantic audit. If the script is missing, report **High** and continue with the bounded semantic audit using `.claude/skills/knowledge-management/SKILL.md`. A missing or exit-`2` checker means this installation cannot be declared healthy.
 
 ### 1. Required Structure
 
 - `.claude/` exists at the repository root
 - `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`, `handoff.md`, `project-discovery.md`, `spec.md`, `spec-run.md`
 - `.claude/agents/` exists (may be empty if user removed shipped agents)
-- `.claude/rules/` exists (may be empty before the user runs `/refactor-memory`)
+- `.claude/rules/` exists and holds only always-on constraints. `ai-behavior.md` and `code-health.md` are expected here.
+- `.claude/skills/` exists and contains `task-management`, `spec-workflow`, `agent-delegation`, `knowledge-management`, each as `<name>/SKILL.md`. These are workflow contracts that load on demand; a missing one is **High** because its command has nothing to load.
+- Every command that depends on a workflow skill states a `> **First step:** Load the \`<skill>\` skill`line:`/plan`and`/checkpoint`→`task-management`; `/spec`and`/spec-run`→`spec-workflow`; `/learn`, `/doctor`, `/refactor-memory`→`knowledge-management`. A missing first-step line is **Medium**: the contract may not load before the command acts.
+- **Tier check.** A file in `.claude/rules/` whose `when_to_use:` names one workflow or one directory rather than "every task" is mis-tiered — it costs its whole body on every file-touching session. Flag as **Medium** and suggest moving it to `.claude/skills/`. Conversely a skill stating a constraint that must hold on every turn belongs in `.claude/rules/`.
 - `.claude/rules/code-health.md` exists and is referenced from `.claude/CLAUDE.md`
-- `.claude/rules/knowledge-management.md` exists and is referenced from `.claude/CLAUDE.md`
+- `.claude/skills/knowledge-management/SKILL.md` exists and is referenced from `.claude/CLAUDE.md`
 - `.claude/knowledge/` exists with `INDEX.md` (warn if missing — `/refactor-memory` will recreate it)
 - `.claude/scripts/knowledge-check.sh` exists (missing is **High**, not a routine warning)
 - `.claude/tasks/` exists with `index.md` and `done/` subdirectory (warn if missing — `/plan` will create on first use)
@@ -102,7 +107,7 @@ Skip this section if `.claude/tasks/` does not exist.
   - `slug` must match the filename (excluding the `YYYY-MM-DD-NNN-` prefix and `.md` suffix).
   - `tags` must be inline YAML array style with 1-5 lowercase kebab-case tags.
 - Flag any task in the top-level folder with `status: done` or `status: cancelled` — these should have been moved to `done/` by `/checkpoint`. Suggest running `/checkpoint`.
-- Apply the **Staleness Thresholds** table in `.claude/rules/task-management.md` (the canonical numbers — do not redefine them here): flag stalled `in-progress` and stuck `awaiting-review` tasks as Medium severity (for the latter, surface prominently and suggest the user verify and give the close-out signal, or reject), and flag abandoned `planning` tasks as cancellation candidates.
+- Apply the **Staleness Thresholds** table in `.claude/skills/task-management/SKILL.md` (the canonical numbers — do not redefine them here): flag stalled `in-progress` and stuck `awaiting-review` tasks as Medium severity (for the latter, surface prominently and suggest the user verify and give the close-out signal, or reject), and flag abandoned `planning` tasks as cancellation candidates.
 - Cross-check `index.md` Active entries against actual task files: every Active entry must correspond to a real file; every real file with `status` ∈ {planning, in-progress, awaiting-review, blocked} must appear in Active. Mismatches → suggest `/checkpoint` to resync.
 - Required sections in every task file body: `## Purpose`, `## Context & Orientation`, `## Plan of Work`, `## Concrete Steps`, `## Validation & Acceptance`, `## Decision Log`, `## Surprises & Discoveries`, `## Outcomes & Retrospective`. Flag missing sections.
 - Within `## Context & Orientation`, flag if `### Memory Hints` is missing or empty — that section is the cross-session lifeline.
@@ -112,7 +117,7 @@ Skip this section if `.claude/tasks/` does not exist.
 
 Skip this section if `.claude/knowledge/` does not exist.
 
-Read `.claude/rules/knowledge-management.md` and use the checker output as the mechanical baseline. Then audit only what requires semantic judgment:
+Read `.claude/skills/knowledge-management/SKILL.md` and use the checker output as the mechanical baseline. Then audit only what requires semantic judgment:
 
 - Confirm the root is a compact router and routing is root → optional domain map → topic, with no nested maps. Preserve intentional external routes. If active topics exceed 24 or the root exceeds 1,200 visible words without domain maps, flag **Low**.
 - Treat an empty tier as informational. An unindexed file with ambiguous intent is a review candidate, not automatically active, retired, or orphaned.
@@ -144,7 +149,7 @@ Skip this section if `.claude/specs/` does not exist.
 - `SPEC.md` frontmatter: required keys `slug`, `status`, `created`, `updated`, `agent`; `status` ∈ {drafting, poc-review, ready, running, blocked, awaiting-final-review, done, cancelled}; folder name must be `created` + `-` + `slug`; `commits` (if present) ∈ {user, per-task, per-phase}.
 - For specs at `poc-review` or later: every `artifacts/` path referenced under `## POC Artifacts` must exist on disk. Missing → **Medium** (the executor's frozen UI reference is gone).
 - **ROADMAP disposition consistency**: `- [ ] ~~task~~` → **Medium** (invalid legacy state; reconcile it to checked + superseded or an explicit blocker before `/spec-run`); a checked + struck row missing `superseded by <task-id or reason>` → **Medium**; a blocked row missing either its condition or `unlock:` requirement → **Medium**. Do not equate every plain unticked row with runnable work — honor dependency notes. `running` where dependency inspection finds no runnable pending row and at least one blocker → **Medium** (the circuit-breaker/status transition was missed); `running` with every row terminal → **Medium** (the final gate never ran); `blocked` with no explicit blocked row → **Medium** (the diagnosis/unlock state is not durable); `blocked` where dependency inspection finds any independent runnable row → **Medium** (the whole-loop transition happened too early); `awaiting-final-review` or `done` with any unticked row → **Medium** (the final gate contradicts ROADMAP state). Top-level spec folder with `status: done`/`cancelled` → **Low** (resync via `/checkpoint` to archive it under `done/`). Archived spec folder whose status is not `done`/`cancelled` → **Medium** (it is shelved in the wrong place). `status: done`/`cancelled` still listed under `## Active` in INDEX → **Low** (resync via `/checkpoint`).
-- **Staleness** (mirror the Staleness Thresholds table in `.claude/rules/task-management.md`; do not redefine the numbers): `running` stale as `in-progress`; `poc-review` and `awaiting-final-review` stale as `awaiting-review` — surface prominently, these wait on the user's verdict; `drafting` stale as `planning`.
+- **Staleness** (mirror the Staleness Thresholds table in `.claude/skills/task-management/SKILL.md`; do not redefine the numbers): `running` stale as `in-progress`; `poc-review` and `awaiting-final-review` stale as `awaiting-review` — surface prominently, these wait on the user's verdict; `drafting` stale as `planning`.
 - `LEDGER.md` spot-check via `tail -n 15`: recent entries match the `### YYYY-MM-DD HH:MMZ — <event>` heading format. Do not slurp the whole file.
 
 ### 6. Anti-Patterns Inside Rules and Agents

@@ -44,7 +44,7 @@ assert_not_contains() {
 }
 
 CODEX_RULE=$REPO_ROOT/.codex/guidelines/spec-workflow.md
-CLAUDE_RULE=$REPO_ROOT/.claude/rules/spec-workflow.md
+CLAUDE_RULE=$REPO_ROOT/.claude/skills/spec-workflow/SKILL.md
 CODEX_RUNNER=$REPO_ROOT/.agents/skills/codex-spec-run/SKILL.md
 CLAUDE_RUNNER=$REPO_ROOT/.claude/commands/spec-run.md
 CODEX_AUTHOR=$REPO_ROOT/.agents/skills/codex-spec/SKILL.md

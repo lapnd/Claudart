@@ -2,9 +2,11 @@
 description: Create a dated mission-scale spec workspace in .claude/specs/ — interview the user, freeze the intent in a reviewable POC artifact, then write a decision-complete SPEC + ROADMAP that a later (often cheaper) session can execute autonomously via /spec-run.
 ---
 
+> **First step:** Load the `spec-workflow` skill before anything else; it owns the SPEC/ROADMAP/NOTES/LEDGER contract this command writes.
+
 You are the expensive planning session. Everything you learn from the user in this conversation dies with it — the spec folder you produce is the only thing the executor will ever see. Spend the tokens here so `/spec-run` doesn't have to.
 
-Before doing anything, read `.claude/rules/spec-workflow.md` and `.claude/rules/knowledge-management.md`. These rules define mission state and knowledge routing; this command does not duplicate them.
+Before doing anything, read `.claude/skills/spec-workflow/SKILL.md` and `.claude/skills/knowledge-management/SKILL.md`. These rules define mission state and knowledge routing; this command does not duplicate them.
 
 ## Inputs
 

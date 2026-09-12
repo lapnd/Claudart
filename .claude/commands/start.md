@@ -2,6 +2,8 @@
 description: Orient a new CLAUDART session from current context, recent git history, and active task documents
 ---
 
+> **First step:** If `.claude/tasks/index.md` lists an active task or `.claude/specs/INDEX.md` lists an active spec, load the `task-management` or `spec-workflow` skill respectively before reporting next steps.
+
 Start this session with a lightweight CLAUDART orientation. This command is read-only, with one exception: consuming the handoff baton (Case H) deletes `.claude/HANDOFF.md` once the user resumes or discards it.
 
 ## Procedure
@@ -10,7 +12,7 @@ Start this session with a lightweight CLAUDART orientation. This command is read
 2. Read `.claude/CONTEXT.md` if it exists. If missing, say the project has no Claude context yet and suggest `/checkpoint` after meaningful work.
 3. Read `.claude/tasks/index.md` if it exists. If missing, treat as "no active tasks". If present, extract entries under `## Active`.
 4. For each Active entry, verify the underlying file exists in `.claude/tasks/` (the index is a cache; the file is truth). Read its frontmatter (`status`, `updated`, `slug`) only — do not full-read task bodies in `/start`.
-5. Read `.claude/knowledge/INDEX.md` if it exists — the root router only. Count visible route lines under `## Knowledge` that match the canonical Markdown route grammar; ignore HTML comments/templates and `- _(none)_`, so a seed index reports zero. Do not follow domain-map or topic links during startup. Later work follows the bounded map-first retrieval in `.claude/rules/knowledge-management.md`.
+5. Read `.claude/knowledge/INDEX.md` if it exists — the root router only. Count visible route lines under `## Knowledge` that match the canonical Markdown route grammar; ignore HTML comments/templates and `- _(none)_`, so a seed index reports zero. Do not follow domain-map or topic links during startup. Later work follows the bounded map-first retrieval in `.claude/skills/knowledge-management/SKILL.md`.
 6. Read `.claude/specs/INDEX.md` if it exists — the INDEX only. Extract entries under `## Active`. Do NOT read SPEC/ROADMAP/NOTES/LEDGER bodies in `/start`.
 7. Run `git log -3 --oneline`. If the directory is not a git repo or has fewer than three commits, report what is available.
 8. Extract only these sections from `.claude/CONTEXT.md` when present:
@@ -81,7 +83,7 @@ Pick the most recently updated one. The exact prompt depends on its status:
 - **`blocked`**: say:
   > "Task `<slug>` is blocked (updated <date>). Has the blocker cleared? If yes, I'll flip to in-progress and resume. If no, tell me what to work on instead."
 
-Do NOT auto-read the task body, auto-resume, or auto-confirm completion. Wait for explicit user direction. When the user confirms a resume, **warm the session**: read the full task file, then read the files in its `Related Code` section (cap ~5 most relevant) so you resume against real code, not the plan's description of it. Then follow the Resumption protocol in `.claude/rules/task-management.md` (verify completed steps still hold against current code, surface drift in Surprises section).
+Do NOT auto-read the task body, auto-resume, or auto-confirm completion. Wait for explicit user direction. When the user confirms a resume, **warm the session**: read the full task file, then read the files in its `Related Code` section (cap ~5 most relevant) so you resume against real code, not the plan's description of it. Then follow the Resumption protocol in `.claude/skills/task-management/SKILL.md` (verify completed steps still hold against current code, surface drift in Surprises section).
 
 ### Case B — No active task, but CONTEXT.md carries a handoff: `## Next Session Should Start By` is set, or an active `(no task)` micro-handoff sits under `## In Progress`
 
@@ -100,4 +102,4 @@ Ask plainly:
 - Keep the report short and actionable.
 - **Warm resume for ad-hoc work:** when the user picks up a `(no task)` micro-handoff from `## In Progress` (Case B), read the files on its `Files:` line (cap ~5) before acting — the same warm-up a task resume gets. This is the `/compact`-style "re-read recent files" applied to un-planned work.
 - If `.claude/CONTEXT.md` items look stale (e.g., dated `<!-- since: -->` more than 30 days old), mention that `/checkpoint` should refresh them after this session.
-- Flag stale Active tasks per the **Staleness Thresholds** table in `.claude/rules/task-management.md` (stalled `in-progress`, stuck `awaiting-review`, abandoned `planning`) — surface a stuck `awaiting-review` prominently; it is not abandoned, it just needs the user's sign-off.
+- Flag stale Active tasks per the **Staleness Thresholds** table in `.claude/skills/task-management/SKILL.md` (stalled `in-progress`, stuck `awaiting-review`, abandoned `planning`) — surface a stuck `awaiting-review` prominently; it is not abandoned, it just needs the user's sign-off.

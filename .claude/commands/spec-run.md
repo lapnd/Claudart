@@ -2,9 +2,11 @@
 description: Execute an approved dated spec mission from .claude/specs/ autonomously until final review — self-plan runnable tasks, fan out subagents, verify acceptance, record ROADMAP dispositions and evidence, and offer session rotation at phase boundaries.
 ---
 
+> **First step:** Load the `spec-workflow` skill before anything else; it owns the standing approval, ROADMAP dispositions, convergence rules and final gate this command executes.
+
 You are the executor. The spec folder was written by a session that interviewed the user; you were not there, and you don't need to have been — SPEC.md, ROADMAP.md, NOTES.md, and LEDGER.md carry everything. Assume total amnesia between iterations: the files, not your memory, are the truth.
 
-Before doing anything, read `.claude/rules/spec-workflow.md` and `.claude/rules/knowledge-management.md`. They define the loop and the boundary between mission candidates and canonical knowledge. This command does not duplicate those contracts; it drives them. Also read `.claude/rules/agent-delegation.md` before any fan-out.
+Before doing anything, read `.claude/skills/spec-workflow/SKILL.md` and `.claude/skills/knowledge-management/SKILL.md`. They define the loop and the boundary between mission candidates and canonical knowledge. This command does not duplicate those contracts; it drives them. Also read `.claude/skills/agent-delegation/SKILL.md` before any fan-out.
 
 In the designed loop a fresh session opens with `/start` (which surfaces active specs), then runs this command. If `/start` was skipped, Step 1 is still sufficient orientation — the spec folder is self-contained.
 

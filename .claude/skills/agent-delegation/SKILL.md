@@ -1,8 +1,7 @@
 ---
-paths: ["**/*"]
+name: agent-delegation
 description: Claude Code subagent delegation — project guidance on HOW to delegate well (decomposition, worker prompts, anti-shadow-run, persistence), layered on top of the Agent tool's built-in WHEN-to-delegate mechanics.
 when_to_use: When delegating to subagents, or planning a task that may parallelize — for the project's decomposition, worker-prompt, anti-shadow-run, and finding-persistence guidance.
-tags: [subagents, delegation, parallelism, orchestration]
 ---
 
 # Agent Delegation
@@ -92,7 +91,7 @@ The parent session remains responsible for the final result. Beyond the harness 
 - Run the relevant validation yourself, or verify the validation evidence is trustworthy.
 - Record each delegation **at spawn time** in the active task file (the CONTEXT micro-handoff for un-planned work; the spec LEDGER as a `delegated` entry for mission work): the unit, the agent, the routing class/model when explicitly selected, the expected output, and where it will be integrated; mark it consumed when integrated. A compaction or handoff must never orphan a running subagent — the file, not session memory, is what remembers outstanding delegations.
 - Persist task/spec state, WIP, proposals, and uncertain subagent findings in the owning task/spec/CONTEXT surface; do not rely on subagent thread history.
-- Route a verified descriptive finding through `.claude/rules/knowledge-management.md` when it is durable beyond the current work. Mid-session promotion requires both the capture gates and one of that rule's immediate-promotion triggers; patch owner + reachable map atomically and run the checker. `/checkpoint` bulk-maintains remaining candidates, while recurring behavior goes to `/learn`.
+- Route a verified descriptive finding through `.claude/skills/knowledge-management/SKILL.md` when it is durable beyond the current work. Mid-session promotion requires both the capture gates and one of that rule's immediate-promotion triggers; patch owner + reachable map atomically and run the checker. `/checkpoint` bulk-maintains remaining candidates, while recurring behavior goes to `/learn`.
 
 ## Task Documents
 

@@ -2,9 +2,11 @@
 description: Create a persistent implementation plan as a markdown document in .claude/tasks/. Replaces native plan mode with a cross-session task file the agent maintains until completion.
 ---
 
+> **First step:** Load the `task-management` skill before anything else; it owns the task-file contract and the read-only locks this command depends on.
+
 You are about to create a persistent task document. The file you produce — not this chat session — is the source of truth for the plan. A future session (yours or another agent's) must be able to resume work from that file alone.
 
-Before doing anything, read `.claude/rules/task-management.md`. That rule defines the file schema, status state machine, planning lock, approval signals, progress update protocol, and completion flow. This command does not duplicate that contract; it only orchestrates creation.
+Before doing anything, read `.claude/skills/task-management/SKILL.md`. That rule defines the file schema, status state machine, planning lock, approval signals, progress update protocol, and completion flow. This command does not duplicate that contract; it only orchestrates creation.
 
 ## Inputs
 
@@ -29,7 +31,7 @@ In parallel:
 
 - Read `.claude/CONTEXT.md` (current state of work).
 - Read `.claude/tasks/index.md` if it exists. If an active task already covers this request, surface it and ask whether to continue that one instead of starting a new file.
-- Read `.claude/knowledge/INDEX.md`, then route only relevant maps/topics within `.claude/rules/knowledge-management.md`'s bounds.
+- Read `.claude/knowledge/INDEX.md`, then route only relevant maps/topics within `.claude/skills/knowledge-management/SKILL.md`'s bounds.
 - Read any `docs/` directory the project provides for architectural context.
 - Run `git log -5 --oneline` to know recent direction.
 
@@ -43,7 +45,7 @@ Use `Read`, `Grep`, `Glob`, and read-only `Bash` (`ls`, `cat`, `git status/log/d
 - Identify existing patterns and helpers to reuse (avoid rewriting what already exists).
 - Surface constraints: linters, type checkers, framework idioms, naming conventions in the relevant area.
 - Note non-obvious context you'll want a future-session agent to know.
-- If the task may parallelize, record a delegation _strategy_ (decomposition, ownership) in the `delegation:` field + Plan of Work — the field's semantics live in `.claude/rules/agent-delegation.md`. Write-scope subagents must wait for `in-progress`; read-only explorers are fine during the planning lock.
+- If the task may parallelize, record a delegation _strategy_ (decomposition, ownership) in the `delegation:` field + Plan of Work — the field's semantics live in `.claude/skills/agent-delegation/SKILL.md`. Write-scope subagents must wait for `in-progress`; read-only explorers are fine during the planning lock.
 
 Explore to de-risk the plan's decisions, not to pre-solve the implementation — findings enter the file as decisions, constraints, and `verify:` checks, never as code (see "Plan Altitude" in the rule file).
 
@@ -60,9 +62,9 @@ No version suffix is needed — the sequence number already guarantees uniquenes
 
 ### Step 5 — Write the task file
 
-Use the exact skeleton in `.claude/rules/task-management.md`. Fill every section:
+Use the exact skeleton in `.claude/skills/task-management/SKILL.md`. Fill every section:
 
-- **Frontmatter**: `status: planning`, today's date in `created` and `updated`, `agent: claude`, `delegation:` (`none` | `strategy-only` | `authorized` — semantics per `.claude/rules/agent-delegation.md`; record the choice in the Decision Log), 1-5 lowercase kebab tags.
+- **Frontmatter**: `status: planning`, today's date in `created` and `updated`, `agent: claude`, `delegation:` (`none` | `strategy-only` | `authorized` — semantics per `.claude/skills/agent-delegation/SKILL.md`; record the choice in the Decision Log), 1-5 lowercase kebab tags.
 - **Purpose**: open with the user's original request quoted verbatim (paraphrase is where intent bends), then 2-3 sentences answering "who gains what, how do they verify it works".
 - **Context & Orientation**: this is your handoff to future-self. Fill all three subsections:
   - _Related Code_: every file path the plan touches or reads, with one-line reason.
@@ -103,15 +105,15 @@ Review the file, request changes by editing it directly or telling me what to ch
 When ready, say "go" / "approved" / "implement" and I'll flip status to `in-progress` and start executing.
 ```
 
-Do NOT begin implementing. Wait for the approval signal defined in `.claude/rules/task-management.md`.
+Do NOT begin implementing. Wait for the approval signal defined in `.claude/skills/task-management/SKILL.md`.
 
 ## After Approval
 
-Once the user gives an approval signal, the contract in `.claude/rules/task-management.md` takes over — this command adds nothing to it. Flip `status: planning → in-progress`, execute Concrete Steps while maintaining the task file per "Progress Updates During Implementation", honor the `delegation:` field per `.claude/rules/agent-delegation.md`, and finish through the **Two-Phase Completion Gate**: report at `awaiting-review` and stop; the user — not you — confirms `done`.
+Once the user gives an approval signal, the contract in `.claude/skills/task-management/SKILL.md` takes over — this command adds nothing to it. Flip `status: planning → in-progress`, execute Concrete Steps while maintaining the task file per "Progress Updates During Implementation", honor the `delegation:` field per `.claude/skills/agent-delegation/SKILL.md`, and finish through the **Two-Phase Completion Gate**: report at `awaiting-review` and stop; the user — not you — confirms `done`.
 
 ## Anti-Patterns
 
-- Do not write code while `status: planning` or `status: awaiting-review` — both are read-only locks (see `.claude/rules/task-management.md`).
+- Do not write code while `status: planning` or `status: awaiting-review` — both are read-only locks (see `.claude/skills/task-management/SKILL.md`).
 - Do not put the plan body into chat instead of the file. The file IS the plan.
 - Do not skip Memory Hints. A plan with no Memory Hints is a plan that won't survive a context reset.
 - Do not call `ExitPlanMode`. This workflow does not use it.

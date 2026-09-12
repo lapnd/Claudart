@@ -1,8 +1,7 @@
 ---
-paths: ["**/*"]
+name: task-management
 description: How agents create, maintain, resume, and complete persistent implementation plans stored in `.claude/tasks/`. Replaces session-only plan mode with cross-session task documents.
 when_to_use: Whenever the user invokes `/plan`, when a task file is open or referenced, or when resuming work that may have an active task in `.claude/tasks/`.
-tags: [tasks, planning, persistence, cross-session]
 ---
 
 # Task Management
@@ -11,7 +10,7 @@ Plans live as markdown documents in `.claude/tasks/`, not in session memory. One
 
 This rule supersedes the native plan mode workflow. Do not rely on `ExitPlanMode` for persistence; the task file is the persistence layer.
 
-Task files remain the owner for task state, WIP, proposed behavior, acceptance state, and uncertain discoveries. A descriptive fact may be promoted mid-task only through `.claude/rules/knowledge-management.md` when both its capture gates and an immediate-promotion trigger pass; local scope is valid, but task state never becomes knowledge.
+Task files remain the owner for task state, WIP, proposed behavior, acceptance state, and uncertain discoveries. A descriptive fact may be promoted mid-task only through `.claude/skills/knowledge-management/SKILL.md` when both its capture gates and an immediate-promotion trigger pass; local scope is valid, but task state never becomes knowledge.
 
 For work that may parallelize, also follow `agent-delegation.md`. The `delegation:` frontmatter field records a delegation strategy at planning time and carries it into execution at the approval signal; its values and whether they gate delegation are defined there, not in this file.
 
@@ -190,7 +189,7 @@ When `status: in-progress`, the agent maintains the task file as it works:
 3. Append to **Surprises & Discoveries** when reality diverges from the plan (e.g., file moved, dependency missing, existing helper found). Prefix each entry with a `(YYYY-MM-DD HH:MMZ)` UTC timestamp.
 4. Append to **Decision Log** when changing approach mid-flight, prefixed with `(YYYY-MM-DD HH:MMZ, <agent>)`. Include rationale.
 5. **Do not delete or rewrite steps that were skipped or abandoned** — strike them through with `~~text~~` and add a Surprises entry explaining why.
-6. Route findings by `.claude/rules/knowledge-management.md`: keep task/WIP/proposal/uncertainty here; promote an eligible descriptive fact directly only under one of the rule's immediate-promotion triggers. Run the checker after a knowledge mutation.
+6. Route findings by `.claude/skills/knowledge-management/SKILL.md`: keep task/WIP/proposal/uncertainty here; promote an eligible descriptive fact directly only under one of the rule's immediate-promotion triggers. Run the checker after a knowledge mutation.
 
 The plan is a living document. Edits to it are part of the work, not an afterthought. Every in-task log entry — a completed step, a Decision Log line, a Surprises line — carries the full `YYYY-MM-DD HH:MMZ` UTC time, never date-only: one task often logs several entries in a single day, and the time is the only thing that keeps them ordered for audit.
 
