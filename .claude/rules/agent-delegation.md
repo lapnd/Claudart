@@ -19,12 +19,12 @@ Role selection and model selection are separate decisions. `Explore`, `Plan`, an
 
 Before each ordinary spawn, classify the delegated unit by its ambiguity, breadth, consequence of a wrong answer, and difficulty of verification. Choose the lowest class that is likely to complete the unit reliably:
 
-| Class | Typical delegated unit | Ideal Claude family |
-| --- | --- | --- |
-| `routine` | focused search, call-site inventory, docs lookup, extraction, mechanical or highly constrained edit | Haiku |
-| `standard` | bounded implementation or debugging with clear contracts and local verification | Sonnet |
-| `complex` | ambiguous cross-file debugging, architecture-sensitive reasoning, difficult review or integration | Opus |
-| `maximum` | genuinely frontier-level, long-horizon, highly ambiguous work, or a unit whose cheaper attempt exposed a capability limit | Fable |
+| Class      | Typical delegated unit                                                                                                    | Ideal Claude family |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `routine`  | focused search, call-site inventory, docs lookup, extraction, mechanical or highly constrained edit                       | Haiku               |
+| `standard` | bounded implementation or debugging with clear contracts and local verification                                           | Sonnet              |
+| `complex`  | ambiguous cross-file debugging, architecture-sensitive reasoning, difficult review or integration                         | Opus                |
+| `maximum`  | genuinely frontier-level, long-horizon, highly ambiguous work, or a unit whose cheaper attempt exposed a capability limit | Fable               |
 
 The **parent session's selected model is a hard ceiling for implicit delegation**. The effective child model is the cheapest suitable model for the class, capped at the parent model's family. A difficult task is not permission to spend above the user's session choice.
 

@@ -19,12 +19,12 @@ Role selection and execution-profile selection are separate decisions. `explorer
 
 Before each ordinary spawn, classify the delegated unit by its ambiguity, breadth, consequence of a wrong answer, and difficulty of verification. Choose the lowest class that is likely to complete the unit reliably:
 
-| Class | Typical delegated unit | Ideal Codex profile |
-| --- | --- | --- |
-| `routine` | focused search, call-site inventory, docs lookup, extraction, mechanical or highly constrained edit | `gpt-5.6-luna` / `low` |
-| `standard` | bounded implementation or debugging with clear contracts and local verification | `gpt-5.6-terra` / `medium` |
-| `complex` | ambiguous cross-file debugging, architecture-sensitive reasoning, difficult review or integration | `gpt-5.6-sol` / `high` |
-| `maximum` | genuinely frontier-level, long-horizon, highly ambiguous work, or a unit whose cheaper attempt exposed a capability limit | `gpt-6-astra` / parent-selected effort |
+| Class      | Typical delegated unit                                                                                                    | Ideal Codex profile                    |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `routine`  | focused search, call-site inventory, docs lookup, extraction, mechanical or highly constrained edit                       | `gpt-5.6-luna` / `low`                 |
+| `standard` | bounded implementation or debugging with clear contracts and local verification                                           | `gpt-5.6-terra` / `medium`             |
+| `complex`  | ambiguous cross-file debugging, architecture-sensitive reasoning, difficult review or integration                         | `gpt-5.6-sol` / `high`                 |
+| `maximum`  | genuinely frontier-level, long-horizon, highly ambiguous work, or a unit whose cheaper attempt exposed a capability limit | `gpt-6-astra` / parent-selected effort |
 
 The **parent session's selected model and reasoning effort are hard ceilings for implicit delegation**. Treat the child execution profile as two independent dimensions: choose the cheapest suitable model and the lowest sufficient reasoning effort for the class, then cap each at the parent session's selected setting. A difficult task is not permission to spend above the user's session choice on either dimension.
 
