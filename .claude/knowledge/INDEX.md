@@ -8,4 +8,4 @@ Use this as a compact router, not an encyclopedia. Route lines use:
 
 ## Knowledge
 
-- _(none)_
+- [Context Cost Model](context-cost-model.md) — measured per-request token cost of the Claude layer; why a rule is expensive and a skill nearly free. · architecture · active
