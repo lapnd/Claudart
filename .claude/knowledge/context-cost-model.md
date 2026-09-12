@@ -17,6 +17,8 @@ scope:
 sources:
   - "../skills/task-management/SKILL.md"
   - "../skills/spec-workflow/SKILL.md"
+related:
+  - "knowledge:instruction-tier-placement"
 verify: "Re-run `claude -p 'ok' --model haiku --output-format json` and a Read-forcing prompt in a scratch repo, comparing usage.iterations[0] context against a repo with no .claude/."
 sensitivity: public
 ---
@@ -62,6 +64,6 @@ Choose by **when the text must be in context**, not by how important it is.
 
 A constraint that applies to essentially every turn belongs in `.claude/rules/` — `ai-behavior` and `code-health` qualify. A contract that only applies inside one workflow belongs in `.claude/skills/`, where it costs a catalog line until something loads it.
 
-Moving the four workflow contracts to skills measured 59,998 → 46,150 on a file-touching session here, and 91,441 → 68,057 on the larger `migration` layer. The light-session cost rose 328 tokens for the four catalog entries.
+Moving the four workflow contracts to skills measured 59,998 → 46,150 on a file-touching session here, and 91,441 → 68,057 on a larger downstream layer. The light-session cost rose 328 tokens for the four catalog entries.
 
 Lazy loading has a real failure mode: `task-management` owns the read-only planning and awaiting-review locks, so a session that never loads it could edit code while a lock is in force. The mitigation is explicit, not probabilistic — every dependent command opens with a "First step: load the `<skill>` skill" line rather than relying on the model to notice.

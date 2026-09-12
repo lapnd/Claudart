@@ -9,3 +9,4 @@ Use this as a compact router, not an encyclopedia. Route lines use:
 ## Knowledge
 
 - [Context Cost Model](context-cost-model.md) — measured per-request token cost of the Claude layer; why a rule is expensive and a skill nearly free. · architecture · active
+- [Instruction Tier Placement](instruction-tier-placement.md) — which tier an instruction file belongs in, and the `paths:` inversion that keeps a universal rule out of context. · architecture · active
