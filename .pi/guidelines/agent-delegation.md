@@ -9,7 +9,7 @@ tags: [delegation, decomposition, parallelism, single-agent]
 
 **Pi has no built-in subagents.** It ships a small core — `read`, `write`, `edit`, `bash`, extended by skills, prompt templates, extensions and packages — and deliberately skips both sub-agents and plan mode. Pi's own README is explicit: _"Pi ships with powerful defaults but skips features like sub agents and plan mode"_, and on sub-agents, _"There's many ways to do this. Spawn pi instances via tmux, or build your own with extensions, or install a package that does it your way."_ There is no spawn API to call, no explorer/worker roles, and no per-delegate model selection.
 
-The same README answers plan mode with _"Write plans to files"_ — which is exactly what `/deepseek-plan`'s Pi counterpart, `/skill:pi-plan`, and the task/spec layers already do. CLAUDART's persistent task documents are the plan-mode replacement on this harness, not a workaround for a missing one.
+The same README answers plan mode with _"Write plans to files"_ — which is exactly what `/skill:pi-plan` and the task/spec layers already do. CLAUDART's persistent task documents are the plan-mode replacement on this harness, not a workaround for a missing one.
 
 That does not make this guideline empty. The failure modes delegation exists to prevent — losing track of what a unit owns, re-deriving the same answer twice, accepting an unverified result, letting findings evaporate when the context window compacts — all still apply to a single long-running session. This file is how CLAUDART handles them without subagents.
 
