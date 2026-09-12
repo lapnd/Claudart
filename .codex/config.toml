@@ -1,3 +1,20 @@
 [agents]
 # Cap concurrent subagent fan-out per session.
 max_concurrent_threads_per_session = 6
+
+# Agent roles must be declared here to exist. Codex does not scan `agents/` —
+# `[agents.<role>]` keys the role by name and `config_file` points at the
+# role-specific config layer, resolved relative to this file. Without these
+# three tables the shipped role files under `agents/` are never loaded.
+
+[agents.clean_code_reviewer]
+description = "Evidence-driven code-health reviewer and scoped refactoring engineer. Invoke deliberately to review, audit, plan, simplify, refactor, or harden an assigned area."
+config_file = "./agents/clean-code-reviewer.toml"
+
+[agents.security_auditor]
+description = "Exhaustive, read-only security auditor producing a triaged report. Invoke only when a security audit is explicitly requested."
+config_file = "./agents/security-auditor.toml"
+
+[agents.ui_visual_critic]
+description = "Adversarial visual-design critic for rendered surfaces. Invoke only when a visual or design review is explicitly requested."
+config_file = "./agents/ui-visual-critic.toml"

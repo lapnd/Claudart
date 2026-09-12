@@ -7,11 +7,11 @@ tags: [subagents, delegation, parallelism, orchestration]
 
 # Agent Delegation
 
-**Trust the harness on _whether and when_ to delegate.** Codex spawns subagents from a direct request or an applicable project or skill instruction, and at the Ultra intelligence level it delegates proactively — deciding on its own when suitable independent work should parallelize. Reach for subagents when work parallelizes, when a search spans many files, when an independent investigation can run on the side. Requests for depth, thoroughness, or "be comprehensive" are normal grounds to fan out; this guideline does not gate that decision and does not require the user to pre-authorize routine delegation.
+**Trust the harness on _whether and when_ to delegate.** Codex spawns subagents from a direct request or an applicable project or skill instruction, and at the `ultra` reasoning effort it delegates proactively — deciding on its own when suitable independent work should parallelize. Reach for subagents when work parallelizes, when a search spans many files, when an independent investigation can run on the side. Requests for depth, thoroughness, or "be comprehensive" are normal grounds to fan out; this guideline does not gate that decision and does not require the user to pre-authorize routine delegation.
 
-**What this rule adds is the _how_, not the _whether_**: how to decompose work, how to avoid shadow-running a delegate, how to write a self-contained worker prompt, and how delegated findings persist into CLAUDART memory. One practical caveat: below Ultra, instruction-triggered spawning is newer and less proven than a direct request — if an expected fan-out does not materialize, name the delegation explicitly ("spawn one explorer per module …") instead of assuming the harness acted on this file.
+**What this rule adds is the _how_, not the _whether_**: how to decompose work, how to avoid shadow-running a delegate, how to write a self-contained worker prompt, and how delegated findings persist into CLAUDART memory. One practical caveat: below `ultra`, instruction-triggered spawning is newer and less proven than a direct request — if an expected fan-out does not materialize, name the delegation explicitly ("spawn one explorer per module …") instead of assuming the harness acted on this file.
 
-This protocol governs the built-in `explorer`/`worker`/`default` delegation pattern. Project-specific custom agents (defined under `.codex/agents/`) carry their own instructions and are invoked directly by name when the user asks for them; they are out of scope here.
+This protocol governs the built-in `explorer`/`worker`/`default` delegation pattern. Project-specific roles carry their own instructions and are invoked by role name; they are out of scope here. A role exists only when `.codex/config.toml` declares it as `[agents.<role>]` with a `config_file` — Codex never discovers `.codex/agents/*.toml` by scanning the directory.
 
 ## Route general-purpose delegates by difficulty
 
@@ -87,13 +87,13 @@ Redundancy is acceptable only when **deliberate and disclosed**: independent rev
 
 ## How to Invoke
 
-Codex spawns subagents from natural-language requests and applicable project/skill instructions; at the Ultra intelligence level it also delegates proactively. When you want a specific decomposition rather than the harness's own, name the agent and the unit of work explicitly.
+Codex spawns subagents from natural-language requests and applicable project/skill instructions; at the `ultra` reasoning effort it also delegates proactively. When you want a specific decomposition rather than the harness's own, name the agent and the unit of work explicitly.
 
 - **Built-in agents** (always available): `default` (general-purpose fallback), `worker` (execution-focused, for implementation and fixes), `explorer` (read-heavy codebase exploration). Custom agents are invoked by their `name`.
 - **Single delegation**: name the agent and hand it a self-contained task, e.g. "Spawn an explorer to find every call site of `parseConfig` and return each as `file:line`."
 - **Routed delegation**: when the effective child profile differs from the parent, pass both the selected exact `model` slug and `reasoning_effort` on the spawn. Do not set only `model` and rely on that model's default effort.
 - **Parallel fan-out**: ask for one agent per independent unit, then wait-and-summarize, e.g. "Spawn one explorer per point above, wait for all of them, and summarize the result for each point." Codex waits until every requested result is available, then returns a single consolidated response.
-- **Steering threads**: use `/agent` in the CLI to switch between and inspect active agent threads; ask Codex directly to steer a running subagent, stop it, or close completed threads.
+- **Steering threads**: `/agents` lists and switches between all active agent sessions, and `/multi-agents` switches between this session's subagents; ask Codex directly to steer a running subagent, stop it, or close completed threads.
 
 Reference: Codex Subagents (https://learn.chatgpt.com/docs/agent-configuration/subagents). Subagents are enabled by default in current Codex releases and still evolving, so when a precise decomposition matters, state it explicitly rather than relying on implicit behavior.
 
@@ -124,7 +124,7 @@ The parent Codex session remains responsible for the final result. **Codex's doc
 
 - **Default to waiting.** Once you spawn a delegate-and-consume unit, do not issue further reads, searches, or edits that touch the delegated question — wait for the consolidated result and build on it. Re-running the same investigation locally is the single most common failure: the parent re-derives what a still-running explorer was sent to find. "Stay busy after spawning" is not a goal; non-redundant progress is.
 - **Parallel local work is the exception, not the rule** — and only for a lane named _before_ spawning that provably needs nothing from the delegated output. If the lane would consume the delegated answer (e.g. seed/docs that depend on the routes an explorer is mapping), it is blocked on the subtask: wait, do not shadow-run it.
-- **A silent subagent is not a stalled one.** A healthy explorer/worker on a long task often emits no intermediate signal; treat silence as in-progress, not failure. Misreading liveness and duplicating the work is a known Codex pitfall ([openai/codex#16900](https://github.com/openai/codex/issues/16900)). If you genuinely suspect it is stuck, steer or stop it explicitly via `/agent` — never quietly redo its work.
+- **A silent subagent is not a stalled one.** A healthy explorer/worker on a long task often emits no intermediate signal; treat silence as in-progress, not failure. Misreading liveness and duplicating the work is a known Codex pitfall ([openai/codex#16900](https://github.com/openai/codex/issues/16900)). If you genuinely suspect it is stuck, steer or stop it explicitly via `/agents` or `/multi-agents` — never quietly redo its work.
 - Review subagent outputs quickly and integrate only the useful parts.
 - Run the relevant validation yourself or verify that the validation evidence is trustworthy.
 - Record each delegation **at spawn time** in the active task file (the CONTEXT micro-handoff for un-planned work; the spec LEDGER as a `delegated` entry for mission work): the unit, the agent, the routing class plus model/reasoning profile when explicitly selected, the expected output, and where it will be integrated; mark it consumed when integrated. A compaction or handoff must never orphan a running subagent — the file, not session memory, is what remembers outstanding delegations.
@@ -150,5 +150,5 @@ When a task is likely to parallelize, record the strategy; otherwise note "Deleg
 - Keep delegation one level deep unless the user explicitly asks for recursive delegation.
 - Never exceed the parent session's model family or reasoning effort through ordinary delegation without explicit user authorization.
 - Keep concurrency conservative — the shipped config caps `[agents] max_concurrent_threads_per_session` at **6**. Raising it, in OpenAI's own words, _"can turn broad delegation instructions into repeated fan-out, which increases token usage, latency, and local resource consumption."_
-- Ultra coordinates multiple agents in parallel by default and Codex itself warns that high multi-agent concurrency can increase usage quickly — match model tier, reasoning effort, and fan-out to the size of the request so a trivial ask doesn't spin up expensive parallel work; judgment, not a brake on genuinely parallel work.
+- The `ultra` reasoning effort coordinates multiple agents in parallel by default and Codex itself warns that high multi-agent concurrency can increase usage quickly — match model tier, reasoning effort, and fan-out to the size of the request so a trivial ask doesn't spin up expensive parallel work; judgment, not a brake on genuinely parallel work.
 - Use read-only sandboxing for explorers and any read-only delegation whenever possible.

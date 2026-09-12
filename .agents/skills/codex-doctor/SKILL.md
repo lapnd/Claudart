@@ -45,6 +45,7 @@ For every `.agents/skills/*/SKILL.md` file:
 For every `.codex/agents/*.toml` file:
 
 - Confirm `name`, `description`, `model`, `model_reasoning_effort`, `sandbox_mode`, and `developer_instructions` keys are present.
+- **Confirm the role is declared.** Codex loads a role only when `.codex/config.toml` contains an `[agents.<role>]` table whose `config_file` points at this file; there is no directory scan. A role file with no matching declaration is dead weight — flag it as **High**, because the project believes it has a configured specialist that never loads.
 - Confirm explorers and review-only/audit-only agents use `sandbox_mode = "read-only"`. A write-capable refiner or worker is valid only when its declared purpose explicitly requires implementation.
 - Confirm every write-capable agent clearly defines scope expectations, protects unrelated user work, requires validation, and warns that other agents may be editing in parallel.
 
