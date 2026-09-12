@@ -2,9 +2,9 @@
 
 [Tiếng Việt](README_VI.md) · [Workflow guide](docs/WORKFLOW.md)
 
-CLAUDART is a repository-local workflow for Claude Code and Codex CLI. It keeps session state, implementation plans, project knowledge, and agent instructions in versioned Markdown files alongside the code.
+CLAUDART is a repository-local workflow for Claude Code, Codex CLI, DeepSeek Harness (`dsh`), and Pi. It keeps session state, implementation plans, project knowledge, and agent instructions in versioned Markdown files alongside the code.
 
-The two runtime layers are independent. Install Claude Code support, Codex support, or both. CLAUDART does not require a database, daemon, or hosted service.
+The four runtime layers are independent. Install any one of them, or several. CLAUDART does not require a database, daemon, or hosted service.
 
 ## What it adds
 
@@ -35,13 +35,38 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 # Codex CLI
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex
 
-# Both
+# DeepSeek Harness (dsh)
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --deepseek
+
+# Pi
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --pi
+
+# Claude Code and Codex
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --both
+
+# All four
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --all
 ```
 
 The installer copies missing files and skips files that already exist. `--force` overwrites existing files and should be used only when that is intentional.
 
-A clean Codex installation adds `.codex/`, `.agents/skills/`, and a root `AGENTS.md`. The source template is stored at `.codex/AGENTS.md` in this repository.
+### The shared `AGENTS.md` router
+
+Codex, `dsh`, and Pi all auto-load `AGENTS.md` from the project root. Rather than fighting over that one filename, CLAUDART treats it as a shared router: each layer keeps its instructions in its own directory (`.codex/AGENTS.md`, `.deepseek/DEEPSEEK.md`, `.pi/PI.md`) and the installer adds one route line pointing at it.
+
+```markdown
+<!-- claudart:routes:start -->
+
+- Codex CLI → follow `.codex/AGENTS.md`
+- DeepSeek Harness (dsh) → follow `.deepseek/DEEPSEEK.md`
+- Pi → follow `.pi/PI.md`
+
+<!-- claudart:routes:end -->
+```
+
+The installer only ever writes inside those markers. If your project already has an `AGENTS.md`, its content is preserved exactly and the block is appended. Claude Code does not read this file; its layer loads through `.claude/CLAUDE.md`.
+
+`.agents/skills/` is likewise shared by all three harnesses. The installer copies only the skills belonging to the layer you asked for, so a single-layer install stays clean; with several layers installed, every harness sees every prefix (`codex-*`, `deepseek-*`, `pi-*`) and you invoke the one matching your layer.
 
 ### Existing project or existing CLAUDART installation
 
@@ -57,26 +82,26 @@ The protocol compares the current project with the current `main` branch and sep
 
 After installation or reconciliation, run the health and normalization sequence once:
 
-| Claude Code        | Codex CLI                |
-| ------------------ | ------------------------ |
-| `/doctor`          | `$codex-doctor`          |
-| `/refactor-memory` | `$codex-refactor-memory` |
-| `/doctor`          | `$codex-doctor`          |
+| Claude Code        | Codex CLI                | DeepSeek (dsh)              | Pi                          |
+| ------------------ | ------------------------ | --------------------------- | --------------------------- |
+| `/doctor`          | `$codex-doctor`          | `$deepseek-doctor`          | `/skill:pi-doctor`          |
+| `/refactor-memory` | `$codex-refactor-memory` | `$deepseek-refactor-memory` | `/skill:pi-refactor-memory` |
+| `/doctor`          | `$codex-doctor`          | `$deepseek-doctor`          | `/skill:pi-doctor`          |
 
-Then begin a normal session with `/start` or `$codex-start`.
+Then begin a normal session with `/start`, `$codex-start`, `$deepseek-start`, or `/skill:pi-start`.
 
 ## Daily workflow
 
-| Purpose                                           | Claude Code        | Codex CLI                |
-| ------------------------------------------------- | ------------------ | ------------------------ |
-| Orient a session                                  | `/start`           | `$codex-start`           |
-| Create a persistent implementation plan           | `/plan <task>`     | `$codex-plan <task>`     |
-| Define large, multi-session work                  | `/spec <mission>`  | `$codex-spec <mission>`  |
-| Execute an approved specification                 | `/spec-run <slug>` | `$codex-spec-run <slug>` |
-| Preserve an unfinished investigation              | `/handoff`         | `$codex-handoff`         |
-| Rebuild current state at a natural stopping point | `/checkpoint`      | `$codex-checkpoint`      |
-| Turn recurring behavior into a rule               | `/learn`           | `$codex-learn`           |
-| Check the installation                            | `/doctor`          | `$codex-doctor`          |
+| Purpose                                           | Claude Code        | Codex CLI                | DeepSeek (dsh)              | Pi                          |
+| ------------------------------------------------- | ------------------ | ------------------------ | --------------------------- | --------------------------- |
+| Orient a session                                  | `/start`           | `$codex-start`           | `$deepseek-start`           | `/skill:pi-start`           |
+| Create a persistent implementation plan           | `/plan <task>`     | `$codex-plan <task>`     | `$deepseek-plan <task>`     | `/skill:pi-plan <task>`     |
+| Define large, multi-session work                  | `/spec <mission>`  | `$codex-spec <mission>`  | `$deepseek-spec <mission>`  | `/skill:pi-spec <mission>`  |
+| Execute an approved specification                 | `/spec-run <slug>` | `$codex-spec-run <slug>` | `$deepseek-spec-run <slug>` | `/skill:pi-spec-run <slug>` |
+| Preserve an unfinished investigation              | `/handoff`         | `$codex-handoff`         | `$deepseek-handoff`         | `/skill:pi-handoff`         |
+| Rebuild current state at a natural stopping point | `/checkpoint`      | `$codex-checkpoint`      | `$deepseek-checkpoint`      | `/skill:pi-checkpoint`      |
+| Turn recurring behavior into a rule               | `/learn`           | `$codex-learn`           | `$deepseek-learn`           | `/skill:pi-learn`           |
+| Check the installation                            | `/doctor`          | `$codex-doctor`          | `$deepseek-doctor`          | `/skill:pi-doctor`          |
 
 Use a task plan for multi-step or multi-file implementation. Use a specification when the work contains several phases, needs a proof-of-concept or acceptance scenarios, or must continue across many sessions.
 
@@ -96,7 +121,7 @@ The important boundary is simple: **rules say how the agent should work; knowled
 
 ## Specialized agents
 
-These agents never run automatically.
+These agents never run automatically. They ship with the Claude, Codex, and DeepSeek layers. The Pi layer omits them: Pi has no built-in subagents, so `.pi/guidelines/agent-delegation.md` routes that work inline or to a separate Pi instance instead.
 
 | Agent               | Role                                                                                                                    |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------- |

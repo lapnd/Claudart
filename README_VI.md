@@ -2,9 +2,9 @@
 
 [English](README.md) · [Hướng dẫn quy trình](docs/WORKFLOW_VI.md)
 
-CLAUDART là một bộ quy trình đặt ngay trong repository dành cho Claude Code và Codex CLI. Trạng thái phiên làm việc, kế hoạch triển khai, kiến thức dự án và chỉ dẫn cho agent đều được lưu bằng Markdown và quản lý cùng mã nguồn.
+CLAUDART là một bộ quy trình đặt ngay trong repository dành cho Claude Code, Codex CLI, DeepSeek Harness (`dsh`) và Pi. Trạng thái phiên làm việc, kế hoạch triển khai, kiến thức dự án và chỉ dẫn cho agent đều được lưu bằng Markdown và quản lý cùng mã nguồn.
 
-Hai lớp Claude và Codex hoạt động độc lập. Bạn có thể cài một lớp hoặc cả hai. CLAUDART không cần cơ sở dữ liệu, daemon hay dịch vụ chạy nền.
+Bốn lớp Claude, Codex, DeepSeek và Pi hoạt động độc lập. Bạn có thể cài một lớp hoặc nhiều lớp. CLAUDART không cần cơ sở dữ liệu, daemon hay dịch vụ chạy nền.
 
 ## CLAUDART bổ sung những gì
 
@@ -35,13 +35,38 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 # Codex CLI
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex
 
-# Cả hai
+# DeepSeek Harness (dsh)
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --deepseek
+
+# Pi
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --pi
+
+# Claude Code và Codex
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --both
+
+# Cả bốn lớp
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --all
 ```
 
 Trình cài đặt sao chép các file còn thiếu và bỏ qua file đã tồn tại. Tùy chọn `--force` sẽ ghi đè file hiện có, vì vậy chỉ dùng khi bạn thực sự muốn thay thế chúng.
 
-Với một bản cài Codex mới, trình cài đặt thêm `.codex/`, `.agents/skills/` và `AGENTS.md` ở thư mục gốc. Trong repository CLAUDART, file mẫu nguồn nằm tại `.codex/AGENTS.md`.
+### `AGENTS.md` dùng chung làm bộ định tuyến
+
+Codex, `dsh` và Pi đều tự nạp `AGENTS.md` ở thư mục gốc. Thay vì tranh nhau một tên file, CLAUDART coi nó là bộ định tuyến dùng chung: mỗi lớp giữ chỉ dẫn trong thư mục riêng (`.codex/AGENTS.md`, `.deepseek/DEEPSEEK.md`, `.pi/PI.md`) và trình cài đặt chỉ thêm một dòng trỏ tới đó.
+
+```markdown
+<!-- claudart:routes:start -->
+
+- Codex CLI → follow `.codex/AGENTS.md`
+- DeepSeek Harness (dsh) → follow `.deepseek/DEEPSEEK.md`
+- Pi → follow `.pi/PI.md`
+
+<!-- claudart:routes:end -->
+```
+
+Trình cài đặt chỉ ghi bên trong cặp marker này. Nếu dự án của bạn đã có `AGENTS.md`, nội dung cũ được giữ nguyên và khối trên được nối vào cuối. Claude Code không đọc file này; lớp của nó nạp qua `.claude/CLAUDE.md`.
+
+`.agents/skills/` cũng dùng chung cho cả ba harness. Trình cài đặt chỉ sao chép skill của lớp bạn yêu cầu, nên bản cài một lớp luôn sạch; khi cài nhiều lớp, mọi harness đều thấy đủ các tiền tố (`codex-*`, `deepseek-*`, `pi-*`) và bạn gọi đúng tiền tố của lớp mình.
 
 ### Dự án đã có cấu hình hoặc đã cài CLAUDART
 
@@ -57,26 +82,26 @@ Quy trình này so sánh dự án hiện tại với nhánh `main` mới nhất,
 
 Sau khi cài hoặc đối soát, chạy một lần chuỗi kiểm tra và chuẩn hóa:
 
-| Claude Code        | Codex CLI                |
-| ------------------ | ------------------------ |
-| `/doctor`          | `$codex-doctor`          |
-| `/refactor-memory` | `$codex-refactor-memory` |
-| `/doctor`          | `$codex-doctor`          |
+| Claude Code        | Codex CLI                | DeepSeek (dsh)              | Pi                          |
+| ------------------ | ------------------------ | --------------------------- | --------------------------- |
+| `/doctor`          | `$codex-doctor`          | `$deepseek-doctor`          | `/skill:pi-doctor`          |
+| `/refactor-memory` | `$codex-refactor-memory` | `$deepseek-refactor-memory` | `/skill:pi-refactor-memory` |
+| `/doctor`          | `$codex-doctor`          | `$deepseek-doctor`          | `/skill:pi-doctor`          |
 
-Sau đó bắt đầu phiên làm việc bình thường bằng `/start` hoặc `$codex-start`.
+Sau đó bắt đầu phiên làm việc bình thường bằng `/start`, `$codex-start`, `$deepseek-start` hoặc `/skill:pi-start`.
 
 ## Quy trình hằng ngày
 
-| Mục đích                                               | Claude Code        | Codex CLI                |
-| ------------------------------------------------------ | ------------------ | ------------------------ |
-| Định hướng phiên                                       | `/start`           | `$codex-start`           |
-| Tạo kế hoạch triển khai bền vững                       | `/plan <task>`     | `$codex-plan <task>`     |
-| Mô tả công việc lớn, kéo dài nhiều phiên               | `/spec <mission>`  | `$codex-spec <mission>`  |
-| Thực thi đặc tả đã được phê duyệt                      | `/spec-run <slug>` | `$codex-spec-run <slug>` |
-| Lưu phần điều tra đang dở                              | `/handoff`         | `$codex-handoff`         |
-| Xây dựng lại trạng thái hiện tại tại điểm dừng phù hợp | `/checkpoint`      | `$codex-checkpoint`      |
-| Biến cách làm lặp lại thành quy tắc                    | `/learn`           | `$codex-learn`           |
-| Kiểm tra bản cài đặt                                   | `/doctor`          | `$codex-doctor`          |
+| Mục đích                                               | Claude Code        | Codex CLI                | DeepSeek (dsh)              | Pi                          |
+| ------------------------------------------------------ | ------------------ | ------------------------ | --------------------------- | --------------------------- |
+| Định hướng phiên                                       | `/start`           | `$codex-start`           | `$deepseek-start`           | `/skill:pi-start`           |
+| Tạo kế hoạch triển khai bền vững                       | `/plan <task>`     | `$codex-plan <task>`     | `$deepseek-plan <task>`     | `/skill:pi-plan <task>`     |
+| Mô tả công việc lớn, kéo dài nhiều phiên               | `/spec <mission>`  | `$codex-spec <mission>`  | `$deepseek-spec <mission>`  | `/skill:pi-spec <mission>`  |
+| Thực thi đặc tả đã được phê duyệt                      | `/spec-run <slug>` | `$codex-spec-run <slug>` | `$deepseek-spec-run <slug>` | `/skill:pi-spec-run <slug>` |
+| Lưu phần điều tra đang dở                              | `/handoff`         | `$codex-handoff`         | `$deepseek-handoff`         | `/skill:pi-handoff`         |
+| Xây dựng lại trạng thái hiện tại tại điểm dừng phù hợp | `/checkpoint`      | `$codex-checkpoint`      | `$deepseek-checkpoint`      | `/skill:pi-checkpoint`      |
+| Biến cách làm lặp lại thành quy tắc                    | `/learn`           | `$codex-learn`           | `$deepseek-learn`           | `/skill:pi-learn`           |
+| Kiểm tra bản cài đặt                                   | `/doctor`          | `$codex-doctor`          | `$deepseek-doctor`          | `/skill:pi-doctor`          |
 
 Dùng kế hoạch tác vụ cho phần triển khai có nhiều bước hoặc nhiều file. Dùng đặc tả khi công việc có nhiều giai đoạn, cần bản thử nghiệm hoặc tiêu chí nghiệm thu, hay phải tiếp tục qua nhiều phiên.
 

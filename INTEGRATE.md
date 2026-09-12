@@ -1,6 +1,6 @@
 # Integrate CLAUDART with your agent (AI-native install)
 
-**You are an AI coding agent** (Claude Code, Codex CLI, or similar) and your user linked this file because they want to **adopt or upgrade CLAUDART** in the current project. CLAUDART is a plain-Markdown operating layer for commands or skills, layered memory, persistent work, project knowledge, and specialized agents.
+**You are an AI coding agent** (Claude Code, Codex CLI, DeepSeek Harness, Pi, or similar) and your user linked this file because they want to **adopt or upgrade CLAUDART** in the current project. CLAUDART is a plain-Markdown operating layer for commands or skills, layered memory, persistent work, project knowledge, and specialized agents.
 
 Source of truth: <https://github.com/vankhaivn/Claudart> (branch `main`).
 
@@ -21,12 +21,12 @@ This file is a **protocol, not an installer**. Follow it top to bottom. It exist
 ## Step 0 — Diagnose first, then fetch proportionally
 
 1. Work from the project root. Run `git status --short` when Git is available, record unrelated work, and do not disturb it.
-2. Inventory only relevant AI paths: `.claude/`, `.codex/`, `.agents/skills/`, root or nested `CLAUDE.md`, root `AGENTS.md`, and any overlapping custom commands, agents, rules, memory, tasks, specs, or knowledge.
+2. Inventory only relevant AI paths: `.claude/`, `.codex/`, `.deepseek/`, `.pi/`, `.agents/skills/`, root or nested `CLAUDE.md`, root `AGENTS.md`, and any overlapping custom commands, agents, rules, memory, tasks, specs, or knowledge. Treat a legacy root `DEEPSEEK.md` or `PI.md` loader as retired: current upstream routes every harness through the root `AGENTS.md` block instead.
 3. Resolve the target layer:
    - explicit user choice wins;
    - otherwise default to the runtime already present;
    - if neither exists and the active agent runtime makes the choice obvious, state that assumption in the plan instead of asking unnecessarily;
-   - if both are selected, classify each layer independently.
+   - if several are selected, classify each layer independently.
 4. Classify each selected layer:
    - **A — Clean adopt:** no meaningful AI operating layer exists yet; a bare loader file is allowed.
    - **B — Merge into an existing workflow:** the project already has its own agents, commands, rules, memory, or work conventions.
@@ -75,7 +75,24 @@ This map is orientation only; the current source tree and its references are aut
 - `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, `.codex/tasks/`, and `.codex/specs/`;
 - `.codex/AGENTS.md` as the source template for the canonical downstream root `AGENTS.md`.
 
-When integrating both layers, preserve intent parity between mirrored Claude and Codex contracts without forcing byte identity where tool mechanics differ.
+**DeepSeek layer** (`.deepseek/` + `.agents/skills/`):
+
+- DeepSeek-native skills under `.agents/skills/deepseek-*`;
+- `.deepseek/guidelines/`, `.deepseek/knowledge/`, `.deepseek/scripts/`, `.deepseek/agents/`, and `.deepseek/config.toml` (shipped empty on purpose);
+- `.deepseek/CONTEXT.md`, `.deepseek/JOURNAL.md`, `.deepseek/tasks/`, and `.deepseek/specs/`;
+- `.deepseek/DEEPSEEK.md` as the source template for the canonical downstream root `DEEPSEEK.md`. DeepSeek harnesses also read root `AGENTS.md`, which the Codex layer owns, so the two layers coexist by using separate root loaders.
+
+**Pi layer** (`.pi/` + `.agents/skills/`):
+
+- Pi-native skills under `.agents/skills/pi-*`, invoked as `/skill:pi-<name>`;
+- `.pi/guidelines/`, `.pi/knowledge/`, `.pi/scripts/`;
+- `.pi/CONTEXT.md`, `.pi/JOURNAL.md`, `.pi/tasks/`, and `.pi/specs/`;
+- `.pi/PI.md` as the layer's instructions file, pointed at from the root `AGENTS.md` router.
+- **No `.pi/agents/` and no `.pi/config.toml`.** `.pi/agents/skills`, `.pi/skills/`, `.pi/npm/`, and `.pi/settings.json` belong to Pi itself; never write them. Pi also has no built-in subagents, so this layer ships no specialist agents.
+
+**Shared paths.** Root `AGENTS.md` is auto-loaded by Codex, `dsh`, and Pi alike, so upstream treats it as a router: a `<!-- claudart:routes:start -->` / `<!-- claudart:routes:end -->` block holds one route line per installed layer, and everything outside that block is project-authored. Splice into that block; never relocate a layer's instructions file to the project root and never rewrite content outside the markers. `.agents/skills/` is shared the same way — install only the prefixes for the selected layers and keep `codex-*`, `deepseek-*`, and `pi-*` distinct rather than merging the skill sets.
+
+When integrating more than one layer, preserve intent parity between the mirrored Claude, Codex, DeepSeek, and Pi contracts without forcing byte identity where tool mechanics differ.
 
 ## Step 1 — Derive the current delta
 
@@ -88,7 +105,7 @@ Before proposing writes, distinguish:
 
 ### Scenario A — Clean adopt
 
-Copy the current selected-layer payload. Splice CLAUDART routes into any existing canonical or overlapping loader, including `.claude/CLAUDE.md`, root `CLAUDE.md`, or root `AGENTS.md` as applicable; never replace project-authored loader content. For missing live-state files, create only the current empty seed/header. For Codex, place the source loader at the current canonical downstream location, normally root `AGENTS.md`, and avoid two competing loaders.
+Copy the current selected-layer payload. Splice CLAUDART routes into any existing canonical or overlapping loader, including `.claude/CLAUDE.md`, root `CLAUDE.md`, or root `AGENTS.md` as applicable; never replace project-authored loader content. For missing live-state files, create only the current empty seed/header. For Codex, DeepSeek, and Pi, do not relocate the layer's instructions file: leave it in its own directory and add that layer's route line to the root `AGENTS.md` marker block, creating the file from the `.agents/AGENTS.md` template when it is absent.
 
 Scenario A is the fast path: do not inspect full history and do not schedule doctor or refactor-memory when Step 4 verification can prove the installation mechanically.
 
@@ -184,7 +201,7 @@ Run bounded mechanical checks against the selected layers and changed dependency
 2. Confirm every approved add, replacement, merge, relocation, and retirement reached its intended final path.
 3. Compare every supposedly verbatim template-owned file with current upstream using `cmp`, checksums, or `git diff --no-index`, accounting only for approved relocation. Any unexplained drift fails verification.
 4. For merged loaders and indexes, confirm both the required current CLAUDART routes and the project-authored sections identified in the plan remain present.
-5. Confirm referenced commands, skills, rules, guidelines, agents, scripts, indexes, and config paths exist; no loader, rule, or guideline auto-loads `JOURNAL.md` or `HANDOFF.md`; existing live-state bodies were not replaced; changed shell scripts pass `bash -n`; changed command/skill/agent/rule/guideline frontmatter still satisfies the current upstream contract; and mirrored contracts remain consistent when both layers changed.
+5. Confirm referenced commands, skills, rules, guidelines, agents, scripts, indexes, and config paths exist; no loader, rule, or guideline auto-loads `JOURNAL.md` or `HANDOFF.md`; existing live-state bodies were not replaced; changed shell scripts pass `bash -n`; changed command/skill/agent/rule/guideline frontmatter still satisfies the current upstream contract; and mirrored contracts remain consistent when more than one layer changed.
 6. Inspect current upstream `scripts/`. If it ships a documented read-only installation verifier that can target another root, run it exactly as documented. If none exists, that absence is not a failure; run the current upstream knowledge checker for each selected layer instead. With the current interface:
 
    ```bash
@@ -193,6 +210,12 @@ Run bounded mechanical checks against the selected layers and changed dependency
 
    bash /tmp/claudart-src/.codex/scripts/knowledge-check.sh \
      --root "$PWD" --layer codex
+
+   bash /tmp/claudart-src/.deepseek/scripts/knowledge-check.sh \
+     --root "$PWD" --layer deepseek
+
+   bash /tmp/claudart-src/.pi/scripts/knowledge-check.sh \
+     --root "$PWD" --layer pi
    ```
 
    Run only selected layers. If current upstream `--help` differs, follow it instead. Prefer the trusted source script over an unreviewed downstream copy.
@@ -213,11 +236,11 @@ When semantic judgment is needed, first review only the changed files and their 
 - the affected contract is repository-wide;
 - the user explicitly requested a full health audit.
 
-When triggered, run `/doctor` for Claude or `$codex-doctor` for Codex. Doctor is diagnostic only. Report findings; do not turn them into automatic writes.
+When triggered, run `/doctor` for Claude, `$codex-doctor` for Codex, `$deepseek-doctor` for DeepSeek, or `/skill:pi-doctor` for Pi. Doctor is diagnostic only. Report findings; do not turn them into automatic writes.
 
 ### 4.3 Refactor-memory is opt-in
 
-Never run `/refactor-memory` or `$codex-refactor-memory` automatically after integration. Run it only when a concrete finding is owned by that workflow, the exact additional files and intended changes are presented, and the user explicitly approves those writes.
+Never run `/refactor-memory`, `$codex-refactor-memory`, `$deepseek-refactor-memory`, or `/skill:pi-refactor-memory` automatically after integration. Run it only when a concrete finding is owned by that workflow, the exact additional files and intended changes are presented, and the user explicitly approves those writes.
 
 After an approved refactor-memory run, repeat mandatory fast verification. Repeat doctor only when the original finding requires semantic confirmation or the user explicitly requests it. There is no default `doctor → refactor-memory → doctor` chain.
 

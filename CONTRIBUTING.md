@@ -32,9 +32,9 @@ Search existing Issues and pull requests first. For a new enhancement, open an I
 
 ### 3. Contributing Code & Agents
 
-We welcome new AI commands and highly specialized agents. If you add a durable Claude-side rule, command, or agent, maintain the Codex-native equivalent too when the concept applies to both tools.
+We welcome new AI commands and highly specialized agents. If you add a durable Claude-side rule, command, or agent, maintain the Codex-, DeepSeek-, and Pi-native equivalents too when the concept applies to those tools.
 
-Use the repository Git and GitHub workflow below for CLAUDART source changes. Add or modify files within the relevant AI layer: `.claude/` for Claude Code, `.codex/` plus `.agents/skills/` for Codex. Session state lives inside each layer (`.claude/CONTEXT.md`, `.claude/JOURNAL.md`, `.codex/CONTEXT.md`, `.codex/JOURNAL.md`).
+Use the repository Git and GitHub workflow below for CLAUDART source changes. Add or modify files within the relevant AI layer: `.claude/` for Claude Code, and `.codex/`, `.deepseek/`, or `.pi/` plus `.agents/skills/` for Codex, DeepSeek, and Pi. Session state lives inside each layer as `CONTEXT.md` and `JOURNAL.md`.
 
 If you've changed APIs, commands, or the knowledge contract, update both English and Vietnamese documentation where a mirrored page exists.
 
@@ -151,9 +151,9 @@ After merge:
 
 ## Repository-Local Agent Guidance
 
-The root `CLAUDE.md` and root `AGENTS.md` in this source repository are intentionally **repository-only** pointers to this contribution workflow. They must remain separate from `.claude/CLAUDE.md` and `.codex/AGENTS.md`, which are part of CLAUDART's installable/runtime templates.
+The root `CLAUDE.md` and root `AGENTS.md` in this source repository are intentionally **repository-only** pointers to this contribution workflow. Root `AGENTS.md` is the file Codex, `dsh`, and Pi all auto-load, so it serves every non-Claude harness working on this repository. Both must remain separate from `.claude/CLAUDE.md`, `.codex/AGENTS.md`, `.deepseek/DEEPSEEK.md`, and `.pi/PI.md`, which are part of CLAUDART's installable/runtime templates.
 
-Do not move this repository Git workflow into `.claude/rules/`, `.codex/guidelines/`, `.agents/skills/`, `install.sh`, or the downstream integration payload. A downstream project may use trunk-based development, GitFlow, GitHub Flow, Gerrit, stacked PRs, or another process entirely; CLAUDART must not overwrite that choice.
+Do not move this repository Git workflow into `.claude/rules/`, `.codex/guidelines/`, `.deepseek/guidelines/`, `.pi/guidelines/`, `.agents/skills/`, `install.sh`, or the downstream integration payload. A downstream project may use trunk-based development, GitFlow, GitHub Flow, Gerrit, stacked PRs, or another process entirely; CLAUDART must not overwrite that choice.
 
 ## Understanding the Architecture Structure
 
@@ -161,12 +161,14 @@ If you're contributing new logic, please adhere to our directory structure:
 
 - `.claude/commands/`: CLAUDART slash commands (`/learn`, `/checkpoint`, etc.). Your command files here should detail the steps the AI takes.
 - `.claude/agents/`: Highly specialized role-based instruction sets (`reviewer.md`, `architect.md`, etc.). Make sure agent prompts are self-contained and heavily instruct the AI on its specific persona and constraints.
-- `.claude/knowledge/` and `.codex/knowledge/`: Durable, **descriptive** project reference — domain, architecture, glossary, and pointers to canonical docs in other folders. Distinct from rules/guidelines (prescriptive). Only the root `INDEX.md` is surfaced by `start`; optional `_maps/`, topic outlines, and the smallest useful sections are loaded on demand.
-- `.claude/rules/knowledge-management.md` and `.codex/guidelines/knowledge-management.md`: the mirrored semantic contract for capture, lifecycle, bounded retrieval, and project-fact classification. Keep their intent in parity.
-- `.claude/scripts/knowledge-check.sh` and `.codex/scripts/knowledge-check.sh`: byte-identical copies of the dependency-free, read-only mechanical checker. Change and test them as one unit.
-- `.codex/` and `.agents/skills/`: Codex-native source templates. They should preserve the same intent and quality as the Claude side, not act as lossy generated artifacts.
-- `.codex/guidelines/agent-delegation.md`: Codex subagent delegation protocol. If you add or change Codex agents, keep this protocol accurate about authorization, ownership boundaries, and parent review responsibilities.
-- `.codex/AGENTS.md`: the **installable Codex root-loader source template**. The installer copies it to `AGENTS.md` at a downstream project root; it is distinct from this repository's root `AGENTS.md`.
+- `.claude/knowledge/`, `.codex/knowledge/`, `.deepseek/knowledge/`, and `.pi/knowledge/`: Durable, **descriptive** project reference — domain, architecture, glossary, and pointers to canonical docs in other folders. Distinct from rules/guidelines (prescriptive). Only the root `INDEX.md` is surfaced by `start`; optional `_maps/`, topic outlines, and the smallest useful sections are loaded on demand.
+- `knowledge-management.md` in `.claude/rules/` and in each harness layer's `guidelines/`: the mirrored semantic contract for capture, lifecycle, bounded retrieval, and project-fact classification. Keep their intent in parity.
+- `knowledge-check.sh` under `.claude/scripts/`, `.codex/scripts/`, `.deepseek/scripts/`, and `.pi/scripts/`: four byte-identical copies of the dependency-free, read-only mechanical checker. Change and test them as one unit; `tests/knowledge-check/run.sh` asserts the copies stay identical.
+- `.codex/`, `.deepseek/`, `.pi/`, and `.agents/skills/`: harness-native source templates. They should preserve the same intent and quality as the Claude side, not act as lossy generated artifacts. `.agents/skills/` is shared by all three harness layers, so keep the `codex-*`, `deepseek-*`, and `pi-*` name prefixes distinct.
+- `agent-delegation.md` in each layer: the per-harness delegation protocols. If you add or change agents in a layer, keep its protocol accurate about authorization, ownership boundaries, and parent review responsibilities. The DeepSeek protocol deliberately avoids asserting harness-specific spawn mechanics, model slugs, or config keys that have not been verified, and the Pi protocol states that Pi has no built-in subagents at all — do not add unverified mechanics to either.
+- `.codex/AGENTS.md`: the Codex layer's **instructions file**, pointed at from the root router; it is distinct from this repository's root `AGENTS.md`.
+- `.deepseek/DEEPSEEK.md` and `.pi/PI.md`: each harness layer's **instructions file**, which stays in its own directory. The installer never relocates them to the project root; it adds a route line for each inside the root `AGENTS.md` marker block.
+- `.agents/AGENTS.md`: the template for the shared root router created when a project has no `AGENTS.md`. Anything the installer writes lives between the `claudart:routes` markers; `tests/install/run.sh` asserts that content outside them survives untouched.
 - `.claude/CLAUDE.md`: the installable Claude project-memory template; it is distinct from this repository's root `CLAUDE.md`.
 - `INTEGRATE.md`: the AI-native install/upgrade protocol an agent follows to merge CLAUDART into an existing project (the alternative to `install.sh` for non-empty setups). Its "What CLAUDART contains" manifest is orientation only — the agent clones the repo as source of truth — but keep it roughly in sync when you add or remove a top-level piece.
 
@@ -174,7 +176,7 @@ Knowledge-check fixtures must be anonymous and synthetic: do not copy proprietar
 
 ## Pull Request Review
 
-1. Maintainers review the PR for scope, correctness, mirrored Claude/Codex intent where applicable, and validation evidence.
+1. Maintainers review the PR for scope, correctness, mirrored intent across the layers it touches, and validation evidence.
 2. Requested changes should stay within the tracked Issue/PR scope; create a separate Issue for unrelated follow-up work.
 3. Once approved and sufficiently validated for the change, merge using the strategy above.
 

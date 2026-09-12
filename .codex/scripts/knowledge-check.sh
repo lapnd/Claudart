@@ -23,7 +23,8 @@ Read-only validation for a CLAUDART knowledge store.
 
 Options:
   --root DIR                 Repository root (default: inferred from script path)
-  --layer claude|codex       Runtime layer (default: inferred from script path)
+  --layer claude|codex|deepseek|pi
+                             Runtime layer (default: inferred from script path)
   --today YYYY-MM-DD         Date used for deterministic freshness checks
   --fail-on error|warning    Exit 1 at this severity (default: error)
   --help                     Show this help
@@ -49,6 +50,8 @@ INFERRED_ROOT=$(CDPATH='' cd -- "$SCRIPT_DIR/../.." 2>/dev/null && pwd -P) ||
 case "$SCRIPT_DIR" in
   */.claude/scripts) INFERRED_LAYER=claude ;;
   */.codex/scripts) INFERRED_LAYER=codex ;;
+  */.deepseek/scripts) INFERRED_LAYER=deepseek ;;
+  */.pi/scripts) INFERRED_LAYER=pi ;;
   *) INFERRED_LAYER= ;;
 esac
 
@@ -60,7 +63,7 @@ while [ "$#" -gt 0 ]; do
       shift 2
       ;;
     --layer)
-      [ "$#" -ge 2 ] || usage_error "--layer requires claude or codex"
+      [ "$#" -ge 2 ] || usage_error "--layer requires claude, codex, deepseek, or pi"
       LAYER_OVERRIDE=$2
       shift 2
       ;;
@@ -98,8 +101,8 @@ else
   LAYER=$INFERRED_LAYER
 fi
 case "$LAYER" in
-  claude | codex) ;;
-  *) usage_error "cannot infer layer; pass --layer claude or --layer codex" ;;
+  claude | codex | deepseek | pi) ;;
+  *) usage_error "cannot infer layer; pass --layer claude, --layer codex, --layer deepseek, or --layer pi" ;;
 esac
 
 if [ -n "$ROOT_OVERRIDE" ]; then
@@ -826,10 +829,10 @@ validate_relation() {
       fi
       ;;
     related:guideline)
-      if [ "$LAYER" != codex ]; then
+      if [ "$LAYER" = claude ]; then
         add_finding ERROR K140 "$relation_rel" "$relation_line" \
           "guideline relation is not native to the selected layer"
-      elif [ ! -f "$ROOT/.codex/guidelines/$relation_slug.md" ]; then
+      elif [ ! -f "$ROOT/.$LAYER/guidelines/$relation_slug.md" ]; then
         add_finding ERROR K141 "$relation_rel" "$relation_line" \
           "guideline relation target does not exist"
       fi

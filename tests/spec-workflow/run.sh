@@ -49,6 +49,12 @@ CODEX_RUNNER=$REPO_ROOT/.agents/skills/codex-spec-run/SKILL.md
 CLAUDE_RUNNER=$REPO_ROOT/.claude/commands/spec-run.md
 CODEX_AUTHOR=$REPO_ROOT/.agents/skills/codex-spec/SKILL.md
 CLAUDE_AUTHOR=$REPO_ROOT/.claude/commands/spec.md
+DEEPSEEK_RULE=$REPO_ROOT/.deepseek/guidelines/spec-workflow.md
+DEEPSEEK_RUNNER=$REPO_ROOT/.agents/skills/deepseek-spec-run/SKILL.md
+DEEPSEEK_AUTHOR=$REPO_ROOT/.agents/skills/deepseek-spec/SKILL.md
+PI_RULE=$REPO_ROOT/.pi/guidelines/spec-workflow.md
+PI_RUNNER=$REPO_ROOT/.agents/skills/pi-spec-run/SKILL.md
+PI_AUTHOR=$REPO_ROOT/.agents/skills/pi-spec/SKILL.md
 
 if /bin/bash -n "$TEST_DIR/run.sh"; then
   pass "Bash syntax is valid"
@@ -56,7 +62,7 @@ else
   fail "Bash syntax is valid"
 fi
 
-for rule in "$CODEX_RULE" "$CLAUDE_RULE"; do
+for rule in "$CODEX_RULE" "$CLAUDE_RULE" "$DEEPSEEK_RULE" "$PI_RULE"; do
   assert_contains "$rule" "full-baseline" \
     "rule defines a full final-gate baseline"
   assert_contains "$rule" "scoped-review" \
@@ -93,8 +99,26 @@ assert_contains "$CODEX_RULE" \
 assert_contains "$CLAUDE_RULE" \
   "effects that escape a defensible local boundary" \
   "Claude bounded patches require a defensible impact boundary"
+assert_contains "$DEEPSEEK_RULE" \
+  "when the mission has no successful full-baseline" \
+  "DeepSeek first mission gate establishes a full baseline"
+assert_contains "$DEEPSEEK_RULE" \
+  'latest successful `final-gate` cumulative evidence state' \
+  "DeepSeek chains repeated scoped reviews from the latest gate"
+assert_contains "$DEEPSEEK_RULE" \
+  "effects that remain inside a defensible local boundary" \
+  "DeepSeek bounded patches require a defensible impact boundary"
+assert_contains "$PI_RULE" \
+  "when the mission has no successful full-baseline" \
+  "Pi first mission gate establishes a full baseline"
+assert_contains "$PI_RULE" \
+  'latest successful `final-gate` cumulative evidence state' \
+  "Pi chains repeated scoped reviews from the latest gate"
+assert_contains "$PI_RULE" \
+  "effects that remain inside a defensible local boundary" \
+  "Pi bounded patches require a defensible impact boundary"
 
-for runner in "$CODEX_RUNNER" "$CLAUDE_RUNNER"; do
+for runner in "$CODEX_RUNNER" "$CLAUDE_RUNNER" "$DEEPSEEK_RUNNER" "$PI_RUNNER"; do
   assert_contains "$runner" "full-baseline" \
     "runner can establish or refresh a full baseline"
   assert_contains "$runner" "scoped-review" \
@@ -125,8 +149,20 @@ assert_contains "$CODEX_RUNNER" \
 assert_contains "$CLAUDE_RUNNER" \
   "semantic change to a shared verifier/harness" \
   "Claude runner falls back only for shared semantic verifier impact"
+assert_contains "$DEEPSEEK_RUNNER" \
+  'latest successful cumulative `final-gate` evidence state' \
+  "DeepSeek runner chains cumulative scoped-review evidence"
+assert_contains "$DEEPSEEK_RUNNER" \
+  "semantically changed shared verifier/harness" \
+  "DeepSeek runner falls back only for shared semantic verifier impact"
+assert_contains "$PI_RUNNER" \
+  'latest successful cumulative `final-gate` evidence state' \
+  "Pi runner chains cumulative scoped-review evidence"
+assert_contains "$PI_RUNNER" \
+  "semantically changed shared verifier/harness" \
+  "Pi runner falls back only for shared semantic verifier impact"
 
-for author in "$CODEX_AUTHOR" "$CLAUDE_AUTHOR"; do
+for author in "$CODEX_AUTHOR" "$CLAUDE_AUTHOR" "$DEEPSEEK_AUTHOR" "$PI_AUTHOR"; do
   assert_contains "$author" "smallest non-redundant" \
     "spec authoring exposes a non-redundant final verification set"
   assert_contains "$author" "composite" \

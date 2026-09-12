@@ -10,6 +10,8 @@ REPO_ROOT=$(CDPATH='' cd -- "$TEST_DIR/../.." 2>/dev/null && pwd -P) || exit 2
 FIXTURES=$TEST_DIR/fixtures
 CLAUDE_CHECKER=$REPO_ROOT/.claude/scripts/knowledge-check.sh
 CODEX_CHECKER=$REPO_ROOT/.codex/scripts/knowledge-check.sh
+DEEPSEEK_CHECKER=$REPO_ROOT/.deepseek/scripts/knowledge-check.sh
+PI_CHECKER=$REPO_ROOT/.pi/scripts/knowledge-check.sh
 TMP_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/claudart-knowledge-tests.XXXXXX" 2>/dev/null) ||
   exit 2
 
@@ -114,7 +116,8 @@ snapshot() {
     LC_ALL=C sort >"$snapshot_output"
 }
 
-if /bin/bash -n "$CLAUDE_CHECKER" "$CODEX_CHECKER" "$TEST_DIR/run.sh"; then
+if /bin/bash -n "$CLAUDE_CHECKER" "$CODEX_CHECKER" "$DEEPSEEK_CHECKER" \
+  "$PI_CHECKER" "$TEST_DIR/run.sh"; then
   pass "Bash syntax is valid"
 else
   fail "Bash syntax is valid"
@@ -124,6 +127,18 @@ if cmp -s "$CLAUDE_CHECKER" "$CODEX_CHECKER"; then
   pass "Claude and Codex checker scripts are byte-identical"
 else
   fail "Claude and Codex checker scripts are byte-identical"
+fi
+
+if cmp -s "$CLAUDE_CHECKER" "$DEEPSEEK_CHECKER"; then
+  pass "Claude and DeepSeek checker scripts are byte-identical"
+else
+  fail "Claude and DeepSeek checker scripts are byte-identical"
+fi
+
+if cmp -s "$CLAUDE_CHECKER" "$PI_CHECKER"; then
+  pass "Claude and Pi checker scripts are byte-identical"
+else
+  fail "Claude and Pi checker scripts are byte-identical"
 fi
 
 materialize healthy-direct claude
@@ -149,6 +164,49 @@ run_checker "$CODEX_CHECKER" "$TMP_ROOT/healthy-codex.out" \
   --root "$healthy_codex" --today 2026-07-29 --fail-on warning
 assert_status "healthy direct store exits successfully with inferred Codex layer" 0
 assert_empty "Codex healthy direct store has no findings"
+
+materialize healthy-direct deepseek
+healthy_deepseek=$MATERIALIZED
+run_checker "$DEEPSEEK_CHECKER" "$TMP_ROOT/healthy-deepseek.out" \
+  --root "$healthy_deepseek" --today 2026-07-29 --fail-on warning
+assert_status "healthy direct store exits successfully with inferred DeepSeek layer" 0
+assert_empty "DeepSeek healthy direct store has no findings"
+
+materialize healthy-direct pi
+healthy_pi=$MATERIALIZED
+run_checker "$PI_CHECKER" "$TMP_ROOT/healthy-pi.out" \
+  --root "$healthy_pi" --today 2026-07-29 --fail-on warning
+assert_status "healthy direct store exits successfully with inferred Pi layer" 0
+assert_empty "Pi healthy direct store has no findings"
+
+# A guideline relation is native to every guidelines-based layer and resolves
+# against that layer's own guidelines directory, never Claude's rules directory.
+materialize guideline-relation pi
+guideline_pi=$MATERIALIZED
+mkdir -p "$guideline_pi/.pi/guidelines"
+printf '# Fixture Guideline\n' >"$guideline_pi/.pi/guidelines/code-health.md"
+run_checker "$PI_CHECKER" "$TMP_ROOT/guideline-pi.out" \
+  --root "$guideline_pi" --layer pi --today 2026-07-29 --fail-on warning
+assert_status "guideline relation resolves under the Pi layer" 0
+assert_empty "resolved Pi guideline relation reports no findings"
+
+materialize guideline-relation deepseek
+guideline_deepseek=$MATERIALIZED
+mkdir -p "$guideline_deepseek/.deepseek/guidelines"
+printf '# Fixture Guideline\n' >"$guideline_deepseek/.deepseek/guidelines/code-health.md"
+run_checker "$DEEPSEEK_CHECKER" "$TMP_ROOT/guideline-deepseek.out" \
+  --root "$guideline_deepseek" --layer deepseek --today 2026-07-29 --fail-on warning
+assert_status "guideline relation resolves under the DeepSeek layer" 0
+assert_empty "resolved DeepSeek guideline relation reports no findings"
+
+materialize guideline-relation claude
+guideline_claude=$MATERIALIZED
+mkdir -p "$guideline_claude/.claude/guidelines"
+printf '# Fixture Guideline\n' >"$guideline_claude/.claude/guidelines/code-health.md"
+run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/guideline-claude.out" \
+  --root "$guideline_claude" --layer claude --today 2026-07-29
+assert_status "guideline relation is rejected under the Claude layer" 1
+assert_code "non-native guideline relation reports K140" K140
 
 space_root=$TMP_ROOT/project-with-spaces/project\ with\ spaces
 mkdir -p "$space_root/.claude"
