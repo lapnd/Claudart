@@ -43,7 +43,7 @@ Optional fields are `aliases`, `triggers`, `scope`, `last_verified`, `sources`, 
 - `sensitivity`: `public`, `internal`, or `restricted`.
 - `name` is a bare lowercase kebab slug that exactly matches the file basename. `type`, `status`, `sensitivity`, `updated`, and `last_verified` are bare safe tokens or `YYYY-MM-DD` dates.
 - `description`, `verify`, and `status_note` are one-line double-quoted strings.
-- `related` items are typed as `knowledge:<slug>` or `rule:<slug>`; `supersedes` items are `knowledge:<slug>`.
+- `related` items are typed as `knowledge:<slug>`, `rule:<slug>`, or `skill:<slug>`; `supersedes` items are `knowledge:<slug>`.
 - `scope` items are typed selectors such as `path:<glob>`, `symbol:<name>`, `component:<name>`, `platform:<name>`, `environment:<name>`, or `version:<name>`.
 - Every list uses its key on one line followed by two-space-indented block items, each double-quoted; omit empty lists. Do not use flow lists, folded or multiline scalars, single quotes, inline comments, YAML anchors/tags, or unrecognized fields.
 - `updated` is the date of the latest content edit. `last_verified` changes only when evidence is checked.

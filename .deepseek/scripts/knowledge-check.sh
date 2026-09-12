@@ -828,6 +828,15 @@ validate_relation() {
           "rule relation target does not exist"
       fi
       ;;
+    related:skill)
+      if [ "$LAYER" != claude ]; then
+        add_finding ERROR K140 "$relation_rel" "$relation_line" \
+          "skill relation is not native to the selected layer"
+      elif [ ! -f "$ROOT/.claude/skills/$relation_slug/SKILL.md" ]; then
+        add_finding ERROR K141 "$relation_rel" "$relation_line" \
+          "skill relation target does not exist"
+      fi
+      ;;
     related:guideline)
       if [ "$LAYER" = claude ]; then
         add_finding ERROR K140 "$relation_rel" "$relation_line" \

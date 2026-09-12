@@ -179,6 +179,24 @@ run_checker "$PI_CHECKER" "$TMP_ROOT/healthy-pi.out" \
 assert_status "healthy direct store exits successfully with inferred Pi layer" 0
 assert_empty "Pi healthy direct store has no findings"
 
+# A skill relation is native to the Claude layer only and resolves against
+# .claude/skills/<slug>/SKILL.md.
+materialize skill-relation claude
+skill_claude=$MATERIALIZED
+mkdir -p "$skill_claude/.claude/skills/spec-workflow"
+printf '# Fixture Skill\n' >"$skill_claude/.claude/skills/spec-workflow/SKILL.md"
+run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/skill-claude.out" \
+  --root "$skill_claude" --layer claude --today 2026-07-29 --fail-on warning
+assert_status "skill relation resolves under the Claude layer" 0
+assert_empty "resolved Claude skill relation reports no findings"
+
+materialize skill-relation codex
+skill_codex=$MATERIALIZED
+run_checker "$CODEX_CHECKER" "$TMP_ROOT/skill-codex.out" \
+  --root "$skill_codex" --layer codex --today 2026-07-29
+assert_status "skill relation is rejected outside the Claude layer" 1
+assert_code "non-native skill relation reports K140" K140
+
 # A guideline relation is native to every guidelines-based layer and resolves
 # against that layer's own guidelines directory, never Claude's rules directory.
 materialize guideline-relation pi
