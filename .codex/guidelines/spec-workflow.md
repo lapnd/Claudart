@@ -123,7 +123,17 @@ The roadmap holds _what_; the ledger holds _evidence and learnings_. Ticking nev
 - Surprise/Decision: <optional — what diverged from the roadmap and why>
 ```
 
-Events: `run-started`, `task-started`, `task-completed`, `validation-failed`, `phase-validated`, `task-blocked`, `replanned`, `delegated`, `circuit-breaker`, `rotation-checkpoint`, `scope-change` (user-initiated only), `final-gate`. Never edit or delete prior entries.
+Events: `run-started`, `task-started`, `task-completed`, `validation-failed`, `phase-validated`, `task-blocked`, `replanned`, `wave-selected`, `delegated`, `circuit-breaker`, `rotation-checkpoint`, `scope-change` (user-initiated only), `final-gate`. Never edit or delete prior entries.
+
+A `wave-selected` entry records a selection narrower than the runnable set — the one decision `delegated` cannot capture, because `delegated` only ever describes a fan-out that happened, never a parallelization that was declined:
+
+```markdown
+### YYYY-MM-DD HH:MMZ — wave-selected 2 of 5 runnable
+
+- Selected: P4.3, P4.8
+- Excluded: P2.1 (rule 3 — ordering, Phase 2 gate not reached), P5.2 (rule 1 — overlap with P4.3 on src/api/\*\*)
+- Evidence: bash .codex/scripts/disjoint.sh . 'a:src/api/\*\*' 'b:src/cli/\*\*' → disjoint
+```
 
 Every `final-gate` entry records `mode: full-baseline | scoped-review`. A full baseline names why it ran (`initial`, `material-amendment`, or conservative fallback), the fresh scenario evidence, and the revision or worktree state proved. A scoped review names the latest successful `final-gate` evidence state it extends, the actual changed surface, `executed` checks, scenarios `covered` by those checks, evidence `reused` from that state, and why each reused scenario is outside the impact closure. Every successful gate also records the resulting revision or bounded worktree fingerprint it proved, then becomes the cumulative baseline for the next review change; the chain must remain rooted in an identifiable full baseline. For a dirty worktree, the fingerprint is the base revision plus mission-relevant changed paths and content digests; exclude secrets, ignored live state, and unrelated user files. This record, not chat memory, makes repeated evidence reuse auditable.
 
@@ -184,7 +194,7 @@ Everything else stays autonomous. A task blocker stops that task; it stops the w
 ## The Loop (per iteration)
 
 1. **Re-orient.** Read `SPEC.md`, `ROADMAP.md`, `NOTES.md`, and the LEDGER tail (~30 lines). Never trust session memory of earlier iterations — after any compaction, these files are the only truth.
-2. **Pick** the first runnable pending task whose dependencies are satisfied. Skip tasks marked `⚠ blocked` and invalid legacy struck-unticked rows; they are not runnable and keep their phase incomplete. Independent tasks in the same wave may fan out in parallel.
+2. **Pick a set, not a task.** Compute the runnable set — `bash .codex/scripts/spec-check.sh next --root . --layer claude`, or by hand from the roadmap. Skip tasks marked `⚠ blocked` and invalid legacy struck-unticked rows; they are not runnable and keep their phase incomplete. Selecting **fewer than the whole runnable set is a decision that must be recorded**: append a `wave-selected` LEDGER entry naming each excluded task and which of the three rules excludes it — **1** file overlap (measurable: `disjoint.sh`), **2** output dependency (one task's result changes what another should produce), **3** ordering, including the plan's own phase order. Rules 2 and 3 are yours to judge; no tool decides them. `"I didn't see anything parallel"` is not a reason, and a clean overlap matrix is necessary but never sufficient — both directions of this mistake have cost real time. Serial remains legitimate; an unrecorded serial default does not.
 3. **Execute.** Append `task-started` to the LEDGER before touching code — a mid-task compaction must be able to see what was in flight. Work solo, or delegate under the active harness policy and `agent-delegation.md`; roadmap wave markings carry a prepared strategy, not a separate permission gate. Record each spawn as a `delegated` LEDGER entry (unit, expected output) so a compaction never orphans a running worker — the LEDGER plays the role the active task file plays for `$codex-plan` work. Worker prompts are self-contained (Goal / Boundary / Scope / Non-overlap / Constraints / Output — carry the roadmap task text and relevant SPEC lines; the worker has no other context).
 4. **Verify on a real surface.** Run the task's `verify:`. Tests alone never prove user-facing behavior — drive the app, open the page, compare UI against the POC artifact. A worker's "done" is a claim to check, not a result to record.
 5. **Tick and log.** Flip `- [ ]` → `- [x]`, re-read to confirm the intended task changed state, append a `task-completed` LEDGER entry with evidence, bump `updated:` in SPEC frontmatter. Clear any Current Acceptance Delta this evidence actually resolves. Route mission-local constraints, pitfalls, decisions, and knowledge candidates into `NOTES.md`; promote an eligible fact immediately only under the knowledge-maintenance exception.

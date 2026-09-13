@@ -525,6 +525,31 @@ check_mission() {
     esac
   done
 
+  # A `wave-selected` entry that names no excluded task and no rule is not a
+  # decision record, it is a ritual line. This cannot force the entry into being
+  # — the contract in spec-workflow does that — it only stops one degrading.
+  #
+  # Accepted with its calibration gate unsatisfied, on the record: `wave-selected`
+  # has zero instances across the 19-mission corpus, so the false-positive rate is
+  # unmeasurable rather than low. WARN until real instances exist to calibrate
+  # against. See the `Serial is a decision` lesson in LESSONS.md.
+  grep -nE '^###.*— *wave-selected' "$ledger" 2>/dev/null | while IFS= read -r entry; do
+    lno=${entry%%:*}
+    # The excluded tasks and the rule live in the entry body, not the heading.
+    body=$(awk -v start="$lno" 'NR > start { if (/^###/) exit; print }' "$ledger")
+    case "$body" in
+      *[Ee]xcluded*) ;;
+      *)
+        add_finding WARN S404 "$rel/LEDGER.md" "$lno" "wave-selected entry names no excluded task, so nothing records why the rest were left out"
+        continue
+        ;;
+    esac
+    case "$body" in
+      *rule\ 1* | *rule\ 2* | *rule\ 3* | *overlap* | *ordering* | *output\ dependency*) ;;
+      *) add_finding WARN S404 "$rel/LEDGER.md" "$lno" "wave-selected entry names no excluding rule (1 overlap / 2 output dependency / 3 ordering)" ;;
+    esac
+  done
+
   # Pair by task id, not by count. Comparing totals hid an unclosed task whenever
   # some other task had been closed without a recorded start.
   awk '
@@ -607,9 +632,12 @@ disposition_for() {
   : >"$pv"
   while IFS="$SEP" read -r kind line task node _rest; do
     [ "$kind" = NODE ] || continue
-    st=$(awk -v sep="$SEP" -v t="$task" '
+    # Not `st`: the caller's loop holds the mission status in `st`, and shell
+    # functions share its scope, so reusing the name printed the last task's
+    # row state as the mission's status in every `next` header.
+    row_state=$(awk -v sep="$SEP" -v t="$task" '
       $0 ~ /^ROW/ { split($0, f, sep); if (f[3] == t) { print f[4]; exit } }' "$r")
-    [ "$st" = done ] && printf '%s\n' "$node" >>"$pv"
+    [ "$row_state" = done ] && printf '%s\n' "$node" >>"$pv"
   done <"$r"
 
   while IFS="$SEP" read -r kind line id state struck blocked verify phase early; do
@@ -665,6 +693,15 @@ case "$SUBCOMMAND" in
       printf '  file overlap (disjoint.sh); ordering and output dependency stay yours.\n'
       [ "$nu" -gt 0 ] &&
         printf '  %s task(s) declare no edges: unscheduled, not ready.\n' "$nu"
+      # Printed only when there is a choice to narrow. Serial is legitimate; an
+      # unrecorded serial default is not, and "I didn't see anything parallel"
+      # has already cost this workspace an agent-hour on two tasks whose file
+      # sets turned out to be 31 and 49 files with zero intersection.
+      if [ "$nr" -gt 1 ]; then
+        printf '  Selecting fewer than %s requires a `wave-selected` LEDGER entry naming\n' "$nr"
+        printf '  each excluded task and which rule excludes it (1 overlap / 2 output\n'
+        printf '  dependency / 3 ordering).\n'
+      fi
     done <"$missions"
     exit 0
     ;;

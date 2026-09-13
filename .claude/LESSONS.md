@@ -170,10 +170,22 @@ Against recorded ground truth the corrected scheduler predicts 19 where 13 ran,
 with **13/13 matched, zero false negatives**, and all six extras explained by
 named exclusions the tool now prints.
 
-**Rung:** script.
+**Rung:** script. `next` prints the obligation whenever more than one task is
+runnable, and The Loop requires a `wave-selected` LEDGER entry naming each
+excluded task and its rule. Rules 2 and 3 stay prose because no tool decides
+them.
+
+**Calibration pending — read before trusting `S404`.** The shape check on
+`wave-selected` entries was accepted with its corpus gate _unsatisfied_: the
+event has **zero instances** across the 19 missions, so its false-positive rate
+is unmeasurable rather than low. It ships as WARN for that reason. Once real
+entries exist, re-run the calibration and hand-classify every finding before
+promoting it or leaving it as is. An enforcer accepted on no evidence must say so
+where the next reader will look.
 
 **Re-derive:**
 
 ```bash
 bash .claude/scripts/spec-check.sh next --root <downstream> --layer claude
+grep -rc 'wave-selected' <downstream>/.claude/specs/   # calibration corpus size
 ```

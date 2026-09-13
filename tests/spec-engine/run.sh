@@ -149,6 +149,12 @@ assert_code "S303 unregistered edge type"   S303 'sed -i "s|(TEST)|(VIBES)|" "$m
 assert_code "S310 open task with no node"   S310 'printf -- "- [ ] P2.9 Unscheduled work (verify: something)\\n" >> "$m/ROADMAP.md"'
 assert_code "S402 final gate without mode"  S402 'printf "\\n### 2026-01-02 12:00Z — final-gate sample\\n\\n- Evidence: all green\\n" >> "$m/LEDGER.md"'
 assert_code "S402 silent when mode given"   -    'printf "\\n### 2026-01-02 12:00Z — final-gate, full-baseline — 3 of 3\\n\\n- Evidence: all green\\n" >> "$m/LEDGER.md"'
+assert_code "S404 wave-selected names no exclusion" S404 \
+  'printf "\\n### 2026-01-02 11:00Z — wave-selected 1 of 2 runnable\\n\\n- Selected: P1.2\\n" >> "$m/LEDGER.md"'
+assert_code "S404 wave-selected names no rule" S404 \
+  'printf "\\n### 2026-01-02 11:00Z — wave-selected 1 of 2 runnable\\n\\n- Selected: P1.2\\n- Excluded: P2.1\\n" >> "$m/LEDGER.md"'
+assert_code "S404 silent on a complete record" - \
+  'printf "\\n### 2026-01-02 11:00Z — wave-selected 1 of 2 runnable\\n\\n- Selected: P1.2\\n- Excluded: P2.1 (rule 3 — ordering, phase gate not reached)\\n" >> "$m/LEDGER.md"'
 assert_code "S401 unmatched task-started"   S401 'printf "\\n### 2026-01-02 11:30Z — task-started P1.2\\n\\n- Evidence: begun\\n" >> "$m/LEDGER.md"'
 # `delegated` closes a task and is the corpus's second most common event. Listing
 # closers by name reported every delegated task as an unclosed crash.
@@ -159,6 +165,13 @@ assert_code "S401 silent when delegated closes" - \
 d=$TMP_ROOT/nextcase
 build "$d"
 out=$(/bin/bash "$CHECKER" next --root "$d" --layer claude 2>&1)
+# The header reports the mission's own status. It printed the last task's row
+# state for a while, because disposition_for reused the caller's `st` variable.
+if printf '%s\n' "$out" | grep -q 'sample-mission \[running\]'; then
+  pass "next header reports the mission status, not a task row state"
+else
+  fail "next header reports the mission status, not a task row state" "$out"
+fi
 if printf '%s\n' "$out" | grep -q 'runnable P1.2'; then
   pass "next reports a task whose only dependency is satisfied"
 else
@@ -169,6 +182,23 @@ if printf '%s\n' "$out" | grep -q 'waiting P2.1 impl/contract'; then
 else
   fail "next names the unmet node rather than omitting the task" "$out"
 fi
+# The obligation to record a narrower selection is stated where the selection is
+# made. With one runnable task there is no choice to justify, so it must be
+# absent — an obligation printed unconditionally is noise and gets tuned out.
+if printf '%s\n' "$out" | grep -q 'requires a `wave-selected` LEDGER entry'; then
+  fail "next states no obligation when only one task is runnable" "$out"
+else
+  pass "next states no obligation when only one task is runnable"
+fi
+sed -i 's|requires: impl/contract (IMPLEMENTATION)|requires: test/contract (TEST)|' \
+  "$d/.claude/specs/2026-01-02-sample-mission/ROADMAP.md"
+out=$(/bin/bash "$CHECKER" next --root "$d" --layer claude 2>&1)
+if printf '%s\n' "$out" | grep -q 'Selecting fewer than 2 requires a `wave-selected`'; then
+  pass "next states the obligation once a choice exists"
+else
+  fail "next states the obligation once a choice exists" "$out"
+fi
+
 printf -- '- [ ] P9.9 Appended without a node (verify: x)\n' >>"$d/.claude/specs/2026-01-02-sample-mission/ROADMAP.md"
 out=$(/bin/bash "$CHECKER" next --root "$d" --layer claude 2>&1)
 if printf '%s\n' "$out" | grep -q 'unmodelled P9.9'; then
