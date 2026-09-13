@@ -19,9 +19,9 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, including 
 
 ## Domain Rules
 
-See @.claude/CONTEXT.md for the current state of work (updated by /checkpoint).
-See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
-See @.claude/rules/code-health.md for the continuous, behavior-preserving implementation baseline applied whenever code or code-adjacent artifacts are inspected or changed.
+See @CONTEXT.md for the current state of work (updated by /checkpoint).
+See @rules/ai-behavior.md for universal AI behavior guidelines.
+See @rules/code-health.md for the continuous, behavior-preserving implementation baseline applied whenever code or code-adjacent artifacts are inspected or changed.
 
 ## Workflow Skills
 

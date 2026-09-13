@@ -68,34 +68,59 @@ grep -l 'paths: \["\*\*/\*"\]' .claude/rules/*.md   # the candidates, not the ve
 
 ---
 
-## An `@` import of a rule is deduplicated, so "loading twice" was never happening
+## One commit changed two things, so the cost landed on the wrong one
 
-**Cost:** a wrong fix, measured at **+24,503 tokens per light session**, reverted
-in `257dec6`.
+**Cost:** a wrong fix worth **24,503 tokens per light session**, reverted in
+`257dec6` — then a wrong _explanation_ of it that stood in this file until an
+external checker contradicted it.
 
-Two files referenced the same rule, so I concluded it was being loaded twice and
-removed one reference. A controlled fixture showed the two references differ by
-**6 tokens** — the loader deduplicates — while removing the reference pushed the
-rule out of the cheap path and cost 24,503 tokens on every light session. The
-diagnosis was arithmetic on a number I never measured.
+Two files referenced the same rule, so I concluded it loaded twice and "fixed"
+it. The fix regressed light sessions by 24,503 tokens. Measuring the import alone
+showed a **6-token** difference, and I wrote that down as _the loader
+deduplicates_. Both halves of that account were wrong.
 
-Two measurement defects sat underneath it. Summing `usage` across a run reports
-**145,942** tokens where the true figure is **59,931** — a 2.4× overstatement,
-because each iteration re-reports the cumulative prompt. Only
-`usage.iterations[0]` is the session's context cost. And comparing two repo
-states in place attributes to the change whatever else moved between the runs;
-that produced a reported "+328 light increase" which a controlled fixture turned
-into **−1,219**.
+`257dec6` changed two things at once. It rewrote `@.claude/rules/X.md` into plain
+backticks, **and** it deleted `paths: ["**/*"]` from all six rules. A rule with no
+`paths:` loads unconditionally at launch, so the deletion is what cost 24,503.
+The import rewrite cost nothing — because that import had never worked.
 
-**Rung:** rule. No script can decide whether a proposed context change is a
-saving, because the answer depends on a measurement the layer cannot perform on
-itself. What _is_ mechanised is the measurement protocol — read iteration zero,
-compare fixtures rather than working trees.
+A three-way fixture, two repetitions, variance under 3 tokens, settles it:
+
+| `.claude/CLAUDE.md` contains    |      light session |
+| ------------------------------- | -----------------: |
+| no import at all                |             36,690 |
+| `@.claude/rules/ai-behavior.md` | 36,704 &nbsp;(+14) |
+| `@rules/ai-behavior.md`         |    37,800 (+1,110) |
+
+**An `@` import resolves relative to the file containing it.** Written from
+`.claude/CLAUDE.md`, `@.claude/rules/…` points at `.claude/.claude/rules/…` and
+silently resolves to nothing. Every such import in this layer was dead; the rules
+were reaching context only through their `paths:` glob on first file read, which
+is why nobody noticed. Upstream found and fixed the same defect in
+`e5abf05 fix(loading): repair Claude imports`.
+
+A non-resolving import and a deduplicated one are indistinguishable by cost —
+both show ~6 tokens — which is exactly why one measurement could not choose
+between them, and why I picked the flattering reading.
+
+Two measurement defects sat underneath the original error. Summing `usage` across
+a run reports **145,942** where the true figure is **59,931** — a 2.4×
+overstatement, since each iteration re-reports the cumulative prompt; only
+`usage.iterations[0]` is the session's context cost. And comparing two repo states
+in place attributes to the change whatever else moved between runs, which turned a
+real **−1,219** into a reported "+328 increase".
+
+**Rung:** script. Detection is fully mechanical and an enforcer already exists —
+upstream's `doctor-check.sh` emits `D201 missing local import target`, which named
+this defect in our tree on its first run and went silent once the imports were
+made relative. Attribution is the part that needs judgement: change one thing per
+measurement, or the number cannot say which half caused it.
 
 **Re-derive:**
 
 ```bash
-claude -p --output-format json 'read the rules and stop' \
+bash .claude/scripts/doctor-check.sh --layer claude | grep D201   # silent when correct
+claude -p --output-format json 'reply with exactly: ok' \
   | jq '.usage.iterations[0].input_tokens'
 ```
 

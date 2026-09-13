@@ -71,8 +71,9 @@ For every rule file in `.claude/rules/*.md`:
 - Read `.claude/CLAUDE.md`.
 - Find the `## Domain Rules` section.
 - For every `@.claude/rules/*.md` import there, confirm the target file exists.
+- **An `@` import resolves relative to the file containing it.** From `.claude/CLAUDE.md`, the correct form is `@rules/ai-behavior.md`; `@.claude/rules/ai-behavior.md` points at `.claude/.claude/rules/…` and silently resolves to nothing. Flag any root-prefixed `@.claude/…` import as **High** — it is dead, and the rule reaches context only through its `paths:` glob. Measured: the broken form adds 14 tokens, the correct one 1,110. `bash .claude/scripts/doctor-check.sh --layer claude | grep D201` detects this mechanically.
 - For every file under `.claude/rules/`, confirm there is a matching `@` import in `.claude/CLAUDE.md`. A file without an import is **lazy, not isolated**: it still loads whenever its `paths:` glob fires. Report it as a tier observation, never as a defect to fix by default.
-- NEVER recommend removing an `@` import to save context. An import of a rule that also has `paths:` is **deduplicated** — measured at a 6-token difference — while removing it pushes the rule off the cheap path. Acting on the opposite assumption cost **24,503 tokens per light session** and had to be reverted. See `.claude/LESSONS.md`.
+- NEVER recommend deleting a rule's `paths:` field. A rule with no `paths:` loads unconditionally at launch; removing it from six rules cost **24,503 tokens per light session** and had to be reverted. That commit also rewrote the `@` imports, and the cost was long misattributed to the import half — change one thing per measurement. See `.claude/LESSONS.md`.
 
 ### 4a. Enforcement Coverage
 
