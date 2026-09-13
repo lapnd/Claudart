@@ -7,10 +7,11 @@
     "test:knowledge": "/bin/bash tests/knowledge-check/run.sh",
     "test:spec-workflow": "/bin/bash tests/spec-workflow/run.sh",
     "test:spec-engine": "/bin/bash tests/spec-engine/run.sh",
-    "check": "npm run format:md:check && npm run check:shell && npm run test:knowledge && npm run test:spec-workflow && npm run test:spec-engine && npm run test:install && npm run test:layers",
+    "check": "npm run format:md:check && npm run check:shell && npm run test:knowledge && npm run test:spec-workflow && npm run test:spec-engine && npm run test:install && npm run test:layers && npm run test:doctor",
     "hooks:install": "git config core.hooksPath .githooks",
     "test:install": "/bin/bash tests/install/run.sh",
-    "test:layers": "/bin/bash tests/layer-integrity/run.sh"
+    "test:layers": "/bin/bash tests/layer-integrity/run.sh",
+    "test:doctor": "node tests/doctor-check/run.mjs"
   },
   "devDependencies": {
     "prettier": "3.8.3"
