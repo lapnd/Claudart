@@ -50,6 +50,18 @@ Walk the conversation chronologically, comparing each assistant turn against the
 
 4. If knowledge changed, run `bash .claude/scripts/knowledge-check.sh`. Report checker failures and never claim the mutation healthy while they remain.
 
+5. **Rank the lesson before writing prose.** A rule is the third-strongest form, not the first. Work down and stop at the first rung that carries the lesson:
+   1. **Mechanism** — change the structure so the failure cannot recur. Nothing to remember.
+   2. **Script** — a check that fires, plus one line saying how to run it.
+   3. **Rule** — prose in `.claude/rules/`, for judgement no program can express. A lesson that stops here MUST say why no mechanism could carry it.
+   4. **Nothing** — the right answer most of the time. A one-off is not a lesson.
+
+   Two gates apply before a lesson at rung 1 or 2 is closed, and both were paid for:
+   - **Mutation.** The check must be _observed failing_ on the defect it names. A suite here passed 14 of 14 with two dead assertions; only injecting the defect exposed them.
+   - **Corpus calibration.** Run it across real missions and hand-classify every finding. An enforcer that fires often is wrong about the data — one fired 109 times, another 83, another 29 times on missions that had completed successfully. Report the false-positive rate as the acceptance number.
+
+   Then append the lesson to `.claude/LESSONS.md`, newest first: what happened, what it cost, the **re-runnable command** that re-derives it, and the rung it landed on. Never record a cost you did not measure.
+
 **Boundary**: `/learn` updates **rules, `.claude/knowledge/`, and `.claude/CLAUDE.md` only**. Do NOT modify `.claude/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claude/JOURNAL.md` entries (it's append-only). You may read both as evidence. `/checkpoint` bulk-maintains remaining candidates but is not the sole knowledge write gate.
 
 ## Output Standard

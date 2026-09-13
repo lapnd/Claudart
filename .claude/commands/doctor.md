@@ -71,7 +71,21 @@ For every rule file in `.claude/rules/*.md`:
 - Read `.claude/CLAUDE.md`.
 - Find the `## Domain Rules` section.
 - For every `@.claude/rules/*.md` import there, confirm the target file exists.
-- For every file under `.claude/rules/`, confirm there is a matching `@` import in `.claude/CLAUDE.md`. Files without an import are loaded only when their `paths:` glob fires — flag this as **isolated rule** so the user knows it won't be globally visible.
+- For every file under `.claude/rules/`, confirm there is a matching `@` import in `.claude/CLAUDE.md`. A file without an import is **lazy, not isolated**: it still loads whenever its `paths:` glob fires. Report it as a tier observation, never as a defect to fix by default.
+- NEVER recommend removing an `@` import to save context. An import of a rule that also has `paths:` is **deduplicated** — measured at a 6-token difference — while removing it pushes the rule off the cheap path. Acting on the opposite assumption cost **24,503 tokens per light session** and had to be reverted. See `.claude/LESSONS.md`.
+
+### 4a. Enforcement Coverage
+
+Two ratios, both computable, both reported as numbers rather than prose. A downward trend is the signal that the layer is drifting back to unenforced prose.
+
+- **Lessons that reached mechanism or script.** Count `**Rung:**` lines in `.claude/LESSONS.md` by rung. Report `mechanism+script / total`. A lesson at `rule` is legitimate only when it states why no mechanism could carry it — flag any that does not.
+- **Enforcers proven able to fail.** Every `S###` emitted by `.claude/scripts/spec-check.sh` must have a mutation in `tests/spec-engine/run.sh`. Report `covered / emitted`; a code with no mutation is unproven, and a code that cannot be made to fire should be deleted rather than kept.
+
+```bash
+grep -c '^\*\*Rung:\*\* mechanism\|^\*\*Rung:\*\* script' .claude/LESSONS.md
+grep -oE 'add_finding [A-Z]+ (S[0-9]+)' .claude/scripts/spec-check.sh | awk '{print $3}' | sort -u
+grep -oE '\bS[0-9]{3}\b' tests/spec-engine/run.sh | sort -u
+```
 
 ### 5. AI Behavior Wiring
 

@@ -3,10 +3,11 @@
   "scripts": {
     "format:md": "prettier --write \"**/*.md\"",
     "format:md:check": "prettier --check \"**/*.md\"",
-    "check:shell": "/bin/bash -n install.sh .claude/scripts/knowledge-check.sh .codex/scripts/knowledge-check.sh .deepseek/scripts/knowledge-check.sh .pi/scripts/knowledge-check.sh tests/knowledge-check/run.sh tests/spec-workflow/run.sh tests/install/run.sh tests/layer-integrity/run.sh",
+    "check:shell": "/bin/bash -n install.sh .claude/scripts/knowledge-check.sh .claude/scripts/spec-check.sh .claude/scripts/disjoint.sh .codex/scripts/knowledge-check.sh .codex/scripts/spec-check.sh .codex/scripts/disjoint.sh .deepseek/scripts/knowledge-check.sh .deepseek/scripts/spec-check.sh .deepseek/scripts/disjoint.sh .pi/scripts/knowledge-check.sh .pi/scripts/spec-check.sh .pi/scripts/disjoint.sh tests/knowledge-check/run.sh tests/spec-workflow/run.sh tests/spec-engine/run.sh tests/install/run.sh tests/layer-integrity/run.sh",
     "test:knowledge": "/bin/bash tests/knowledge-check/run.sh",
     "test:spec-workflow": "/bin/bash tests/spec-workflow/run.sh",
-    "check": "npm run format:md:check && npm run check:shell && npm run test:knowledge && npm run test:spec-workflow && npm run test:install && npm run test:layers",
+    "test:spec-engine": "/bin/bash tests/spec-engine/run.sh",
+    "check": "npm run format:md:check && npm run check:shell && npm run test:knowledge && npm run test:spec-workflow && npm run test:spec-engine && npm run test:install && npm run test:layers",
     "hooks:install": "git config core.hooksPath .githooks",
     "test:install": "/bin/bash tests/install/run.sh",
     "test:layers": "/bin/bash tests/layer-integrity/run.sh"
