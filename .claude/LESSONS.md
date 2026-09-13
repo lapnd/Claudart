@@ -18,6 +18,56 @@ New lessons go at the top. `/learn` writes here; `/doctor` counts the rungs.
 
 ---
 
+## The expensive rule is the one loaded in the wrong place, not the long one
+
+**Cost:** measured across three downstream repositories — **15,671** tokens per
+Markdown read in one, **4,826** per book page in another, both recovered by
+changing a glob and nothing else.
+
+`paths: ["**/*"]` is what a rule ends up with when a layer is copied into a new
+project, and it silently means _load on the first file read, whatever that file
+is_. Two symptoms, both measured, neither visible from reading the rules:
+
+- One repo read its own ROADMAPs, SPECs and LEDGERs more than any source file,
+  and reading a `.md` cost **77,467** tokens against **69,974** for a `.go` —
+  because three rules about production code, security and frontend architecture
+  loaded in full on every prose read. All thirteen of its rules carried `**/*`.
+- Another is a static book generator: 992 HTML pages, 32 `.js`, 14 `.mjs`, one
+  `.py`, no Go, no TypeScript, no Vue. It was loading a 95%-coverage bar,
+  authentication, secrets management, OpenTelemetry, SOC 2 and hexagonal ports
+  and adapters onto every one of those book pages. Both rule descriptions said
+  they applied to "other languages in this workspace" — the workspace they were
+  copied from, not the one they were sitting in.
+
+Scope, do not delete, and prove the rule still fires where it should: after
+narrowing, reading the build script stayed the most expensive read in the repo,
+which is what distinguishes narrowing from disabling.
+
+**Rung:** script for detection, rule for the fix. The detection needs no
+judgement at all — if reading prose costs more than reading source, something is
+scoped wrong, and the number says so without anyone reading a rule. Choosing the
+correct glob does need judgement: it means deciding what the rule governs and
+what this repository actually contains, which no program can decide.
+
+**No enforcer on the universal glob itself, deliberately.** Hand-classified across
+two repos, a rule matching every path was legitimate more often than not — 8 of 13
+rules in one, 2 of 4 in the other — so a check that flagged every occurrence would
+run at roughly 40% precision. By the gate two lessons below, an enforcer that fires
+that often is wrong about the data. Measure instead of flagging.
+
+**Re-derive:**
+
+```bash
+# a mis-scoped rule shows up as prose costing more than source
+for p in .claude/CONTEXT.md src/main.go; do
+  claude -p --model haiku --output-format json "read $p then reply with exactly: ok" \
+    | jq --arg p "$p" -r '.usage.iterations[0] | "\($p) \(.input_tokens + .cache_read_input_tokens + .cache_creation_input_tokens)"'
+done
+grep -l 'paths: \["\*\*/\*"\]' .claude/rules/*.md   # the candidates, not the verdict
+```
+
+---
+
 ## An `@` import of a rule is deduplicated, so "loading twice" was never happening
 
 **Cost:** a wrong fix, measured at **+24,503 tokens per light session**, reverted
