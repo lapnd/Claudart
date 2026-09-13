@@ -49,19 +49,19 @@ Lớp Claude và Codex có ba agent chuyên biệt mà harness của chúng nạ
 
 ```bash
 # Claude Code, lựa chọn mặc định
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash
 
 # Codex CLI
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --codex
 
 # DeepSeek Harness (dsh)
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --deepseek
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --deepseek
 
 # Pi
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --pi
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --pi
 
 # Cả hai runtime
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --both
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --both
 ```
 
 Trình cài đặt sao chép file còn thiếu và bỏ qua file đã tồn tại, trừ khi bạn truyền `--force`. Cách này phù hợp với bản cài mới, không phù hợp để hợp nhất một cấu hình đã tùy chỉnh.
@@ -81,7 +81,7 @@ Dùng [INTEGRATE.md](../INTEGRATE.md). Quy trình tích hợp yêu cầu agent:
 
 Prompt gợi ý:
 
-> Đọc https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md và làm theo để tích hợp hoặc cập nhật CLAUDART trong dự án này. Giữ nguyên nội dung riêng của dự án và trình bày các thay đổi dự kiến trước khi ghi file.
+> Đọc https://raw.githubusercontent.com/lapnd/Claudart/main/INTEGRATE.md và làm theo để tích hợp hoặc cập nhật CLAUDART trong dự án này. Giữ nguyên nội dung riêng của dự án và trình bày các thay đổi dự kiến trước khi ghi file.
 
 ### Đối soát ban đầu
 

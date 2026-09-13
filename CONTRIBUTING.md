@@ -4,7 +4,7 @@ First off, thank you for considering contributing to **CLAUDART**! It's people l
 
 By participating in this project, you agree to abide by our code of conduct.
 
-> **Repository-only workflow.** The Git/GitHub conventions in this file govern contributions to the `vankhaivn/Claudart` source repository only. They are not part of the CLAUDART runtime/template installed into downstream projects. Downstream repositories own their own issue, branch, commit, PR, and merge workflow.
+> **Repository-only workflow.** The Git/GitHub conventions in this file govern contributions to the `lapnd/Claudart` source repository only. They are not part of the CLAUDART runtime/template installed into downstream projects. Downstream repositories own their own issue, branch, commit, PR, and merge workflow.
 
 ## How Can I Contribute?
 

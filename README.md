@@ -23,29 +23,29 @@ The four runtime layers are independent. Install any one of them, or several. CL
 The default installation adds the Claude Code layer:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash
 ```
 
 Choose a layer explicitly when needed:
 
 ```bash
 # Claude Code
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --claude
 
 # Codex CLI
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --codex
 
 # DeepSeek Harness (dsh)
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --deepseek
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --deepseek
 
 # Pi
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --pi
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --pi
 
 # Claude Code and Codex
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --both
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --both
 
 # All four
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --all
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --all
 ```
 
 The installer copies missing files and skips files that already exist. `--force` overwrites existing files and should be used only when that is intentional.
@@ -56,10 +56,10 @@ The installer copies missing files and skips files that already exist. `--force`
 
 ```bash
 # from a fork
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --repo lapnd/Claudart --all
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --repo vankhaivn/Claudart --all
 
 # or set them in the environment, which is easier through a pipe
-CLAUDART_REPO=lapnd/Claudart curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --all
+CLAUDART_REPO=vankhaivn/Claudart curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --all
 ```
 
 An explicit flag wins over the environment. A value that is not `<owner>/<name>` is refused before anything is downloaded, so a typo fails immediately instead of surfacing as a 404 partway through the install.
@@ -88,7 +88,7 @@ Do not use the installer as a merge tool. It can copy or overwrite files, but it
 
 Ask your coding agent to follow the integration protocol instead:
 
-> Read https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md and follow it to integrate or update CLAUDART in this project. Preserve project-specific content and show me the proposed changes before writing them.
+> Read https://raw.githubusercontent.com/lapnd/Claudart/main/INTEGRATE.md and follow it to integrate or update CLAUDART in this project. Preserve project-specific content and show me the proposed changes before writing them.
 
 The protocol compares the current project with the current `main` branch and separates stale CLAUDART files from project-authored customizations.
 

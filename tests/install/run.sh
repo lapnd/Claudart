@@ -225,23 +225,23 @@ sed 's|^printf .\\n%s  Downloading.*|echo "URL=$TARBALL_URL"; exit 0|' \
 resolved_url() { /bin/bash "$URL_PROBE" "$@" 2>&1 | sed -n 's/^URL=//p'; }
 
 BASE=https://github.com
-assert_equals "no flags keeps the upstream default" \
-  "$BASE/vankhaivn/Claudart/archive/refs/heads/main.tar.gz" "$(resolved_url)"
-assert_equals "--repo selects a fork" \
-  "$BASE/lapnd/Claudart/archive/refs/heads/main.tar.gz" "$(resolved_url --repo lapnd/Claudart)"
-assert_equals "--repo=VALUE selects a fork" \
-  "$BASE/lapnd/Claudart/archive/refs/heads/main.tar.gz" "$(resolved_url --repo=lapnd/Claudart)"
+assert_equals "no flags installs this fork, the default" \
+  "$BASE/lapnd/Claudart/archive/refs/heads/main.tar.gz" "$(resolved_url)"
+assert_equals "--repo selects another repository" \
+  "$BASE/vankhaivn/Claudart/archive/refs/heads/main.tar.gz" "$(resolved_url --repo vankhaivn/Claudart)"
+assert_equals "--repo=VALUE selects another repository" \
+  "$BASE/vankhaivn/Claudart/archive/refs/heads/main.tar.gz" "$(resolved_url --repo=vankhaivn/Claudart)"
 assert_equals "--branch selects a branch" \
-  "$BASE/vankhaivn/Claudart/archive/refs/heads/dev.tar.gz" "$(resolved_url --branch dev)"
+  "$BASE/lapnd/Claudart/archive/refs/heads/dev.tar.gz" "$(resolved_url --branch dev)"
 assert_equals "--repo and --branch combine with a layer flag" \
-  "$BASE/lapnd/Claudart/archive/refs/heads/next.tar.gz" \
-  "$(resolved_url --repo lapnd/Claudart --branch next --all)"
+  "$BASE/vankhaivn/Claudart/archive/refs/heads/next.tar.gz" \
+  "$(resolved_url --repo vankhaivn/Claudart --branch next --all)"
 assert_equals "CLAUDART_REPO works without flags, for the piped one-liner" \
-  "$BASE/lapnd/Claudart/archive/refs/heads/main.tar.gz" \
-  "$(CLAUDART_REPO=lapnd/Claudart resolved_url)"
-assert_equals "an explicit flag beats the environment" \
   "$BASE/vankhaivn/Claudart/archive/refs/heads/main.tar.gz" \
-  "$(CLAUDART_REPO=lapnd/Claudart resolved_url --repo vankhaivn/Claudart)"
+  "$(CLAUDART_REPO=vankhaivn/Claudart resolved_url)"
+assert_equals "an explicit flag beats the environment" \
+  "$BASE/lapnd/Claudart/archive/refs/heads/main.tar.gz" \
+  "$(CLAUDART_REPO=vankhaivn/Claudart resolved_url --repo lapnd/Claudart)"
 
 # Fail closed. A malformed value would otherwise surface as a 404 partway
 # through the install, which reads like a network fault rather than a typo.

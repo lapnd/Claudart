@@ -2,7 +2,7 @@
 
 **You are an AI coding agent** (Claude Code, Codex CLI, DeepSeek Harness, Pi, or similar) and your user linked this file because they want to **adopt or upgrade CLAUDART** in the current project. CLAUDART is a plain-Markdown operating layer for commands or skills, layered memory, persistent work, project knowledge, and specialized agents.
 
-Source of truth: <https://github.com/vankhaivn/Claudart> (branch `main`).
+Source of truth: <https://github.com/lapnd/Claudart> (branch `main`).
 
 This file is a **protocol, not an installer**. Follow it top to bottom. It exists because a fresh-copy installer cannot safely reconcile custom instructions, live state, tasks, specifications, or project knowledge.
 
@@ -40,18 +40,18 @@ This file is a **protocol, not an installer**. Follow it top to bottom. It exist
    For Scenario A, or the initial pass for Scenario B:
 
    ```bash
-   git clone --depth 1 --branch main https://github.com/vankhaivn/Claudart /tmp/claudart-src
+   git clone --depth 1 --branch main https://github.com/lapnd/Claudart /tmp/claudart-src
    ```
 
    For Scenario C, clone full history. For Scenario B, deepen only when a real collision needs stale-vs-custom evidence:
 
    ```bash
-   git clone --branch main https://github.com/vankhaivn/Claudart /tmp/claudart-src
+   git clone --branch main https://github.com/lapnd/Claudart /tmp/claudart-src
    # Or, after a shallow clone:
    git -C /tmp/claudart-src fetch --unshallow
    ```
 
-   If cloning is unavailable, fetch current raw files on demand from `https://raw.githubusercontent.com/vankhaivn/Claudart/main/<path>`. Without history, preserve ambiguous differences and show the exact uncertainty instead of guessing.
+   If cloning is unavailable, fetch current raw files on demand from `https://raw.githubusercontent.com/lapnd/Claudart/main/<path>`. Without history, preserve ambiguous differences and show the exact uncertainty instead of guessing.
 
 6. Enumerate the actual selected-layer payload from current upstream. Read `install.sh` as a payload and relocation reference, plus the loaders and every file in the proposed dependency closure. README, workflow, and contributing docs are orientation only; read them only when a real ambiguity requires them.
 7. Treat `install.sh` as a payload reference, not a merge tool. Do not execute it during Scenario B or C, do not use `--force`, and do not run any write-capable maintenance workflow before approval.

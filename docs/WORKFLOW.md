@@ -49,22 +49,22 @@ The Claude and Codex layers ship three specialist agents their harnesses load di
 
 ```bash
 # Claude Code, the default
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash
 
 # Codex CLI
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --codex
 
 # DeepSeek Harness (dsh)
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --deepseek
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --deepseek
 
 # Pi
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --pi
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --pi
 
 # Claude Code and Codex
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --both
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --both
 
 # All four runtimes
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --all
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --all
 ```
 
 The installer copies files that are missing and skips existing files unless `--force` is supplied. It is suitable for a clean installation, not for merging a customized setup.
@@ -84,7 +84,7 @@ Use [INTEGRATE.md](../INTEGRATE.md). The integration protocol asks an agent to:
 
 A useful prompt is:
 
-> Read https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md and follow it to integrate or update CLAUDART in this project. Preserve project-specific content and show me the proposed changes before writing them.
+> Read https://raw.githubusercontent.com/lapnd/Claudart/main/INTEGRATE.md and follow it to integrate or update CLAUDART in this project. Preserve project-specific content and show me the proposed changes before writing them.
 
 ### Initial reconciliation
 

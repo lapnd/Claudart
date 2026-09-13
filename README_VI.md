@@ -23,29 +23,29 @@ Bốn lớp Claude, Codex, DeepSeek và Pi hoạt động độc lập. Bạn c�
 Mặc định, lệnh sau cài lớp Claude Code:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash
 ```
 
 Chọn lớp cần cài khi cần thiết:
 
 ```bash
 # Claude Code
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --claude
 
 # Codex CLI
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --codex
 
 # DeepSeek Harness (dsh)
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --deepseek
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --deepseek
 
 # Pi
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --pi
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --pi
 
 # Claude Code và Codex
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --both
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --both
 
 # Cả bốn lớp
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --all
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --all
 ```
 
 Trình cài đặt sao chép các file còn thiếu và bỏ qua file đã tồn tại. Tùy chọn `--force` sẽ ghi đè file hiện có, vì vậy chỉ dùng khi bạn thực sự muốn thay thế chúng.
@@ -56,10 +56,10 @@ Trình cài đặt sao chép các file còn thiếu và bỏ qua file đã tồn
 
 ```bash
 # từ một fork
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --repo lapnd/Claudart --all
+curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --repo vankhaivn/Claudart --all
 
 # hoặc đặt qua biến môi trường, tiện hơn khi chạy qua pipe
-CLAUDART_REPO=lapnd/Claudart curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --all
+CLAUDART_REPO=vankhaivn/Claudart curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- --all
 ```
 
 Cờ tường minh thắng biến môi trường. Giá trị không đúng dạng `<owner>/<name>` bị từ chối trước khi tải bất cứ thứ gì, nên gõ sai sẽ báo lỗi ngay thay vì hiện ra dưới dạng 404 giữa chừng.
@@ -88,7 +88,7 @@ Không dùng trình cài đặt như một công cụ hợp nhất. Nó có th�
 
 Hãy yêu cầu coding agent làm theo quy trình tích hợp:
 
-> Đọc https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md và làm theo để tích hợp hoặc cập nhật CLAUDART trong dự án này. Giữ nguyên nội dung riêng của dự án và trình bày các thay đổi dự kiến trước khi ghi file.
+> Đọc https://raw.githubusercontent.com/lapnd/Claudart/main/INTEGRATE.md và làm theo để tích hợp hoặc cập nhật CLAUDART trong dự án này. Giữ nguyên nội dung riêng của dự án và trình bày các thay đổi dự kiến trước khi ghi file.
 
 Quy trình này so sánh dự án hiện tại với nhánh `main` mới nhất, đồng thời phân biệt file CLAUDART đã cũ với nội dung do dự án tự viết.
 

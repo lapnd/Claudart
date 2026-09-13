@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # CLAUDART Installer
 # Usage (one-liner):
-#   curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash
 #
 # Options (pass after --):
 #   (no flags)   Install the Claude Code layer (.claude/)
@@ -23,7 +23,7 @@ set -euo pipefail
 
 # Overridable by --repo/--branch or by the environment. The URL is built after
 # argument parsing so a flag cannot be silently ignored.
-REPO="${CLAUDART_REPO:-vankhaivn/Claudart}"
+REPO="${CLAUDART_REPO:-lapnd/Claudart}"
 BRANCH="${CLAUDART_BRANCH:-main}"
 
 INSTALL_CLAUDE=true
@@ -44,8 +44,8 @@ show_help() {
 $(bold "CLAUDART Installer")
 
 USAGE
-  curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
-  curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- [OPTIONS]
+  curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash
+  curl -fsSL https://raw.githubusercontent.com/lapnd/Claudart/main/install.sh | bash -s -- [OPTIONS]
   bash install.sh [OPTIONS]
 
 OPTIONS
@@ -63,11 +63,11 @@ OPTIONS
 
 SOURCE
   Default                 $REPO (branch $BRANCH)
-  A fork                  --repo lapnd/Claudart
-  Environment instead     CLAUDART_REPO=lapnd/Claudart CLAUDART_BRANCH=main
+  Upstream                --repo vankhaivn/Claudart
+  Environment instead     CLAUDART_REPO=vankhaivn/Claudart CLAUDART_BRANCH=main
 
   Prefer the environment form for the piped one-liner, where flags otherwise
-  need \`bash -s -- --repo lapnd/Claudart\`.
+  need \`bash -s -- --repo vankhaivn/Claudart\`.
 
 LAYERS
   Claude Code (default)   .claude/     (loaded through .claude/CLAUDE.md)
