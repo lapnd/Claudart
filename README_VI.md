@@ -50,6 +50,20 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 
 Trình cài đặt sao chép các file còn thiếu và bỏ qua file đã tồn tại. Tùy chọn `--force` sẽ ghi đè file hiện có, vì vậy chỉ dùng khi bạn thực sự muốn thay thế chúng.
 
+### Cài từ một fork
+
+`--repo` và `--branch` quyết định nơi tải lớp về, nên có thể cài từ fork mà không phải sửa script:
+
+```bash
+# từ một fork
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --repo lapnd/Claudart --all
+
+# hoặc đặt qua biến môi trường, tiện hơn khi chạy qua pipe
+CLAUDART_REPO=lapnd/Claudart curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --all
+```
+
+Cờ tường minh thắng biến môi trường. Giá trị không đúng dạng `<owner>/<name>` bị từ chối trước khi tải bất cứ thứ gì, nên gõ sai sẽ báo lỗi ngay thay vì hiện ra dưới dạng 404 giữa chừng.
+
 ### `AGENTS.md` dùng chung làm bộ định tuyến
 
 Codex, `dsh` và Pi đều tự nạp `AGENTS.md` ở thư mục gốc. Thay vì tranh nhau một tên file, CLAUDART coi nó là bộ định tuyến dùng chung: mỗi lớp giữ chỉ dẫn trong thư mục riêng (`.codex/AGENTS.md`, `.deepseek/DEEPSEEK.md`, `.pi/PI.md`) và trình cài đặt chỉ thêm một dòng trỏ tới đó.

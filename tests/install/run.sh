@@ -212,6 +212,63 @@ for layer in codex deepseek pi; do
   fi
 done
 
+# ── source selection (--repo / --branch) ──────────────────────────────────────
+#
+# The installer must be able to point at a fork. These assertions read the URL it
+# would fetch rather than fetching it, so they need no network: the download line
+# is replaced with one that prints the resolved value and exits.
+
+URL_PROBE=$TMP_ROOT/probe-install.sh
+sed 's|^printf .\\n%s  Downloading.*|echo "URL=$TARBALL_URL"; exit 0|' \
+  "$INSTALLER" >"$URL_PROBE"
+
+resolved_url() { /bin/bash "$URL_PROBE" "$@" 2>&1 | sed -n 's/^URL=//p'; }
+
+BASE=https://github.com
+assert_equals "no flags keeps the upstream default" \
+  "$BASE/vankhaivn/Claudart/archive/refs/heads/main.tar.gz" "$(resolved_url)"
+assert_equals "--repo selects a fork" \
+  "$BASE/lapnd/Claudart/archive/refs/heads/main.tar.gz" "$(resolved_url --repo lapnd/Claudart)"
+assert_equals "--repo=VALUE selects a fork" \
+  "$BASE/lapnd/Claudart/archive/refs/heads/main.tar.gz" "$(resolved_url --repo=lapnd/Claudart)"
+assert_equals "--branch selects a branch" \
+  "$BASE/vankhaivn/Claudart/archive/refs/heads/dev.tar.gz" "$(resolved_url --branch dev)"
+assert_equals "--repo and --branch combine with a layer flag" \
+  "$BASE/lapnd/Claudart/archive/refs/heads/next.tar.gz" \
+  "$(resolved_url --repo lapnd/Claudart --branch next --all)"
+assert_equals "CLAUDART_REPO works without flags, for the piped one-liner" \
+  "$BASE/lapnd/Claudart/archive/refs/heads/main.tar.gz" \
+  "$(CLAUDART_REPO=lapnd/Claudart resolved_url)"
+assert_equals "an explicit flag beats the environment" \
+  "$BASE/vankhaivn/Claudart/archive/refs/heads/main.tar.gz" \
+  "$(CLAUDART_REPO=lapnd/Claudart resolved_url --repo vankhaivn/Claudart)"
+
+# Fail closed. A malformed value would otherwise surface as a 404 partway
+# through the install, which reads like a network fault rather than a typo.
+#
+# The expected message is asserted, not merely a non-zero exit: an installer that
+# does not know `--repo` at all also exits non-zero, so exit status alone cannot
+# tell a validated rejection from an unrecognised flag, and the assertion would
+# pass for the wrong reason.
+refuses() {
+  label=$1
+  needle=$2
+  shift 2
+  out=$(/bin/bash "$URL_PROBE" "$@" 2>&1 | sed 's/\x1b\[[0-9;]*m//g')
+  if /bin/bash "$URL_PROBE" "$@" >/dev/null 2>&1; then
+    fail "$label (exited 0)"
+  elif printf '%s' "$out" | grep -qF -- "$needle"; then
+    pass "$label"
+  else
+    fail "$label (wrong reason: ${out%%$'\n'*})"
+  fi
+}
+refuses "--repo with no value is refused" "--repo requires a value" --repo
+refuses "--branch with no value is refused" "--branch requires a value" --branch
+refuses "a repo without a slash is refused" "expects <owner>/<name>" --repo notaslash
+refuses "a repo with two slashes is refused" "expects <owner>/<name>" --repo a/b/c
+refuses "an empty repo is refused" "expects <owner>/<name>" --repo=
+
 printf '1..%s\n' "$PASS_COUNT"
 if [ "$FAIL_COUNT" -gt 0 ]; then
   printf 'FAIL: %s assertion(s) failed\n' "$FAIL_COUNT" >&2

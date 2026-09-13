@@ -11,14 +11,20 @@
 #   --pi         Install the Pi layer (.pi/ + .agents/ + AGENTS.md route)
 #   --both       Install both Claude and Codex layers
 #   --all        Install the Claude, Codex, DeepSeek, and Pi layers
+#   --repo O/N   Install from a different GitHub repository (default below)
+#   --branch B   Install from a different branch (default: main)
 #   --force      Overwrite existing files
 #   --help       Show this help text
+#
+# CLAUDART_REPO and CLAUDART_BRANCH set the same two values. Prefer them for the
+# piped one-liner, where flags need the awkward `bash -s --` form.
 
 set -euo pipefail
 
-REPO="vankhaivn/Claudart"
-BRANCH="main"
-TARBALL_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz"
+# Overridable by --repo/--branch or by the environment. The URL is built after
+# argument parsing so a flag cannot be silently ignored.
+REPO="${CLAUDART_REPO:-vankhaivn/Claudart}"
+BRANCH="${CLAUDART_BRANCH:-main}"
 
 INSTALL_CLAUDE=true
 INSTALL_CODEX=false
@@ -50,8 +56,18 @@ OPTIONS
   --pi         Install the Pi layer instead
   --both       Install both Claude Code and Codex layers
   --all        Install the Claude Code, Codex, DeepSeek, and Pi layers
+  --repo O/N   Install from a different GitHub repository
+  --branch B   Install from a different branch
   --force      Overwrite files that already exist
   --help       Show this help text
+
+SOURCE
+  Default                 $REPO (branch $BRANCH)
+  A fork                  --repo lapnd/Claudart
+  Environment instead     CLAUDART_REPO=lapnd/Claudart CLAUDART_BRANCH=main
+
+  Prefer the environment form for the piped one-liner, where flags otherwise
+  need \`bash -s -- --repo lapnd/Claudart\`.
 
 LAYERS
   Claude Code (default)   .claude/     (loaded through .claude/CLAUDE.md)
@@ -69,19 +85,54 @@ EOF2
 
 # ── arg parsing ───────────────────────────────────────────────────────────────
 
-for arg in "$@"; do
-  case "$arg" in
+# A `while`/`shift` loop rather than `for arg`, because --repo and --branch take
+# a value. Both `--repo O/N` and `--repo=O/N` are accepted; the piped one-liner
+# reaches these through `bash -s --`, which is why the environment works too.
+need_value() {
+  [ -n "${2:-}" ] || {
+    printf '%s %s requires a value\n' "$(red "error")" "$1" >&2
+    exit 1
+  }
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
     --claude)   INSTALL_CLAUDE=true;  INSTALL_CODEX=false; INSTALL_DEEPSEEK=false; INSTALL_PI=false ;;
     --codex)    INSTALL_CLAUDE=false; INSTALL_CODEX=true;  INSTALL_DEEPSEEK=false; INSTALL_PI=false ;;
     --deepseek) INSTALL_CLAUDE=false; INSTALL_CODEX=false; INSTALL_DEEPSEEK=true;  INSTALL_PI=false ;;
     --pi)       INSTALL_CLAUDE=false; INSTALL_CODEX=false; INSTALL_DEEPSEEK=false; INSTALL_PI=true ;;
     --both)     INSTALL_CLAUDE=true;  INSTALL_CODEX=true;  INSTALL_DEEPSEEK=false; INSTALL_PI=false ;;
     --all)      INSTALL_CLAUDE=true;  INSTALL_CODEX=true;  INSTALL_DEEPSEEK=true;  INSTALL_PI=true ;;
+    --repo)     need_value "$1" "${2:-}"; REPO="$2";   shift ;;
+    --repo=*)   REPO="${1#*=}" ;;
+    --branch)   need_value "$1" "${2:-}"; BRANCH="$2"; shift ;;
+    --branch=*) BRANCH="${1#*=}" ;;
     --force)  FORCE=true ;;
     --help|-h) show_help; exit 0 ;;
-    *) printf '%s Unknown option: %s\n' "$(red "error")" "$arg" >&2; exit 1 ;;
+    *) printf '%s Unknown option: %s\n' "$(red "error")" "$1" >&2; exit 1 ;;
   esac
+  shift
 done
+
+# Validate before building a URL. A malformed value would otherwise surface as a
+# 404 tarball halfway through the install, which reads like a network fault.
+case "$REPO" in
+  */*/* | /* | */ | *' '* | '') REPO_OK=false ;;
+  */*) REPO_OK=true ;;
+  *) REPO_OK=false ;;
+esac
+if [ "$REPO_OK" != true ]; then
+  printf '%s --repo expects <owner>/<name>, got: %s\n' "$(red "error")" "$REPO" >&2
+  exit 1
+fi
+case "$BRANCH" in
+  '' | *' '*)
+    printf '%s --branch expects a branch name, got: %s\n' "$(red "error")" "$BRANCH" >&2
+    exit 1
+    ;;
+esac
+
+TARBALL_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz"
 
 # ── download ──────────────────────────────────────────────────────────────────
 
@@ -89,7 +140,7 @@ DEST="${PWD}"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
-printf '\n%s  Downloading CLAUDART from %s …\n' "$(bold "→")" "$REPO"
+printf '\n%s  Downloading CLAUDART from %s (%s) …\n' "$(bold "→")" "$REPO" "$BRANCH"
 
 if command -v curl &>/dev/null; then
   curl -fsSL "$TARBALL_URL" | tar -xz -C "$TMPDIR" --strip-components=1

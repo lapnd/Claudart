@@ -50,6 +50,20 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 
 The installer copies missing files and skips files that already exist. `--force` overwrites existing files and should be used only when that is intentional.
 
+### Installing from a fork
+
+`--repo` and `--branch` choose where the layer is fetched from, so a fork can be installed without editing the script:
+
+```bash
+# from a fork
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --repo lapnd/Claudart --all
+
+# or set them in the environment, which is easier through a pipe
+CLAUDART_REPO=lapnd/Claudart curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --all
+```
+
+An explicit flag wins over the environment. A value that is not `<owner>/<name>` is refused before anything is downloaded, so a typo fails immediately instead of surfacing as a 404 partway through the install.
+
 ### The shared `AGENTS.md` router
 
 Codex, `dsh`, and Pi all auto-load `AGENTS.md` from the project root. Rather than fighting over that one filename, CLAUDART treats it as a shared router: each layer keeps its instructions in its own directory (`.codex/AGENTS.md`, `.deepseek/DEEPSEEK.md`, `.pi/PI.md`) and the installer adds one route line pointing at it.
